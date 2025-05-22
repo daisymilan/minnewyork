@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LuxuryButton } from '@/components/ui/luxury-button';
 import { LuxuryCard } from '@/components/ui/luxury-card';
@@ -136,7 +136,16 @@ const Login = () => {
           </p>
         </div>
         
-        <div className="mt-8 text-center text-xs text-luxury-cream/40">
+        <div className="mt-6 text-center text-sm">
+          <p className="text-luxury-cream/60">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-luxury-gold hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </div>
+        
+        <div className="mt-4 text-center text-xs text-luxury-cream/40">
           <p>For demo: use any of the following emails with any password</p>
           <p className="mt-1">ceo@min.com, cco@min.com, marketing@min.com, support@min.com</p>
         </div>

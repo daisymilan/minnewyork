@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useContext, createContext, ReactNode } from 'react';
+import React, { useState, useCallback, useContext, createContext, ReactNode } from 'react';
 import { toast } from '@/components/ui/sonner';
 import { 
   User, 

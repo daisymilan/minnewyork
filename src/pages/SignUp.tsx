@@ -37,7 +37,7 @@ const SignUp = () => {
     
     try {
       // Use the provided N8N webhook URL
-      const n8nWebhookUrl = 'https://minnewyorkofficial.app.n8n.cloud/webhook/signup-user';
+      const n8nWebhookUrl = 'https://minnewyorkofficial.app.n8n.cloud/webhook/auth/signup';
       
       // Send signup request to N8N webhook
       const response = await fetch(n8nWebhookUrl, {

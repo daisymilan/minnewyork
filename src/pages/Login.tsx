@@ -6,6 +6,7 @@ import { LuxuryButton } from '@/components/ui/luxury-button';
 import { LuxuryCard } from '@/components/ui/luxury-card';
 import VoiceCommandButton from '@/components/ui/voice-command-button';
 import useVoiceCommand from '@/hooks/useVoiceCommand';
+import { toast } from '@/components/ui/sonner';
 
 const Login = () => {
   const [email, setEmail] = useState('ceo@min.com');

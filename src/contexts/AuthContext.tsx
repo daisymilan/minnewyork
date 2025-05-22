@@ -62,34 +62,72 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulate API request
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    if (mockUsers[email]) {
-      setUser(mockUsers[email]);
-      localStorage.setItem('user', JSON.stringify(mockUsers[email]));
-      toast.success(`Welcome back, ${mockUsers[email].name}`);
-      return true;
+    try {
+      // Use the N8N webhook for sign in
+      const n8nWebhookUrl = 'https://minnewyorkofficial.app.n8n.cloud/webhook/auth/signin';
+      
+      const response = await fetch(n8nWebhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      if (!response.ok) {
+        toast.error('Invalid email or password');
+        return false;
+      }
+      
+      // For demo purposes, we'll continue using the mock users
+      if (mockUsers[email]) {
+        setUser(mockUsers[email]);
+        localStorage.setItem('user', JSON.stringify(mockUsers[email]));
+        toast.success(`Welcome back, ${mockUsers[email].name}`);
+        return true;
+      }
+      
+      toast.error('Invalid email or password');
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('An error occurred during login');
+      return false;
     }
-    
-    toast.error('Invalid email or password');
-    return false;
   };
   
   const loginWithVoice = async (): Promise<boolean> => {
-    // Simulate voice recognition and authentication
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // For demo, always log in as CEO
-    if (mockUsers['ceo@min.com']) {
-      setUser(mockUsers['ceo@min.com']);
-      localStorage.setItem('user', JSON.stringify(mockUsers['ceo@min.com']));
-      toast.success(`Voice authentication successful. Welcome, ${mockUsers['ceo@min.com'].name}`);
-      return true;
+    try {
+      // Use the N8N webhook for voice login
+      const n8nWebhookUrl = 'https://minnewyorkofficial.app.n8n.cloud/webhook/auth/voice-login';
+      
+      const response = await fetch(n8nWebhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        toast.error('Voice authentication failed');
+        return false;
+      }
+      
+      // For demo purposes, continue using the CEO mock user
+      if (mockUsers['ceo@min.com']) {
+        setUser(mockUsers['ceo@min.com']);
+        localStorage.setItem('user', JSON.stringify(mockUsers['ceo@min.com']));
+        toast.success(`Voice authentication successful. Welcome, ${mockUsers['ceo@min.com'].name}`);
+        return true;
+      }
+      
+      toast.error('Voice authentication failed');
+      return false;
+    } catch (error) {
+      console.error('Voice login error:', error);
+      toast.error('An error occurred during voice authentication');
+      return false;
     }
-    
-    toast.error('Voice authentication failed');
-    return false;
   };
   
   const logout = () => {

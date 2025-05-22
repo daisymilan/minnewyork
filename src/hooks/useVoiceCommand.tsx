@@ -65,8 +65,8 @@ const useVoiceCommand = ({
     
     try {
       // Use the browser's SpeechRecognition API
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
+      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognitionAPI();
       
       recognition.continuous = continuous;
       recognition.interimResults = true;

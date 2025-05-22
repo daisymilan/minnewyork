@@ -36,8 +36,8 @@ const SignUp = () => {
     setIsLoading(true);
     
     try {
-      // This would be replaced with your N8N webhook URL in production
-      const n8nWebhookUrl = 'https://your-n8n-instance.com/webhook/signup';
+      // Use the provided N8N webhook URL
+      const n8nWebhookUrl = 'https://minnewyorkofficial.app.n8n.cloud/webhook/signup-user';
       
       // Send signup request to N8N webhook
       const response = await fetch(n8nWebhookUrl, {

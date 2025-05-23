@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { LuxuryButton } from '@/components/ui/luxury-button';
 
@@ -22,7 +21,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   toggleSidebar,
   className
 }) => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   
   const navItems: SidebarItem[] = [
     {
@@ -165,7 +164,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               variant="outline" 
               size="sm" 
               className="ml-auto"
-              onClick={logout}
+              onClick={signOut}
             >
               Logout
             </LuxuryButton>

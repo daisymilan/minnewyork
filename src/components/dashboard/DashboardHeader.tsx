@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import VoiceCommandButton from '@/components/ui/voice-command-button';
 import useVoiceCommand from '@/hooks/useVoiceCommand';
 import { toast } from '@/components/ui/sonner';

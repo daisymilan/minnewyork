@@ -1,41 +1,65 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import KpiCard from '@/components/dashboard/KpiCard';
 import { LuxuryCard } from '@/components/ui/luxury-card';
+import { woocommerceApi } from '@/services/woocommerce';
+import { analyticsApi } from '@/services/analytics';
+import { useWebhookEvents } from '@/hooks/useWebhookEvents';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
-  // Sample KPI data - in a real app, this would come from an API
-  const kpiData = {
+  // Initialize webhook event listeners
+  useWebhookEvents();
+  
+  // Fetch real data using React Query
+  const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
+    queryKey: ['salesAnalytics'],
+    queryFn: analyticsApi.getSalesAnalytics,
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+    queryKey: ['orders'],
+    queryFn: woocommerceApi.getOrders,
+    refetchInterval: 60000, // Refetch every minute
+  });
+  
+  // Use real data or fallback to mock data
+  const kpiData = analyticsData ? {
     revenue: {
-      value: 283450,
-      trend: 12.5,
+      value: analyticsData.total_revenue,
+      trend: analyticsData.revenue_trend,
       type: 'currency' as const,
     },
     orders: {
-      value: 1254,
-      trend: 8.2,
+      value: analyticsData.total_orders,
+      trend: analyticsData.orders_trend,
       type: 'number' as const,
     },
     conversion: {
-      value: 3.2,
-      trend: -1.8,
+      value: analyticsData.conversion_rate,
+      trend: analyticsData.conversion_trend,
       type: 'percentage' as const,
     },
     averageOrder: {
-      value: 226,
-      trend: 5.3,
+      value: analyticsData.average_order_value,
+      trend: analyticsData.aov_trend,
       type: 'currency' as const,
     }
+  } : {
+    revenue: { value: 283450, trend: 12.5, type: 'currency' as const },
+    orders: { value: 1254, trend: 8.2, type: 'number' as const },
+    conversion: { value: 3.2, trend: -1.8, type: 'percentage' as const },
+    averageOrder: { value: 226, trend: 5.3, type: 'currency' as const }
   };
   
-  // Regional sales data - in a real app, this would come from an API
-  const regionalData = [
+  const regionalData = analyticsData?.regional_data || [
     { name: 'North America', value: 42 },
     { name: 'Europe', value: 28 },
     { name: 'Middle East', value: 18 },
@@ -48,6 +72,16 @@ const Dashboard = () => {
     { name: 'Dubai', stock: 2145, status: 'Optimal' },
     { name: 'Riyadh', stock: 984, status: 'Medium' },
   ];
+  
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'delivered': return 'bg-green-500/10 text-green-500';
+      case 'shipped': return 'bg-blue-500/10 text-blue-500';
+      case 'processing': return 'bg-amber-500/10 text-amber-500';
+      case 'refunded': return 'bg-purple-500/10 text-purple-500';
+      default: return 'bg-gray-500/10 text-gray-500';
+    }
+  };
   
   return (
     <div className="flex h-screen bg-luxury-black text-luxury-cream">
@@ -136,20 +170,24 @@ const Dashboard = () => {
                   {/* Sales by Region */}
                   <LuxuryCard className="p-6">
                     <h3 className="text-lg font-display text-luxury-gold mb-4">Sales by Region</h3>
-                    <div className="space-y-4">
-                      {regionalData.map((region) => (
-                        <div key={region.name} className="flex items-center">
-                          <span className="w-32 text-sm">{region.name}</span>
-                          <div className="flex-1 h-2 bg-luxury-black rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gold-gradient rounded-full"
-                              style={{ width: `${region.value}%` }}
-                            ></div>
+                    {analyticsLoading ? (
+                      <div className="text-center py-4">Loading regional data...</div>
+                    ) : (
+                      <div className="space-y-4">
+                        {regionalData.map((region) => (
+                          <div key={region.name} className="flex items-center">
+                            <span className="w-32 text-sm">{region.name}</span>
+                            <div className="flex-1 h-2 bg-luxury-black rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gold-gradient rounded-full"
+                                style={{ width: `${region.value}%` }}
+                              ></div>
+                            </div>
+                            <span className="ml-3 text-sm">{region.value}%</span>
                           </div>
-                          <span className="ml-3 text-sm">{region.value}%</span>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </LuxuryCard>
                   
                   {/* Recent Orders */}
@@ -159,72 +197,43 @@ const Dashboard = () => {
                       <button className="text-sm text-luxury-gold hover:underline">View All</button>
                     </div>
                     
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-luxury-gold/10">
-                            <th className="text-left py-3 font-medium text-luxury-cream/60">Order ID</th>
-                            <th className="text-left py-3 font-medium text-luxury-cream/60">Customer</th>
-                            <th className="text-left py-3 font-medium text-luxury-cream/60">Product</th>
-                            <th className="text-left py-3 font-medium text-luxury-cream/60">Amount</th>
-                            <th className="text-left py-3 font-medium text-luxury-cream/60">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="border-b border-luxury-gold/5">
-                            <td className="py-3">#ORD-7346</td>
-                            <td className="py-3">Emma Wilson</td>
-                            <td className="py-3">Moon Dance</td>
-                            <td className="py-3">$195.00</td>
-                            <td className="py-3">
-                              <span className="px-2 py-1 text-xs rounded-full bg-green-500/10 text-green-500">Delivered</span>
-                            </td>
-                          </tr>
-                          <tr className="border-b border-luxury-gold/5">
-                            <td className="py-3">#ORD-7345</td>
-                            <td className="py-3">James Taylor</td>
-                            <td className="py-3">Long Board</td>
-                            <td className="py-3">$240.00</td>
-                            <td className="py-3">
-                              <span className="px-2 py-1 text-xs rounded-full bg-blue-500/10 text-blue-500">Shipped</span>
-                            </td>
-                          </tr>
-                          <tr className="border-b border-luxury-gold/5">
-                            <td className="py-3">#ORD-7344</td>
-                            <td className="py-3">Sarah Ahmed</td>
-                            <td className="py-3">Dune</td>
-                            <td className="py-3">$175.00</td>
-                            <td className="py-3">
-                              <span className="px-2 py-1 text-xs rounded-full bg-amber-500/10 text-amber-500">Processing</span>
-                            </td>
-                          </tr>
-                          <tr className="border-b border-luxury-gold/5">
-                            <td className="py-3">#ORD-7343</td>
-                            <td className="py-3">Olivia Chen</td>
-                            <td className="py-3">Hour Glass</td>
-                            <td className="py-3">$195.00</td>
-                            <td className="py-3">
-                              <span className="px-2 py-1 text-xs rounded-full bg-green-500/10 text-green-500">Delivered</span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="py-3">#ORD-7342</td>
-                            <td className="py-3">Michael Brown</td>
-                            <td className="py-3">Old School Bench</td>
-                            <td className="py-3">$240.00</td>
-                            <td className="py-3">
-                              <span className="px-2 py-1 text-xs rounded-full bg-purple-500/10 text-purple-500">Refunded</span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
+                    {ordersLoading ? (
+                      <div className="text-center py-4">Loading orders...</div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-luxury-gold/10">
+                              <th className="text-left py-3 font-medium text-luxury-cream/60">Order ID</th>
+                              <th className="text-left py-3 font-medium text-luxury-cream/60">Customer</th>
+                              <th className="text-left py-3 font-medium text-luxury-cream/60">Product</th>
+                              <th className="text-left py-3 font-medium text-luxury-cream/60">Amount</th>
+                              <th className="text-left py-3 font-medium text-luxury-cream/60">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {ordersData?.slice(0, 5).map((order) => (
+                              <tr key={order.id} className="border-b border-luxury-gold/5">
+                                <td className="py-3">#{order.id}</td>
+                                <td className="py-3">{order.customer_name}</td>
+                                <td className="py-3">{order.product_name}</td>
+                                <td className="py-3">${order.amount.toFixed(2)}</td>
+                                <td className="py-3">
+                                  <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(order.status)}`}>
+                                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </LuxuryCard>
                 </div>
                 
                 {/* Sidebar with additional widgets */}
                 <div className="space-y-6">
-                  {/* Voice Command Helper */}
                   <LuxuryCard className="p-6" variant="glass">
                     <h3 className="text-lg font-display text-luxury-gold mb-3">Voice Commands</h3>
                     <p className="text-sm text-luxury-cream/70 mb-4">
@@ -255,7 +264,6 @@ const Dashboard = () => {
                     </ul>
                   </LuxuryCard>
                   
-                  {/* Warehouse Inventory */}
                   <LuxuryCard className="p-6">
                     <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Inventory</h3>
                     

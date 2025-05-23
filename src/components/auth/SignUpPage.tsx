@@ -43,18 +43,22 @@ export const SignUpPage: React.FC = () => {
       return;
     }
 
-    const result = await signUp({
-      email: formData.email,
-      password: formData.password,
-      fullName: formData.fullName,
-      role: formData.role
-    });
+    try {
+      const result = await signUp({
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.fullName,
+        role: formData.role
+      });
 
-    if (result.success) {
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
+      if (result.success) {
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Error in signup form submission:", error);
     }
   };
 

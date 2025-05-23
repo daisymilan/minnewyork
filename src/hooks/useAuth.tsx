@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useContext, createContext, ReactNode } from 'react';
 import { toast } from '@/components/ui/sonner';
 import { 
@@ -139,8 +138,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // Return a success object since we can't read the actual response with no-cors
       return { 
-        success: true,
-        message: "Account creation request was sent. Please check if your account was created."
+        success: true
       };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Network error during registration';

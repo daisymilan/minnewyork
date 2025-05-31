@@ -2,10 +2,13 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const B2BMenuItem = () => {
+  const navigate = useNavigate();
+
   const handleB2BClick = () => {
-    window.location.href = '/b2b';
+    navigate('/b2b');
   };
 
   return (

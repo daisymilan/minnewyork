@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { LuxuryButton } from '@/components/ui/luxury-button';
+import { B2BMenuItem } from './B2BMenuItem';
 
 interface SidebarItem {
   name: string;
@@ -130,6 +131,15 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               </a>
             </li>
           ))}
+          
+          {/* B2B Leads Upload - Show for specific roles */}
+          {user && ['CEO', 'CCO', 'Commercial Director', 'Marketing Director'].includes(user.role) && (
+            <li>
+              <div className="px-3 py-2">
+                <B2BMenuItem />
+              </div>
+            </li>
+          )}
         </ul>
       </nav>
       

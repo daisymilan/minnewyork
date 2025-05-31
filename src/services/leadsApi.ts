@@ -1,4 +1,3 @@
-
 // Leads API service for N8N webhook integration
 export interface Lead {
   id: string;
@@ -82,25 +81,21 @@ const getFileExtension = (filename: string): string => {
 export const leadsApi = {
   async uploadToN8N(file: File): Promise<UploadResponse> {
     try {
-      const base64Data = await fileToBase64(file);
       const sessionId = generateSessionId();
       
-      const payload = {
-        filename: file.name,
-        file_data: base64Data,
-        upload_timestamp: new Date().toISOString(),
-        session_id: sessionId,
-        file_type: getFileExtension(file.name)
-      };
+      // Create FormData for binary file upload
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('filename', file.name);
+      formData.append('upload_timestamp', new Date().toISOString());
+      formData.append('session_id', sessionId);
+      formData.append('file_type', getFileExtension(file.name));
 
-      console.log('Uploading file to N8N:', payload.filename);
+      console.log('Uploading file to N8N:', file.name);
 
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/upload-b2b-leads', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
+        body: formData // Send as binary data via FormData
       });
 
       if (!response.ok) {

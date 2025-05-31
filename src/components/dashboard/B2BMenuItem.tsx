@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Users } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 export const B2BMenuItem = () => {
   const handleB2BClick = () => {
@@ -14,8 +14,8 @@ export const B2BMenuItem = () => {
       className="w-full justify-start text-luxury-cream hover:bg-luxury-gold/20"
       onClick={handleB2BClick}
     >
-      <Users className="mr-2 h-4 w-4" />
-      B2B Management
+      <Upload className="mr-2 h-4 w-4" />
+      B2B Leads Upload
     </Button>
   );
 };

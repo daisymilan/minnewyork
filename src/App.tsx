@@ -23,13 +23,7 @@ const AppRoutes = () => {
       <Route path="/login" element={<SignInPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/b2b" element={
-        <div className="min-h-screen bg-luxury-black text-luxury-cream">
-          <div className="container mx-auto px-6 py-8">
-            <B2BDashboard />
-          </div>
-        </div>
-      } />
+      <Route path="/b2b" element={<B2BDashboard />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

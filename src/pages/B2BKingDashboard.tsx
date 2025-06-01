@@ -29,18 +29,17 @@ const B2BKingDashboard = () => {
     queryFn: b2bKingApi.getB2BQuotes,
   });
 
-  const { data: leads = [], isLoading: leadsLoading } = useQuery({
+  const { data: b2bLeads = [], isLoading: leadsLoading } = useQuery({
     queryKey: ['b2b-leads'],
     queryFn: b2bKingApi.getLeads,
   });
 
-  // Calculate stats including processed leads
-  const allLeads = [...leads, ...processedLeads];
+  // Calculate stats
   const stats = {
     totalCustomers: customers.length,
     approvedCustomers: customers.filter(c => c.status === 'approved').length,
     pendingQuotes: quotes.filter(q => q.status === 'pending').length,
-    newLeads: allLeads.filter(l => l.status === 'new').length,
+    totalLeads: b2bLeads.length + processedLeads.length,
   };
 
   const toggleSidebar = () => {
@@ -107,8 +106,8 @@ const B2BKingDashboard = () => {
             <LuxuryCard className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-luxury-cream/60 text-sm">All Leads</p>
-                  <p className="text-2xl font-bold text-purple-500">{allLeads.length}</p>
+                  <p className="text-luxury-cream/60 text-sm">Total Leads</p>
+                  <p className="text-2xl font-bold text-purple-500">{stats.totalLeads}</p>
                 </div>
                 <Target className="h-8 w-8 text-purple-500/60" />
               </div>
@@ -159,7 +158,36 @@ const B2BKingDashboard = () => {
                   />
                 </LuxuryCard>
                 
-                <LeadsTable leads={allLeads} isLoading={leadsLoading} />
+                <LeadsTable leads={b2bLeads} isLoading={leadsLoading} />
+
+                {/* Show processed leads separately if any */}
+                {processedLeads.length > 0 && (
+                  <LuxuryCard className="p-6">
+                    <div className="mb-4">
+                      <h3 className="text-lg font-display text-luxury-gold mb-2">Recently Processed Leads</h3>
+                      <p className="text-luxury-cream/60 text-sm">{processedLeads.length} leads processed from uploaded files</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {processedLeads.map((lead) => (
+                        <div key={lead.id} className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4">
+                          <div className="space-y-2">
+                            <div className="font-medium text-luxury-cream">{lead.name}</div>
+                            <div className="text-sm text-luxury-cream/60">{lead.company}</div>
+                            <div className="text-sm text-luxury-cream/60">{lead.email}</div>
+                            <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                              lead.priority === 'high' ? 'bg-red-500/20 text-red-400' :
+                              lead.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                              lead.priority === 'research' ? 'bg-blue-500/20 text-blue-400' :
+                              'bg-gray-500/20 text-gray-400'
+                            }`}>
+                              {lead.priority} priority
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </LuxuryCard>
+                )}
               </div>
             </TabsContent>
           </Tabs>

@@ -1,10 +1,10 @@
-
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { b2bKingApi } from '@/services/b2bking';
 import { B2BCustomersTable } from '@/components/b2b/B2BCustomersTable';
 import { B2BQuotesTable } from '@/components/b2b/B2BQuotesTable';
 import { LeadsTable } from '@/components/b2b/LeadsTable';
+import { LeadsUploader } from '@/components/b2b/LeadsUploader';
 import { LuxuryCard } from '@/components/ui/luxury-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -13,6 +13,7 @@ import { Building2, Users, FileText, Target } from 'lucide-react';
 
 const B2BKingDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const queryClient = useQueryClient();
 
   // Fetch B2B data using React Query
   const { data: customers = [], isLoading: customersLoading } = useQuery({
@@ -40,6 +41,11 @@ const B2BKingDashboard = () => {
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
+  };
+
+  const handleUploadSuccess = () => {
+    // Refetch leads data after successful upload
+    queryClient.invalidateQueries({ queryKey: ['b2b-leads'] });
   };
 
   return (
@@ -132,7 +138,17 @@ const B2BKingDashboard = () => {
             </TabsContent>
 
             <TabsContent value="leads" className="space-y-4">
-              <LeadsTable leads={leads} isLoading={leadsLoading} />
+              <div className="space-y-6">
+                <LuxuryCard className="p-6">
+                  <div className="mb-4">
+                    <h3 className="text-lg font-display text-luxury-gold mb-2">Upload Leads</h3>
+                    <p className="text-luxury-cream/60 text-sm">Upload Excel or CSV files to import new leads</p>
+                  </div>
+                  <LeadsUploader onUploadSuccess={handleUploadSuccess} />
+                </LuxuryCard>
+                
+                <LeadsTable leads={leads} isLoading={leadsLoading} />
+              </div>
             </TabsContent>
           </Tabs>
         </div>

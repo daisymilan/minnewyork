@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/sonner';
-import { b2bKingApi } from '@/services/b2bking';
+import { leadsApi } from '@/services/leadsApi';
 import { Upload, FileSpreadsheet } from 'lucide-react';
 
 interface LeadsUploaderProps {
@@ -36,10 +36,11 @@ export const LeadsUploader: React.FC<LeadsUploaderProps> = ({ onUploadSuccess })
     setIsUploading(true);
 
     try {
-      const result = await b2bKingApi.uploadLeads(file);
+      console.log('Uploading file to N8N webhook:', file.name);
+      const result = await leadsApi.uploadToN8N(file);
       
-      if (result.success) {
-        toast.success(`Successfully imported ${result.leads_imported || 0} leads`);
+      if (result.status === 'processing') {
+        toast.success(`File uploaded successfully! Processing through N8N workflow...`);
         onUploadSuccess();
       } else {
         toast.error(result.message || 'Failed to upload leads');

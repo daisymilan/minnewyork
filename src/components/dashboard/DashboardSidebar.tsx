@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -135,9 +136,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           {/* B2B Leads Upload - Show for specific roles */}
           {user && ['CEO', 'CCO', 'Commercial Director', 'Marketing Director'].includes(user.role) && (
             <li>
-              <div className="px-3 py-2">
-                <B2BMenuItem />
-              </div>
+              <B2BMenuItem />
             </li>
           )}
         </ul>

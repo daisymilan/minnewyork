@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,13 +11,12 @@ export const B2BMenuItem = () => {
   };
 
   return (
-    <Button
-      variant="ghost"
-      className="w-full justify-start text-luxury-cream hover:bg-luxury-gold/20"
+    <a 
       onClick={handleB2BClick}
+      className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-luxury-gold/10 hover:text-luxury-gold cursor-pointer"
     >
-      <Upload className="mr-2 h-4 w-4" />
-      B2B Leads Upload
-    </Button>
+      <Upload className="h-5 w-5 text-luxury-gold/80" />
+      <span>B2B Leads Upload</span>
+    </a>
   );
 };

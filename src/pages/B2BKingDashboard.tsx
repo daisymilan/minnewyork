@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { b2bKingApi } from '@/services/b2bking';
@@ -10,9 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import { useState } from 'react';
 import { Building2, Users, FileText, Target } from 'lucide-react';
+import { Lead } from '@/services/leadsApi';
 
 const B2BKingDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [processedLeads, setProcessedLeads] = useState<Lead[]>([]);
   const queryClient = useQueryClient();
 
   // Fetch B2B data using React Query
@@ -31,12 +34,13 @@ const B2BKingDashboard = () => {
     queryFn: b2bKingApi.getLeads,
   });
 
-  // Calculate stats
+  // Calculate stats including processed leads
+  const allLeads = [...leads, ...processedLeads];
   const stats = {
     totalCustomers: customers.length,
     approvedCustomers: customers.filter(c => c.status === 'approved').length,
     pendingQuotes: quotes.filter(q => q.status === 'pending').length,
-    newLeads: leads.filter(l => l.status === 'new').length,
+    newLeads: allLeads.filter(l => l.status === 'new').length,
   };
 
   const toggleSidebar = () => {
@@ -46,6 +50,11 @@ const B2BKingDashboard = () => {
   const handleUploadSuccess = () => {
     // Refetch leads data after successful upload
     queryClient.invalidateQueries({ queryKey: ['b2b-leads'] });
+  };
+
+  const handleLeadsProcessed = (newLeads: Lead[]) => {
+    // Add processed leads to the local state to display immediately
+    setProcessedLeads(prev => [...prev, ...newLeads]);
   };
 
   return (
@@ -98,8 +107,8 @@ const B2BKingDashboard = () => {
             <LuxuryCard className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-luxury-cream/60 text-sm">New Leads</p>
-                  <p className="text-2xl font-bold text-purple-500">{stats.newLeads}</p>
+                  <p className="text-luxury-cream/60 text-sm">All Leads</p>
+                  <p className="text-2xl font-bold text-purple-500">{allLeads.length}</p>
                 </div>
                 <Target className="h-8 w-8 text-purple-500/60" />
               </div>
@@ -142,12 +151,15 @@ const B2BKingDashboard = () => {
                 <LuxuryCard className="p-6">
                   <div className="mb-4">
                     <h3 className="text-lg font-display text-luxury-gold mb-2">Upload Leads</h3>
-                    <p className="text-luxury-cream/60 text-sm">Upload Excel or CSV files to import new leads</p>
+                    <p className="text-luxury-cream/60 text-sm">Upload Excel or CSV files to import new leads through N8N workflow</p>
                   </div>
-                  <LeadsUploader onUploadSuccess={handleUploadSuccess} />
+                  <LeadsUploader 
+                    onUploadSuccess={handleUploadSuccess}
+                    onLeadsProcessed={handleLeadsProcessed}
+                  />
                 </LuxuryCard>
                 
-                <LeadsTable leads={leads} isLoading={leadsLoading} />
+                <LeadsTable leads={allLeads} isLoading={leadsLoading} />
               </div>
             </TabsContent>
           </Tabs>

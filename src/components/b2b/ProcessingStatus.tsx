@@ -29,11 +29,11 @@ export const ProcessingStatus: React.FC<ProcessingStatusProps> = ({
     switch (status) {
       case 'uploading':
       case 'processing':
-        return <Loader2 className="h-5 w-5 animate-spin text-blue-600" />;
+        return <Loader2 className="h-5 w-5 animate-spin text-luxury-gold" />;
       case 'completed':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
       case 'error':
-        return <AlertCircle className="h-5 w-5 text-red-600" />;
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
       default:
         return null;
     }
@@ -55,28 +55,28 @@ export const ProcessingStatus: React.FC<ProcessingStatusProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg border p-6 space-y-4">
+    <div className="bg-luxury-black/50 border border-luxury-gold/20 rounded-lg p-6 space-y-4">
       <div className="flex items-center space-x-3">
         {getStatusIcon()}
         <div>
-          <h3 className="font-medium text-gray-900">
+          <h3 className="font-medium text-luxury-cream">
             {status === 'processing' ? 'Processing Status' : 
              status === 'uploading' ? 'Upload Status' :
              status === 'completed' ? 'Processing Complete' : 'Error'}
           </h3>
-          <p className="text-sm text-gray-600">{getStatusMessage()}</p>
+          <p className="text-sm text-luxury-cream/60">{getStatusMessage()}</p>
         </div>
       </div>
 
       {(status === 'uploading' || status === 'processing') && (
         <div className="space-y-2">
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-luxury-black/50 rounded-full h-2">
             <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-luxury-gold h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="flex justify-between text-xs text-gray-500">
+          <div className="flex justify-between text-xs text-luxury-cream/50">
             <span>{progress}% complete</span>
             {processedLeads && totalLeads && (
               <span>{processedLeads} / {totalLeads} leads</span>
@@ -87,16 +87,18 @@ export const ProcessingStatus: React.FC<ProcessingStatusProps> = ({
 
       {status === 'processing' && workflowSteps.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-700">Workflow Progress:</h4>
+          <h4 className="text-sm font-medium text-luxury-cream">Workflow Progress:</h4>
           <div className="space-y-1">
             {workflowSteps.map((step, index) => (
               <div key={index} className="flex items-center space-x-2 text-sm">
                 {step === currentStep ? (
-                  <Loader2 className="h-3 w-3 animate-spin text-blue-600" />
+                  <Loader2 className="h-3 w-3 animate-spin text-luxury-gold" />
+                ) : workflowSteps.indexOf(currentStep || '') > index ? (
+                  <CheckCircle className="h-3 w-3 text-green-500" />
                 ) : (
-                  <CheckCircle className="h-3 w-3 text-green-600" />
+                  <div className="h-3 w-3 rounded-full border border-luxury-cream/30" />
                 )}
-                <span className={step === currentStep ? 'text-blue-600 font-medium' : 'text-gray-600'}>
+                <span className={step === currentStep ? 'text-luxury-gold font-medium' : 'text-luxury-cream/60'}>
                   {step}
                 </span>
               </div>

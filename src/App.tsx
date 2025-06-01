@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import { SignInPage } from "./components/auth/SignInPage";
 import { SignUpPage } from "./components/auth/SignUpPage";
 import B2BDashboard from "./components/b2b/B2BDashboard";
+import B2BKingDashboard from "./pages/B2BKingDashboard";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const AppRoutes = () => {
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/b2b" element={<B2BDashboard />} />
+      <Route path="/b2bking" element={<B2BKingDashboard />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

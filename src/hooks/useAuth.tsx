@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useContext, createContext, ReactNode } from 'react';
 import { toast } from '@/components/ui/sonner';
 import { 
@@ -25,7 +26,7 @@ interface AuthContextType {
 const mockUsers: Record<string, User> = {
   'ceo@min.com': {
     id: '1',
-    name: 'Chad Murawczyk',
+    name: 'Chad',
     email: 'ceo@min.com',
     role: 'CEO',
     avatar: '/avatar-ceo.png',

@@ -36,7 +36,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           <rect width="7" height="5" x="3" y="16" rx="1" />
         </svg>
       ),
-      href: '#',
+      href: '/dashboard',
       roles: ['CEO', 'CCO', 'Commercial Director', 'GCC Regional Manager', 'Marketing Director', 'Production Manager', 'Customer Support', 'Social Media Manager']
     },
     {
@@ -91,7 +91,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
         </svg>
       ),
-      href: '#',
+      href: '/marketing',
       roles: ['CEO', 'CCO', 'Marketing Director', 'Social Media Manager']
     },
   ];

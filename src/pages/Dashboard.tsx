@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -15,6 +16,26 @@ const Dashboard = () => {
   
   // Initialize webhook event listeners
   useWebhookEvents();
+  
+  // Clear localStorage on component mount to ensure fresh user data
+  useEffect(() => {
+    // Check if the stored user has the old name and update it
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser.name === 'Chad Murawczyk') {
+          // Update to new name
+          parsedUser.name = 'Chad';
+          localStorage.setItem('user', JSON.stringify(parsedUser));
+          // Force a page refresh to update the auth context
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error('Error updating user data:', error);
+      }
+    }
+  }, []);
   
   // Fetch real data using React Query
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({

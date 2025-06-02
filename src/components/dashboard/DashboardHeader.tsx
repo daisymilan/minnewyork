@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import VoiceCommandButton from '@/components/ui/voice-command-button';
@@ -101,11 +102,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ className }) => {
         
         {/* User avatar */}
         {user && (
-          <button className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-sm">
             <div className="h-8 w-8 rounded-full bg-luxury-gold/20 flex items-center justify-center text-luxury-gold">
               {user.name.charAt(0)}
             </div>
-          </button>
+            <div className="hidden lg:block">
+              <div className="text-luxury-cream">{user.name}</div>
+              <div className="text-xs text-luxury-cream/60">{user.role}</div>
+            </div>
+          </div>
         )}
       </div>
     </header>

@@ -14,6 +14,10 @@ import { SignUpPage } from "./components/auth/SignUpPage";
 import B2BDashboard from "./components/b2b/B2BDashboard";
 import B2BKingDashboard from "./pages/B2BKingDashboard";
 import MarketingDashboard from "./pages/MarketingDashboard";
+import CalendarDashboard from "./pages/CalendarDashboard";
+import AnalyticsDashboard from "./pages/AnalyticsDashboard";
+import AdCreatorDashboard from "./pages/AdCreatorDashboard";
+import SupportDashboard from "./pages/SupportDashboard";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -28,6 +32,10 @@ const AppRoutes = () => {
       <Route path="/b2b" element={<B2BDashboard />} />
       <Route path="/b2bking" element={<B2BKingDashboard />} />
       <Route path="/marketing" element={<MarketingDashboard />} />
+      <Route path="/calendar" element={<CalendarDashboard />} />
+      <Route path="/analytics" element={<AnalyticsDashboard />} />
+      <Route path="/ad-creator" element={<AdCreatorDashboard />} />
+      <Route path="/support" element={<SupportDashboard />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

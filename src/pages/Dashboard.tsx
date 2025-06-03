@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -90,12 +89,24 @@ const Dashboard = () => {
     averageOrder: { value: 226, trend: 5.3, type: 'currency' as const }
   };
   
-  // Use real regional data from overview API
+  // Use real regional data from overview API with improved type handling
   const regionalData = overviewData?.regional_breakdown ? 
-    Object.entries(overviewData.regional_breakdown).map(([name, value]) => ({
-      name,
-      value: typeof value === 'number' ? value : parseInt(value.toString())
-    })) : [
+    Object.entries(overviewData.regional_breakdown).map(([name, value]) => {
+      // Safely convert value to number with proper type checking
+      let numValue = 0;
+      if (typeof value === 'number') {
+        numValue = value;
+      } else if (typeof value === 'string') {
+        numValue = parseInt(value) || 0;
+      } else if (value != null) {
+        numValue = parseInt(String(value)) || 0;
+      }
+      
+      return {
+        name,
+        value: numValue
+      };
+    }) : [
       { name: 'North America', value: 42 },
       { name: 'Europe', value: 28 },
       { name: 'Middle East', value: 18 },

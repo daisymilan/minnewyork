@@ -28,6 +28,19 @@ export interface OrderRoutingStats {
   last_sync: string;
 }
 
+export interface WarehouseOverview {
+  total_warehouses: number;
+  active_warehouses: number;
+  total_inventory_value: number;
+  low_stock_alerts: number;
+  warehouses: Array<{
+    name: string;
+    location: string;
+    status: string;
+    total_items: number;
+  }>;
+}
+
 export const orderRoutingApi = {
   // Route a new order through the workflow
   async routeOrder(orderData: any): Promise<OrderRoutingResponse> {
@@ -51,12 +64,16 @@ export const orderRoutingApi = {
   // Get inventory status across all warehouses
   async getInventoryStatus(): Promise<InventoryStatus[]> {
     try {
-      // This would connect to your inventory sync endpoints
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/inventory/status');
       const result = await response.json();
       
       if (result.success && result.data) {
         return result.data.inventory_status || [];
+      }
+      
+      // Return result directly if it's an array
+      if (Array.isArray(result)) {
+        return result;
       }
       
       // Fallback mock data based on your workflow
@@ -106,6 +123,11 @@ export const orderRoutingApi = {
         return result.data;
       }
       
+      // Return result directly if it matches the expected format
+      if (result.total_orders_routed && result.orders_by_region) {
+        return result;
+      }
+      
       // Fallback data
       return {
         total_orders_routed: 1254,
@@ -119,6 +141,40 @@ export const orderRoutingApi = {
       };
     } catch (error) {
       console.error('Error fetching routing stats:', error);
+      throw error;
+    }
+  },
+
+  // Get warehouse overview data
+  async getWarehouseOverview(): Promise<WarehouseOverview> {
+    try {
+      const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/warehouse/overview');
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        return result.data;
+      }
+      
+      // Return result directly if it matches the expected format
+      if (result.total_warehouses !== undefined) {
+        return result;
+      }
+      
+      // Fallback data
+      return {
+        total_warehouses: 4,
+        active_warehouses: 4,
+        total_inventory_value: 2850000,
+        low_stock_alerts: 3,
+        warehouses: [
+          { name: 'Shipforus USA', location: 'Las Vegas, NV', status: 'active', total_items: 1234 },
+          { name: 'OTO UAE', location: 'Dubai, UAE', status: 'active', total_items: 856 },
+          { name: 'OTO KSA', location: 'Riyadh, KSA', status: 'active', total_items: 2145 },
+          { name: 'DSL Europe', location: 'Nice, France', status: 'active', total_items: 984 }
+        ]
+      };
+    } catch (error) {
+      console.error('Error fetching warehouse overview:', error);
       throw error;
     }
   }

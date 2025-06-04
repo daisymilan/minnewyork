@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -6,6 +7,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import KpiCard from '@/components/dashboard/KpiCard';
 import { LuxuryCard } from '@/components/ui/luxury-card';
 import { dashboardApi } from '@/services/dashboard';
+import { orderRoutingApi } from '@/services/orderRouting';
 import { useWebhookEvents } from '@/hooks/useWebhookEvents';
 
 const Dashboard = () => {
@@ -58,6 +60,19 @@ const Dashboard = () => {
     queryKey: ['dashboardProducts'],
     queryFn: dashboardApi.getProducts,
     refetchInterval: 120000, // Refetch every 2 minutes
+  });
+
+  // Add order routing data
+  const { data: routingStats, isLoading: routingLoading } = useQuery({
+    queryKey: ['orderRoutingStats'],
+    queryFn: orderRoutingApi.getRoutingStats,
+    refetchInterval: 60000, // Refetch every minute
+  });
+
+  const { data: inventoryStatus, isLoading: inventoryLoading } = useQuery({
+    queryKey: ['inventoryStatus'],
+    queryFn: orderRoutingApi.getInventoryStatus,
+    refetchInterval: 300000, // Refetch every 5 minutes
   });
   
   // Use real data from the new API endpoints
@@ -113,7 +128,8 @@ const Dashboard = () => {
       { name: 'Asia', value: 12 },
     ];
   
-  const warehouseData = [
+  // Use real inventory data from order routing API
+  const warehouseData = inventoryStatus || [
     { name: 'Vegas', stock: 1234, status: 'Optimal' },
     { name: 'Nice', stock: 856, status: 'Low' },
     { name: 'Dubai', stock: 2145, status: 'Optimal' },
@@ -126,6 +142,9 @@ const Dashboard = () => {
       case 'shipped': return 'bg-blue-500/10 text-blue-500';
       case 'processing': return 'bg-amber-500/10 text-amber-500';
       case 'refunded': return 'bg-purple-500/10 text-purple-500';
+      case 'optimal': return 'bg-green-500/10 text-green-500';
+      case 'low': return 'bg-red-500/10 text-red-500';
+      case 'medium': return 'bg-amber-500/10 text-amber-500';
       default: return 'bg-gray-500/10 text-gray-500';
     }
   };
@@ -188,7 +207,7 @@ const Dashboard = () => {
                   type={kpiData.conversion.type}
                   icon={
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z" />
+                      <path d="m2 4 3 12h14l3-12-6 7-4 7-4 7-6-7Z" />
                       <path d="m5 16 3 4" />
                       <path d="m16 16 3 4" />
                     </svg>
@@ -236,6 +255,32 @@ const Dashboard = () => {
                       </div>
                     )}
                   </LuxuryCard>
+                  
+                  {/* Order Routing Statistics */}
+                  {routingStats && (
+                    <LuxuryCard className="p-6">
+                      <h3 className="text-lg font-display text-luxury-gold mb-4">Order Routing Statistics</h3>
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-luxury-gold">{routingStats.orders_by_region.USA}</div>
+                          <div className="text-sm text-luxury-cream/60">USA Orders</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-luxury-gold">{routingStats.orders_by_region.GCC}</div>
+                          <div className="text-sm text-luxury-cream/60">GCC Orders</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-luxury-gold">{routingStats.orders_by_region.Europe}</div>
+                          <div className="text-sm text-luxury-cream/60">Europe Orders</div>
+                        </div>
+                      </div>
+                      <div className="text-center pt-4 border-t border-luxury-gold/10">
+                        <div className="text-sm text-luxury-cream/60">
+                          Active Warehouses: {routingStats.active_warehouses.join(', ')}
+                        </div>
+                      </div>
+                    </LuxuryCard>
+                  )}
                   
                   {/* Recent Orders */}
                   <LuxuryCard className="p-6">
@@ -314,23 +359,28 @@ const Dashboard = () => {
                   <LuxuryCard className="p-6">
                     <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Inventory</h3>
                     
-                    <div className="space-y-3">
-                      {warehouseData.map((warehouse) => (
-                        <div key={warehouse.name} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md">
-                          <div>
-                            <h4 className="font-medium">{warehouse.name}</h4>
-                            <p className="text-xs text-luxury-cream/60">{warehouse.stock} units</p>
+                    {inventoryLoading ? (
+                      <div className="text-center py-4">Loading inventory...</div>
+                    ) : (
+                      <div className="space-y-3">
+                        {warehouseData.map((warehouse, index) => (
+                          <div key={warehouse.warehouse || warehouse.name || index} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md">
+                            <div>
+                              <h4 className="font-medium">{warehouse.warehouse || warehouse.name}</h4>
+                              <p className="text-xs text-luxury-cream/60">
+                                {warehouse.stock_quantity || warehouse.stock} units
+                              </p>
+                              {warehouse.provider && (
+                                <p className="text-xs text-luxury-gold/70">{warehouse.provider}</p>
+                              )}
+                            </div>
+                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.stock_status || warehouse.status)}`}>
+                              {(warehouse.stock_status || warehouse.status || '').charAt(0).toUpperCase() + (warehouse.stock_status || warehouse.status || '').slice(1)}
+                            </span>
                           </div>
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            warehouse.status === 'Optimal' ? 'bg-green-500/10 text-green-500' :
-                            warehouse.status === 'Medium' ? 'bg-amber-500/10 text-amber-500' :
-                            'bg-red-500/10 text-red-500'
-                          }`}>
-                            {warehouse.status}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </LuxuryCard>
 
                   {/* Product Insights */}

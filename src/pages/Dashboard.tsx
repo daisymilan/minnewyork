@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -72,6 +71,13 @@ const Dashboard = () => {
   const { data: inventoryStatus, isLoading: inventoryLoading } = useQuery({
     queryKey: ['inventoryStatus'],
     queryFn: orderRoutingApi.getInventoryStatus,
+    refetchInterval: 300000, // Refetch every 5 minutes
+  });
+
+  // Add warehouse overview data
+  const { data: warehouseOverview, isLoading: warehouseLoading } = useQuery({
+    queryKey: ['warehouseOverview'],
+    queryFn: orderRoutingApi.getWarehouseOverview,
     refetchInterval: 300000, // Refetch every 5 minutes
   });
   
@@ -278,6 +284,50 @@ const Dashboard = () => {
                         <div className="text-sm text-luxury-cream/60">
                           Active Warehouses: {routingStats.active_warehouses.join(', ')}
                         </div>
+                      </div>
+                    </LuxuryCard>
+                  )}
+                  
+                  {/* Warehouse Overview */}
+                  {warehouseOverview && (
+                    <LuxuryCard className="p-6">
+                      <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Overview</h3>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-luxury-gold">{warehouseOverview.total_warehouses}</div>
+                          <div className="text-sm text-luxury-cream/60">Total Warehouses</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-500">{warehouseOverview.active_warehouses}</div>
+                          <div className="text-sm text-luxury-cream/60">Active</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-luxury-gold">${warehouseOverview.total_inventory_value.toLocaleString()}</div>
+                          <div className="text-sm text-luxury-cream/60">Inventory Value</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-red-400">{warehouseOverview.low_stock_alerts}</div>
+                          <div className="text-sm text-luxury-cream/60">Low Stock Alerts</div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {warehouseOverview.warehouses.map((warehouse) => (
+                          <div key={warehouse.name} className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <h4 className="font-medium text-luxury-cream">{warehouse.name}</h4>
+                                <p className="text-sm text-luxury-cream/60">{warehouse.location}</p>
+                              </div>
+                              <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
+                                {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
+                              </span>
+                            </div>
+                            <div className="text-sm text-luxury-cream/60">
+                              {warehouse.total_items.toLocaleString()} items
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </LuxuryCard>
                   )}

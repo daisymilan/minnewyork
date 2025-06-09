@@ -67,16 +67,71 @@ export const orderRoutingApi = {
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/inventory/status');
       const result = await response.json();
       
-      if (result.success && result.data) {
-        return result.data.inventory_status || [];
+      console.log('📦 Raw inventory response:', result);
+      
+      // Handle the actual webhook structure - it's an array with one object
+      let inventoryData = result;
+      if (Array.isArray(result) && result.length > 0) {
+        inventoryData = result[0];
       }
       
-      // Return result directly if it's an array
-      if (Array.isArray(result)) {
-        return result;
+      if (inventoryData.success && inventoryData.warehouses) {
+        const inventoryList: InventoryStatus[] = [];
+        
+        // Process shipforus warehouse
+        if (inventoryData.warehouses.shipforus) {
+          const shipforus = inventoryData.warehouses.shipforus;
+          inventoryList.push({
+            provider: shipforus.provider,
+            warehouse: `${shipforus.warehouse_id} (${shipforus.region})`,
+            stock_quantity: shipforus.total_products,
+            stock_status: shipforus.status,
+            last_updated: shipforus.last_sync
+          });
+        }
+        
+        // Process DSL warehouse
+        if (inventoryData.warehouses.dsl) {
+          const dsl = inventoryData.warehouses.dsl;
+          inventoryList.push({
+            provider: dsl.provider,
+            warehouse: `${dsl.warehouse_id} (${dsl.region})`,
+            stock_quantity: dsl.total_products,
+            stock_status: dsl.status,
+            last_updated: dsl.last_sync
+          });
+        }
+        
+        // Process OTO warehouses (multiple sub-warehouses)
+        if (inventoryData.warehouses.oto) {
+          const oto = inventoryData.warehouses.oto;
+          if (oto.warehouses && Array.isArray(oto.warehouses)) {
+            oto.warehouses.forEach((subWarehouse: any) => {
+              inventoryList.push({
+                provider: oto.provider,
+                warehouse: `${subWarehouse.warehouse_id} (${subWarehouse.name})`,
+                stock_quantity: subWarehouse.products,
+                stock_status: oto.status,
+                last_updated: oto.last_sync
+              });
+            });
+          } else {
+            // Fallback for main OTO warehouse
+            inventoryList.push({
+              provider: oto.provider,
+              warehouse: `${oto.warehouse_id} (${oto.region})`,
+              stock_quantity: oto.total_products,
+              stock_status: oto.status,
+              last_updated: oto.last_sync
+            });
+          }
+        }
+        
+        console.log('📊 Processed inventory list:', inventoryList);
+        return inventoryList;
       }
       
-      // Fallback mock data based on your workflow
+      // Fallback data if parsing fails
       return [
         {
           provider: 'Shipforus',

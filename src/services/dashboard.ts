@@ -182,13 +182,54 @@ export const dashboardApi = {
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/products');
       const result = await response.json();
       
-      if (result.success && result.data) {
+      console.log('📦 Raw products response:', result);
+      
+      // Handle the new response structure - it's an array with one object containing products
+      let productsData = result;
+      if (Array.isArray(result) && result.length > 0) {
+        productsData = result[0];
+      }
+      
+      if (productsData.products && Array.isArray(productsData.products)) {
+        // Map the actual product structure to our dashboard interface
+        const mappedProducts: DashboardProduct[] = productsData.products.map((product: any) => ({
+          id: product.id.toString(),
+          name: product.name,
+          price: product.price,
+          stock_quantity: product.stock_quantity,
+          status: product.status,
+          sales_count: product.sales_count || 0
+        }));
+        
+        // Calculate insights from the actual product data
+        const totalProducts = productsData.count || productsData.products.length;
+        const lowStockProducts = productsData.products.filter((p: any) => 
+          p.stock_status === 'outofstock' || (p.manage_stock && p.stock_quantity <= 5)
+        ).length;
+        
+        console.log('📦 Processed products:', mappedProducts.length);
+        console.log('📦 Low stock alerts:', lowStockProducts);
+        
         return {
-          products: result.data.top_products || result.data.products || [],
-          insights: result.data.inventory_insights || {}
+          products: mappedProducts,
+          insights: {
+            total_products: totalProducts,
+            low_stock_alerts: lowStockProducts
+          }
         };
       }
       
+      // Return empty data if parsing fails
+      return {
+        products: [],
+        insights: {
+          total_products: 0,
+          low_stock_alerts: 0
+        }
+      };
+    } catch (error) {
+      console.error('Error fetching dashboard products:', error);
+      // Return fallback data instead of throwing
       return {
         products: [],
         insights: {
@@ -196,9 +237,6 @@ export const dashboardApi = {
           low_stock_alerts: 5
         }
       };
-    } catch (error) {
-      console.error('Error fetching dashboard products:', error);
-      throw error;
     }
   },
 

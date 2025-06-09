@@ -10,7 +10,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { dashboardApi } from '@/services/dashboard';
 import { orderRoutingApi } from '@/services/orderRouting';
 import { useWebhookEvents } from '@/hooks/useWebhookEvents';
-import ProductDetailsSheet from '@/components/dashboard/ProductDetailsSheet';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -564,44 +563,41 @@ const Dashboard = () => {
                     )}
                   </LuxuryCard>
 
-                  {/* Product Insights - Now clickable */}
-                  <ProductDetailsSheet
-                    products={productsData?.products || []}
-                    insights={productsData?.insights || { total_products: 0, low_stock_alerts: 0 }}
-                    isLoading={productsLoading}
+                  {/* Product Insights - Now navigates to ProductsPage */}
+                  <LuxuryCard 
+                    className="p-6 cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+                    onClick={() => navigate('/products')}
                   >
-                    <LuxuryCard className="p-6 cursor-pointer hover:bg-luxury-gold/5 transition-colors">
-                      <h3 className="text-lg font-display text-luxury-gold mb-4">Product Insights</h3>
-                      {productsLoading ? (
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <Skeleton className="h-4 w-24" />
-                            <Skeleton className="h-4 w-8" />
-                          </div>
-                          <div className="flex justify-between">
-                            <Skeleton className="h-4 w-28" />
-                            <Skeleton className="h-4 w-6" />
-                          </div>
+                    <h3 className="text-lg font-display text-luxury-gold mb-4">Product Insights</h3>
+                    {productsLoading ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-8" />
                         </div>
-                      ) : productsData ? (
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span className="text-luxury-cream/60">Total Products</span>
-                            <span>{productsData.insights?.total_products || 0}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-luxury-cream/60">Low Stock Alerts</span>
-                            <span className="text-red-400">{productsData.insights?.low_stock_alerts || 0}</span>
-                          </div>
-                          <div className="text-xs text-luxury-cream/40 mt-3 text-center">
-                            Click to view details
-                          </div>
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-4 w-6" />
                         </div>
-                      ) : (
-                        <div className="text-center py-4 text-luxury-cream/60">No product data available</div>
-                      )}
-                    </LuxuryCard>
-                  </ProductDetailsSheet>
+                      </div>
+                    ) : productsData ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-luxury-cream/60">Total Products</span>
+                          <span>{productsData.insights?.total_products || 0}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-luxury-cream/60">Low Stock Alerts</span>
+                          <span className="text-red-400">{productsData.insights?.low_stock_alerts || 0}</span>
+                        </div>
+                        <div className="text-xs text-luxury-cream/40 mt-3 text-center">
+                          Click to view details
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 text-luxury-cream/60">No product data available</div>
+                    )}
+                  </LuxuryCard>
                 </div>
               </div>
             </div>

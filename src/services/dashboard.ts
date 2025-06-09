@@ -106,14 +106,40 @@ export const dashboardApi = {
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/orders');
       const result = await response.json();
       
-      if (result.success && result.data) {
+      console.log('📦 Raw orders response:', result);
+      
+      // Handle the actual webhook structure - it's an array with one object
+      let ordersData = result;
+      if (Array.isArray(result) && result.length > 0) {
+        ordersData = result[0];
+      }
+      
+      if (ordersData.orders && Array.isArray(ordersData.orders)) {
+        // Map the n8n order structure to our dashboard interface
+        const mappedOrders: DashboardOrder[] = ordersData.orders.map((order: any) => ({
+          id: order.order_number || order.id.toString(),
+          customer_name: order.customer_name || 'Unknown Customer',
+          product_name: `Order #${order.order_number || order.id}`, // Since product name isn't in the response
+          amount: parseFloat(order.total) || 0,
+          status: order.status || 'unknown',
+          date_created: order.date_created || new Date().toISOString(),
+          region: order.customer_country || 'Unknown'
+        }));
+        
+        const summary = {
+          total_orders: ordersData.count || ordersData.orders.length,
+          total_revenue: ordersData.orders.reduce((sum: number, order: any) => sum + (parseFloat(order.total) || 0), 0),
+          orders_by_region: {} // Could be calculated if needed
+        };
+        
+        console.log('📦 Processed orders:', mappedOrders);
         return {
-          orders: result.data.recent_orders || result.data.orders || [],
-          summary: result.data.summary || {}
+          orders: mappedOrders,
+          summary
         };
       }
       
-      // Return fallback data
+      // Return fallback data if parsing fails
       return {
         orders: [
           {
@@ -127,9 +153,9 @@ export const dashboardApi = {
           }
         ],
         summary: {
-          total_orders: 156,
-          total_revenue: 12345.67,
-          orders_by_region: { 'USA': 68, 'Europe': 52, 'GCC': 36 }
+          total_orders: 1,
+          total_revenue: 195.00,
+          orders_by_region: { 'USA': 1 }
         }
       };
     } catch (error) {

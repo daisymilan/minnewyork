@@ -1,13 +1,14 @@
-
 // Dashboard API service for comprehensive dashboard data
 export interface DashboardOrder {
   id: string;
   customer_name: string;
+  customer_email?: string;
   product_name: string;
   amount: number;
   status: string;
   date_created: string;
   region?: string;
+  items_count?: number;
 }
 
 export interface DashboardProduct {
@@ -119,11 +120,13 @@ export const dashboardApi = {
         const mappedOrders: DashboardOrder[] = ordersData.orders.map((order: any) => ({
           id: order.order_number || order.id.toString(),
           customer_name: order.customer_name || 'Unknown Customer',
+          customer_email: order.customer_email,
           product_name: `Order #${order.order_number || order.id}`, // Since product name isn't in the response
           amount: parseFloat(order.total) || 0,
           status: order.status || 'unknown',
           date_created: order.date_created || new Date().toISOString(),
-          region: order.customer_country || 'Unknown'
+          region: order.customer_country || 'Unknown',
+          items_count: order.items_count || 1
         }));
         
         const summary = {

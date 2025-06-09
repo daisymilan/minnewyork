@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import KpiCard from '@/components/dashboard/KpiCard';
@@ -12,6 +12,7 @@ import { useWebhookEvents } from '@/hooks/useWebhookEvents';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
   // Initialize webhook event listeners
@@ -380,7 +381,12 @@ const Dashboard = () => {
                   <LuxuryCard className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-display text-luxury-gold">Recent Orders</h3>
-                      <button className="text-sm text-luxury-gold hover:underline">View All</button>
+                      <button 
+                        onClick={() => navigate('/orders')}
+                        className="text-sm text-luxury-gold hover:underline"
+                      >
+                        View All
+                      </button>
                     </div>
                     
                     {ordersLoading ? (

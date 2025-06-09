@@ -163,7 +163,9 @@ const Dashboard = () => {
       case 'delivered': return 'bg-green-500/10 text-green-500';
       case 'shipped': return 'bg-blue-500/10 text-blue-500';
       case 'processing': return 'bg-amber-500/10 text-amber-500';
+      case 'pending': return 'bg-orange-500/10 text-orange-500';
       case 'refunded': return 'bg-purple-500/10 text-purple-500';
+      case 'cancelled': return 'bg-red-500/10 text-red-500';
       case 'optimal': return 'bg-green-500/10 text-green-500';
       case 'low': return 'bg-red-500/10 text-red-500';
       case 'medium': return 'bg-amber-500/10 text-amber-500';
@@ -377,7 +379,7 @@ const Dashboard = () => {
                     </LuxuryCard>
                   )}
                   
-                  {/* Recent Orders */}
+                  {/* Recent Orders - Now using real data */}
                   <LuxuryCard className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-display text-luxury-gold">Recent Orders</h3>
@@ -391,24 +393,24 @@ const Dashboard = () => {
                     
                     {ordersLoading ? (
                       <div className="text-center py-4">Loading orders...</div>
-                    ) : (
+                    ) : ordersData?.orders && ordersData.orders.length > 0 ? (
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b border-luxury-gold/10">
                               <th className="text-left py-3 font-medium text-luxury-cream/60">Order ID</th>
                               <th className="text-left py-3 font-medium text-luxury-cream/60">Customer</th>
-                              <th className="text-left py-3 font-medium text-luxury-cream/60">Product</th>
+                              <th className="text-left py-3 font-medium text-luxury-cream/60">Email</th>
                               <th className="text-left py-3 font-medium text-luxury-cream/60">Amount</th>
                               <th className="text-left py-3 font-medium text-luxury-cream/60">Status</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {ordersData?.orders?.slice(0, 5).map((order) => (
+                            {ordersData.orders.slice(0, 5).map((order) => (
                               <tr key={order.id} className="border-b border-luxury-gold/5">
                                 <td className="py-3">#{order.id}</td>
                                 <td className="py-3">{order.customer_name}</td>
-                                <td className="py-3">{order.product_name}</td>
+                                <td className="py-3 text-luxury-cream/60">{order.customer_email || 'N/A'}</td>
                                 <td className="py-3">${order.amount.toFixed(2)}</td>
                                 <td className="py-3">
                                   <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(order.status)}`}>
@@ -419,6 +421,10 @@ const Dashboard = () => {
                             ))}
                           </tbody>
                         </table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <div className="text-luxury-cream/60">No recent orders found</div>
                       </div>
                     )}
                   </LuxuryCard>

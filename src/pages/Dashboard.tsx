@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -543,18 +542,18 @@ const Dashboard = () => {
                     ) : warehouseData && warehouseData.length > 0 ? (
                       <div className="space-y-3">
                         {warehouseData.map((warehouse, index) => (
-                          <div key={warehouse.warehouse || warehouse.name || index} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md">
+                          <div key={warehouse.warehouse || index} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md">
                             <div>
-                              <h4 className="font-medium">{warehouse.warehouse || warehouse.name}</h4>
+                              <h4 className="font-medium">{warehouse.warehouse}</h4>
                               <p className="text-xs text-luxury-cream/60">
-                                {warehouse.stock_quantity || warehouse.stock} units
+                                {warehouse.stock_quantity} units
                               </p>
                               {warehouse.provider && (
                                 <p className="text-xs text-luxury-gold/70">{warehouse.provider}</p>
                               )}
                             </div>
-                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.stock_status || warehouse.status)}`}>
-                              {(warehouse.stock_status || warehouse.status || '').charAt(0).toUpperCase() + (warehouse.stock_status || warehouse.status || '').slice(1)}
+                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.stock_status)}`}>
+                              {warehouse.stock_status.charAt(0).toUpperCase() + warehouse.stock_status.slice(1)}
                             </span>
                           </div>
                         ))}

@@ -206,8 +206,44 @@ export const orderRoutingApi = {
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/warehouse/overview');
       const result = await response.json();
       
-      if (result.success && result.data) {
-        return result.data;
+      console.log('🏭 Raw warehouse overview response:', result);
+      
+      // Handle the actual webhook structure - it's an array with one object
+      let overviewData = result;
+      if (Array.isArray(result) && result.length > 0) {
+        overviewData = result[0];
+      }
+      
+      if (overviewData.success && overviewData.overview && overviewData.warehouses) {
+        const overview = overviewData.overview;
+        const warehouses = overviewData.warehouses;
+        
+        // Calculate total inventory value (estimated based on orders)
+        const totalInventoryValue = warehouses.reduce((sum: number, warehouse: any) => {
+          return sum + (warehouse.orders_today || 0) * 150; // Estimate $150 per order
+        }, 0);
+        
+        // Count low stock alerts
+        const lowStockAlerts = overviewData.alerts?.length || 0;
+        
+        // Map warehouses to the expected format
+        const warehouseList = warehouses.map((warehouse: any) => ({
+          name: warehouse.name,
+          location: `${warehouse.country} (${warehouse.region})`,
+          status: warehouse.status,
+          total_items: warehouse.orders_today || 0 // Using orders as proxy for activity
+        }));
+        
+        const warehouseOverview: WarehouseOverview = {
+          total_warehouses: overview.total_warehouses,
+          active_warehouses: overview.operational_warehouses,
+          total_inventory_value: totalInventoryValue,
+          low_stock_alerts: lowStockAlerts,
+          warehouses: warehouseList
+        };
+        
+        console.log('🏭 Processed warehouse overview:', warehouseOverview);
+        return warehouseOverview;
       }
       
       // Return result directly if it matches the expected format

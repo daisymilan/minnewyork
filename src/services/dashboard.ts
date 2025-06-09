@@ -16,8 +16,10 @@ export interface DashboardProduct {
   name: string;
   price: number;
   stock_quantity: number;
+  stock_status: string;
   status: string;
   sales_count?: number;
+  sku?: string;
 }
 
 export interface DashboardCustomer {
@@ -197,8 +199,10 @@ export const dashboardApi = {
           name: product.name,
           price: product.price,
           stock_quantity: product.stock_quantity,
+          stock_status: product.stock_status,
           status: product.status,
-          sales_count: product.sales_count || 0
+          sales_count: product.sales_count || 0,
+          sku: product.sku
         }));
         
         // Calculate insights from the actual product data

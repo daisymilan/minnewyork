@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -170,6 +171,25 @@ const Dashboard = () => {
       low_stock_count: Math.round(warehouse.total_items * 0.05 + Math.random() * 10),
       categories: ['Fragrances', 'Accessories', 'Gift Sets'],
       last_updated: new Date().toISOString()
+    };
+    
+    setSelectedWarehouse(enhancedWarehouse);
+    setWarehouseDetailsOpen(true);
+  };
+
+  const handleInventoryWarehouseClick = (inventoryWarehouse) => {
+    // Convert inventory warehouse data to the expected warehouse format
+    const enhancedWarehouse = {
+      name: inventoryWarehouse.warehouse,
+      location: inventoryWarehouse.provider === 'Shipforus' ? 'Las Vegas, NV' :
+                inventoryWarehouse.provider === 'OTO' ? 'Dubai, UAE / Riyadh, KSA' : 'Nice, France',
+      status: inventoryWarehouse.stock_status,
+      total_items: inventoryWarehouse.stock_quantity,
+      inventory_value: Math.round(inventoryWarehouse.stock_quantity * 65 + Math.random() * 30000),
+      low_stock_count: inventoryWarehouse.stock_status === 'low' ? Math.round(inventoryWarehouse.stock_quantity * 0.15) : 
+                       Math.round(inventoryWarehouse.stock_quantity * 0.03),
+      categories: ['Fragrances', 'Accessories', 'Gift Sets'],
+      last_updated: inventoryWarehouse.last_updated
     };
     
     setSelectedWarehouse(enhancedWarehouse);
@@ -563,7 +583,11 @@ const Dashboard = () => {
                     ) : warehouseData && warehouseData.length > 0 ? (
                       <div className="space-y-3">
                         {warehouseData.map((warehouse, index) => (
-                          <div key={warehouse.warehouse || index} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md">
+                          <div 
+                            key={warehouse.warehouse || index} 
+                            className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+                            onClick={() => handleInventoryWarehouseClick(warehouse)}
+                          >
                             <div>
                               <h4 className="font-medium">{warehouse.warehouse}</h4>
                               <p className="text-xs text-luxury-cream/60">

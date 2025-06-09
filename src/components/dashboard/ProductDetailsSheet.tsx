@@ -44,8 +44,11 @@ const ProductDetailsSheet: React.FC<ProductDetailsSheetProps> = ({
     return 'bg-green-500/10 text-green-500';
   };
 
-  const lowStockProducts = products.filter(p => p.stock_quantity <= 5);
-  const outOfStockProducts = products.filter(p => p.stock_quantity === 0);
+  const lowStockProducts = products.filter(p => p.stock_quantity <= 5 || p.stock_status === 'outofstock');
+  const outOfStockProducts = products.filter(p => p.stock_quantity === 0 || p.stock_status === 'outofstock');
+
+  console.log('ProductDetailsSheet - Products:', products.length);
+  console.log('ProductDetailsSheet - Low stock:', lowStockProducts.length);
 
   return (
     <Sheet>
@@ -77,7 +80,7 @@ const ProductDetailsSheet: React.FC<ProductDetailsSheetProps> = ({
             </LuxuryCard>
             <LuxuryCard className="p-4 text-center">
               <div className="text-2xl font-bold text-green-500">
-                {products.filter(p => p.stock_quantity > 5).length}
+                {products.filter(p => p.stock_quantity > 5 && p.stock_status !== 'outofstock').length}
               </div>
               <div className="text-sm text-luxury-cream/60">In Stock</div>
             </LuxuryCard>
@@ -96,8 +99,8 @@ const ProductDetailsSheet: React.FC<ProductDetailsSheetProps> = ({
                     </div>
                     <div className="text-right">
                       <p className="text-luxury-gold">${product.price}</p>
-                      <Badge className={getStockStatusColor(product.stock_quantity)}>
-                        {product.stock_quantity === 0 ? 'Out of Stock' : 'Low Stock'}
+                      <Badge className={getStockStatusColor(product.stock_quantity, product.stock_status)}>
+                        {product.stock_quantity === 0 || product.stock_status === 'outofstock' ? 'Out of Stock' : 'Low Stock'}
                       </Badge>
                     </div>
                   </div>
@@ -108,7 +111,7 @@ const ProductDetailsSheet: React.FC<ProductDetailsSheetProps> = ({
 
           {/* All Products */}
           <LuxuryCard className="p-6">
-            <h3 className="text-lg font-display text-luxury-gold mb-4">All Products</h3>
+            <h3 className="text-lg font-display text-luxury-gold mb-4">All Products ({products.length})</h3>
             {isLoading ? (
               <div className="space-y-3">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -124,7 +127,7 @@ const ProductDetailsSheet: React.FC<ProductDetailsSheetProps> = ({
                   </div>
                 ))}
               </div>
-            ) : products.length > 0 ? (
+            ) : products && products.length > 0 ? (
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {products.map((product) => (
                   <div key={product.id} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md hover:bg-luxury-gold/5 transition-colors">
@@ -133,6 +136,7 @@ const ProductDetailsSheet: React.FC<ProductDetailsSheetProps> = ({
                       <div className="flex items-center gap-4 text-sm text-luxury-cream/60">
                         <span>Stock: {product.stock_quantity}</span>
                         <span>Sales: {product.sales_count || 0}</span>
+                        {product.sku && <span>SKU: {product.sku}</span>}
                       </div>
                     </div>
                     <div className="text-right">
@@ -141,8 +145,8 @@ const ProductDetailsSheet: React.FC<ProductDetailsSheetProps> = ({
                         <Badge className={getStatusColor(product.status)}>
                           {product.status}
                         </Badge>
-                        <Badge className={getStockStatusColor(product.stock_quantity)}>
-                          {product.stock_quantity === 0 ? 'Out' : product.stock_quantity <= 5 ? 'Low' : 'Good'}
+                        <Badge className={getStockStatusColor(product.stock_quantity, product.stock_status)}>
+                          {product.stock_quantity === 0 || product.stock_status === 'outofstock' ? 'Out' : product.stock_quantity <= 5 ? 'Low' : 'Good'}
                         </Badge>
                       </div>
                     </div>

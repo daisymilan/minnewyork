@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import KpiCard from '@/components/dashboard/KpiCard';
+import WarehouseDetailsSheet from '@/components/dashboard/WarehouseDetailsSheet';
 import { LuxuryCard } from '@/components/ui/luxury-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { dashboardApi } from '@/services/dashboard';
@@ -15,6 +16,8 @@ const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+  const [warehouseDetailsOpen, setWarehouseDetailsOpen] = useState(false);
   
   // Initialize webhook event listeners
   useWebhookEvents();
@@ -157,6 +160,20 @@ const Dashboard = () => {
       case 'medium': return 'bg-amber-500/10 text-amber-500';
       default: return 'bg-gray-500/10 text-gray-500';
     }
+  };
+
+  const handleWarehouseClick = (warehouse) => {
+    // Enhance warehouse data with mock additional details for demonstration
+    const enhancedWarehouse = {
+      ...warehouse,
+      inventory_value: Math.round(warehouse.total_items * 45 + Math.random() * 50000),
+      low_stock_count: Math.round(warehouse.total_items * 0.05 + Math.random() * 10),
+      categories: ['Fragrances', 'Accessories', 'Gift Sets'],
+      last_updated: new Date().toISOString()
+    };
+    
+    setSelectedWarehouse(enhancedWarehouse);
+    setWarehouseDetailsOpen(true);
   };
   
   return (
@@ -408,7 +425,11 @@ const Dashboard = () => {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {warehouseOverview.warehouses.map((warehouse) => (
-                          <div key={warehouse.name} className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4">
+                          <div 
+                            key={warehouse.name} 
+                            className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4 cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+                            onClick={() => handleWarehouseClick(warehouse)}
+                          >
                             <div className="flex justify-between items-start mb-2">
                               <div>
                                 <h4 className="font-medium text-luxury-cream">{warehouse.name}</h4>
@@ -604,6 +625,13 @@ const Dashboard = () => {
           )}
         </main>
       </div>
+
+      {/* Warehouse Details Sheet */}
+      <WarehouseDetailsSheet
+        warehouse={selectedWarehouse}
+        isOpen={warehouseDetailsOpen}
+        onClose={() => setWarehouseDetailsOpen(false)}
+      />
     </div>
   );
 };

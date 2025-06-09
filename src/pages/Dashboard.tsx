@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -6,6 +7,7 @@ import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import KpiCard from '@/components/dashboard/KpiCard';
 import { LuxuryCard } from '@/components/ui/luxury-card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { dashboardApi } from '@/services/dashboard';
 import { orderRoutingApi } from '@/services/orderRouting';
 import { useWebhookEvents } from '@/hooks/useWebhookEvents';
@@ -97,8 +99,8 @@ const Dashboard = () => {
     console.log('- Should show component:', !!routingStats);
   }, [routingStats, routingLoading, routingError]);
   
-  // Use real data from the new API endpoints
-  const kpiData = analyticsData ? {
+  // Use real data or loading states instead of mock data
+  const kpiData = analyticsLoading ? null : analyticsData ? {
     revenue: {
       value: analyticsData.kpis.total_revenue,
       trend: analyticsData.kpis.growth_rate,
@@ -119,15 +121,10 @@ const Dashboard = () => {
       trend: 5.3, // Estimated trend
       type: 'currency' as const,
     }
-  } : {
-    revenue: { value: 283450, trend: 12.5, type: 'currency' as const },
-    orders: { value: 1254, trend: 8.2, type: 'number' as const },
-    conversion: { value: 3.2, trend: -1.8, type: 'percentage' as const },
-    averageOrder: { value: 226, trend: 5.3, type: 'currency' as const }
-  };
+  } : null;
   
-  // Use real regional data from overview API with improved type handling
-  const regionalData = overviewData?.regional_breakdown ? 
+  // Use real regional data or loading state
+  const regionalData = overviewLoading ? null : overviewData?.regional_breakdown ? 
     Object.entries(overviewData.regional_breakdown).map(([name, value]) => {
       // Safely convert value to number with proper type checking
       let numValue = 0;
@@ -143,20 +140,10 @@ const Dashboard = () => {
         name,
         value: numValue
       };
-    }) : [
-      { name: 'North America', value: 42 },
-      { name: 'Europe', value: 28 },
-      { name: 'Middle East', value: 18 },
-      { name: 'Asia', value: 12 },
-    ];
+    }) : null;
   
-  // Use real inventory data from order routing API
-  const warehouseData = inventoryStatus || [
-    { name: 'Vegas', stock: 1234, status: 'Optimal' },
-    { name: 'Nice', stock: 856, status: 'Low' },
-    { name: 'Dubai', stock: 2145, status: 'Optimal' },
-    { name: 'Riyadh', stock: 984, status: 'Medium' },
-  ];
+  // Use real inventory data or loading state
+  const warehouseData = inventoryLoading ? null : inventoryStatus;
   
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -195,62 +182,75 @@ const Dashboard = () => {
               
               {/* KPI Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <KpiCard
-                  title="Total Revenue"
-                  value={kpiData.revenue.value}
-                  trend={kpiData.revenue.trend}
-                  type={kpiData.revenue.type}
-                  icon={
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-                      <path d="M12 6v2" />
-                      <path d="M12 16v2" />
-                    </svg>
-                  }
-                />
-                
-                <KpiCard
-                  title="Orders"
-                  value={kpiData.orders.value}
-                  trend={kpiData.orders.trend}
-                  type={kpiData.orders.type}
-                  icon={
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                      <path d="M3 6h18" />
-                      <path d="M16 10a4 4 0 0 1-8 0" />
-                    </svg>
-                  }
-                />
-                
-                <KpiCard
-                  title="Conversion Rate"
-                  value={kpiData.conversion.value}
-                  trend={kpiData.conversion.trend}
-                  type={kpiData.conversion.type}
-                  icon={
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m2 4 3 12h14l3-12-6 7-4 7-4 7-6-7Z" />
-                      <path d="m5 16 3 4" />
-                      <path d="m16 16 3 4" />
-                    </svg>
-                  }
-                />
-                
-                <KpiCard
-                  title="Average Order Value"
-                  value={kpiData.averageOrder.value}
-                  trend={kpiData.averageOrder.trend}
-                  type={kpiData.averageOrder.type}
-                  icon={
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect width="18" height="18" x="3" y="3" rx="2" />
-                      <path d="M3 9h18" />
-                      <path d="M9 21V9" />
-                    </svg>
-                  }
-                />
+                {analyticsLoading || !kpiData ? (
+                  // Loading skeleton for KPI cards
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <LuxuryCard key={i} className="p-6">
+                      <Skeleton className="h-4 w-24 mb-4" />
+                      <Skeleton className="h-8 w-32 mb-2" />
+                      <Skeleton className="h-3 w-16" />
+                    </LuxuryCard>
+                  ))
+                ) : (
+                  <>
+                    <KpiCard
+                      title="Total Revenue"
+                      value={kpiData.revenue.value}
+                      trend={kpiData.revenue.trend}
+                      type={kpiData.revenue.type}
+                      icon={
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                          <path d="M12 6v2" />
+                          <path d="M12 16v2" />
+                        </svg>
+                      }
+                    />
+                    
+                    <KpiCard
+                      title="Orders"
+                      value={kpiData.orders.value}
+                      trend={kpiData.orders.trend}
+                      type={kpiData.orders.type}
+                      icon={
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                          <path d="M3 6h18" />
+                          <path d="M16 10a4 4 0 0 1-8 0" />
+                        </svg>
+                      }
+                    />
+                    
+                    <KpiCard
+                      title="Conversion Rate"
+                      value={kpiData.conversion.value}
+                      trend={kpiData.conversion.trend}
+                      type={kpiData.conversion.type}
+                      icon={
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="m2 4 3 12h14l3-12-6 7-4 7-4 7-6-7Z" />
+                          <path d="m5 16 3 4" />
+                          <path d="m16 16 3 4" />
+                        </svg>
+                      }
+                    />
+                    
+                    <KpiCard
+                      title="Average Order Value"
+                      value={kpiData.averageOrder.value}
+                      trend={kpiData.averageOrder.trend}
+                      type={kpiData.averageOrder.type}
+                      icon={
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect width="18" height="18" x="3" y="3" rx="2" />
+                          <path d="M3 9h18" />
+                          <path d="M9 21V9" />
+                        </svg>
+                      }
+                    />
+                  </>
+                )}
               </div>
               
               {/* Two column layout for dashboard widgets */}
@@ -261,8 +261,16 @@ const Dashboard = () => {
                   <LuxuryCard className="p-6">
                     <h3 className="text-lg font-display text-luxury-gold mb-4">Sales by Region</h3>
                     {overviewLoading ? (
-                      <div className="text-center py-4">Loading regional data...</div>
-                    ) : (
+                      <div className="space-y-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <div key={i} className="flex items-center">
+                            <Skeleton className="w-32 h-4" />
+                            <Skeleton className="flex-1 h-2 ml-4 mr-3" />
+                            <Skeleton className="w-8 h-4" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : regionalData ? (
                       <div className="space-y-4">
                         {regionalData.map((region) => (
                           <div key={region.name} className="flex items-center">
@@ -277,10 +285,12 @@ const Dashboard = () => {
                           </div>
                         ))}
                       </div>
+                    ) : (
+                      <div className="text-center py-4 text-luxury-cream/60">No regional data available</div>
                     )}
                   </LuxuryCard>
                   
-                  {/* Order Routing Statistics - Always show with better debugging */}
+                  {/* Order Routing Statistics */}
                   <LuxuryCard className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-display text-luxury-gold">Order Routing Statistics</h3>
@@ -288,55 +298,94 @@ const Dashboard = () => {
                         {routingLoading && 'Loading...'}
                         {routingError && 'Error loading data'}
                         {!routingLoading && !routingError && routingStats && 'Live data from n8n'}
-                        {!routingLoading && !routingError && !routingStats && 'Using fallback data'}
+                        {!routingLoading && !routingError && !routingStats && 'No data available'}
                       </div>
                     </div>
                     
                     {routingLoading ? (
-                      <div className="text-center py-8">
-                        <div className="text-luxury-cream/60">Loading routing data from n8n...</div>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          {Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="text-center">
+                              <Skeleton className="h-8 w-16 mx-auto mb-2" />
+                              <Skeleton className="h-4 w-20 mx-auto" />
+                            </div>
+                          ))}
+                        </div>
+                        <div className="pt-4 border-t border-luxury-gold/10">
+                          <Skeleton className="h-4 w-48 mx-auto mb-1" />
+                          <Skeleton className="h-3 w-32 mx-auto" />
+                        </div>
                       </div>
                     ) : routingError ? (
                       <div className="text-center py-8">
                         <div className="text-red-400 mb-2">Failed to load routing data</div>
                         <div className="text-xs text-luxury-cream/60">Error: {routingError.message}</div>
                       </div>
-                    ) : (
+                    ) : routingStats ? (
                       <>
                         <div className="grid grid-cols-3 gap-4 mb-4">
                           <div className="text-center">
                             <div className="text-2xl font-bold text-luxury-gold">
-                              {routingStats?.orders_by_region?.USA || 523}
+                              {routingStats.orders_by_region?.USA || 0}
                             </div>
                             <div className="text-sm text-luxury-cream/60">USA Orders</div>
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-luxury-gold">
-                              {routingStats?.orders_by_region?.GCC || 456}
+                              {routingStats.orders_by_region?.GCC || 0}
                             </div>
                             <div className="text-sm text-luxury-cream/60">GCC Orders</div>
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-luxury-gold">
-                              {routingStats?.orders_by_region?.Europe || 275}
+                              {routingStats.orders_by_region?.Europe || 0}
                             </div>
                             <div className="text-sm text-luxury-cream/60">Europe Orders</div>
                           </div>
                         </div>
                         <div className="text-center pt-4 border-t border-luxury-gold/10">
                           <div className="text-sm text-luxury-cream/60">
-                            Active Warehouses: {routingStats?.active_warehouses?.join(', ') || 'Shipforus-USA, OTO-UAE, OTO-KSA, DSL-EU'}
+                            Active Warehouses: {routingStats.active_warehouses?.join(', ') || 'None'}
                           </div>
                           <div className="text-xs text-luxury-cream/40 mt-1">
-                            Total Routed: {routingStats?.total_orders_routed || 1254}
+                            Total Routed: {routingStats.total_orders_routed || 0}
                           </div>
                         </div>
                       </>
+                    ) : (
+                      <div className="text-center py-8 text-luxury-cream/60">No routing data available</div>
                     )}
                   </LuxuryCard>
                   
                   {/* Warehouse Overview */}
-                  {warehouseOverview && (
+                  {warehouseLoading ? (
+                    <LuxuryCard className="p-6">
+                      <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Overview</h3>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <div key={i} className="text-center">
+                            <Skeleton className="h-8 w-16 mx-auto mb-1" />
+                            <Skeleton className="h-4 w-20 mx-auto" />
+                          </div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <div key={i} className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <Skeleton className="h-4 w-24 mb-1" />
+                                <Skeleton className="h-3 w-16" />
+                              </div>
+                              <Skeleton className="h-5 w-12" />
+                            </div>
+                            <Skeleton className="h-3 w-20" />
+                          </div>
+                        ))}
+                      </div>
+                    </LuxuryCard>
+                  ) : warehouseOverview ? (
                     <LuxuryCard className="p-6">
                       <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Overview</h3>
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -377,9 +426,9 @@ const Dashboard = () => {
                         ))}
                       </div>
                     </LuxuryCard>
-                  )}
+                  ) : null}
                   
-                  {/* Recent Orders - Now using real data */}
+                  {/* Recent Orders - Now using real data with loading state */}
                   <LuxuryCard className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-display text-luxury-gold">Recent Orders</h3>
@@ -392,7 +441,20 @@ const Dashboard = () => {
                     </div>
                     
                     {ordersLoading ? (
-                      <div className="text-center py-4">Loading orders...</div>
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-5 gap-4 py-3 border-b border-luxury-gold/10">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Skeleton key={i} className="h-4" />
+                          ))}
+                        </div>
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <div key={i} className="grid grid-cols-5 gap-4 py-3 border-b border-luxury-gold/5">
+                            {Array.from({ length: 5 }).map((_, j) => (
+                              <Skeleton key={j} className="h-4" />
+                            ))}
+                          </div>
+                        ))}
+                      </div>
                     ) : ordersData?.orders && ordersData.orders.length > 0 ? (
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
@@ -466,8 +528,19 @@ const Dashboard = () => {
                     <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Inventory</h3>
                     
                     {inventoryLoading ? (
-                      <div className="text-center py-4">Loading inventory...</div>
-                    ) : (
+                      <div className="space-y-3">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <div key={i} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md">
+                            <div>
+                              <Skeleton className="h-4 w-20 mb-1" />
+                              <Skeleton className="h-3 w-16 mb-1" />
+                              <Skeleton className="h-3 w-12" />
+                            </div>
+                            <Skeleton className="h-5 w-12" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : warehouseData && warehouseData.length > 0 ? (
                       <div className="space-y-3">
                         {warehouseData.map((warehouse, index) => (
                           <div key={warehouse.warehouse || warehouse.name || index} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md">
@@ -486,13 +559,26 @@ const Dashboard = () => {
                           </div>
                         ))}
                       </div>
+                    ) : (
+                      <div className="text-center py-4 text-luxury-cream/60">No inventory data available</div>
                     )}
                   </LuxuryCard>
 
                   {/* Product Insights */}
-                  {productsData && (
-                    <LuxuryCard className="p-6">
-                      <h3 className="text-lg font-display text-luxury-gold mb-4">Product Insights</h3>
+                  <LuxuryCard className="p-6">
+                    <h3 className="text-lg font-display text-luxury-gold mb-4">Product Insights</h3>
+                    {productsLoading ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-8" />
+                        </div>
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-4 w-6" />
+                        </div>
+                      </div>
+                    ) : productsData ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-luxury-cream/60">Total Products</span>
@@ -503,8 +589,10 @@ const Dashboard = () => {
                           <span className="text-red-400">{productsData.insights?.low_stock_alerts || 0}</span>
                         </div>
                       </div>
-                    </LuxuryCard>
-                  )}
+                    ) : (
+                      <div className="text-center py-4 text-luxury-cream/60">No product data available</div>
+                    )}
+                  </LuxuryCard>
                 </div>
               </div>
             </div>

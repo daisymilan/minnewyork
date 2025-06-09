@@ -109,6 +109,19 @@ export const dashboardApi = {
       
       console.log('📦 Raw orders response:', result);
       
+      // Check if there's an error in the response
+      if (result.error) {
+        console.log('📦 Orders API returned error:', result.error);
+        return {
+          orders: [],
+          summary: {
+            total_orders: 0,
+            total_revenue: 0,
+            orders_by_region: {}
+          }
+        };
+      }
+      
       // Handle the actual webhook structure - it's an array with one object
       let ordersData = result;
       if (Array.isArray(result) && result.length > 0) {
@@ -142,28 +155,25 @@ export const dashboardApi = {
         };
       }
       
-      // Return fallback data if parsing fails
+      // Return empty data if parsing fails
       return {
-        orders: [
-          {
-            id: 'ORD-7346',
-            customer_name: 'Emma Wilson',
-            product_name: 'Moon Dance',
-            amount: 195.00,
-            status: 'delivered',
-            date_created: new Date().toISOString(),
-            region: 'USA'
-          }
-        ],
+        orders: [],
         summary: {
-          total_orders: 1,
-          total_revenue: 195.00,
-          orders_by_region: { 'USA': 1 }
+          total_orders: 0,
+          total_revenue: 0,
+          orders_by_region: {}
         }
       };
     } catch (error) {
       console.error('Error fetching dashboard orders:', error);
-      throw error;
+      return {
+        orders: [],
+        summary: {
+          total_orders: 0,
+          total_revenue: 0,
+          orders_by_region: {}
+        }
+      };
     }
   },
 

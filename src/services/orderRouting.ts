@@ -174,8 +174,48 @@ export const orderRoutingApi = {
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/routing/stats');
       const result = await response.json();
       
-      if (result.success && result.data) {
-        return result.data;
+      console.log('📊 Raw routing stats response:', result);
+      
+      // Handle the actual webhook structure - it's an array with one object
+      let statsData = result;
+      if (Array.isArray(result) && result.length > 0) {
+        statsData = result[0];
+      }
+      
+      if (statsData.success && statsData.summary) {
+        const summary = statsData.summary;
+        const fulfillmentProviders = summary.fulfillment_providers;
+        
+        // Extract regional data from the new structure
+        const ordersByRegion = {
+          USA: summary.orders_by_region.USA?.count || 0,
+          GCC: summary.orders_by_region.GCC?.count || 0,
+          Europe: summary.orders_by_region.Europe?.count || 0
+        };
+        
+        // Build active warehouses list from fulfillment providers
+        const activeWarehouses = Object.entries(fulfillmentProviders)
+          .filter(([_, provider]: [string, any]) => provider.status === 'operational')
+          .map(([name, _]) => {
+            // Map provider names to warehouse display names
+            switch (name) {
+              case 'shipforus': return 'Shipforus-USA';
+              case 'oto': return 'OTO-UAE, OTO-KSA';
+              case 'dsl': return 'DSL-EU';
+              default: return name;
+            }
+          })
+          .join(', ').split(', '); // Convert back to array for consistency
+        
+        const routingStats: OrderRoutingStats = {
+          total_orders_routed: summary.total_orders,
+          orders_by_region: ordersByRegion,
+          active_warehouses: activeWarehouses,
+          last_sync: statsData.timestamp
+        };
+        
+        console.log('📊 Processed routing stats:', routingStats);
+        return routingStats;
       }
       
       // Return result directly if it matches the expected format

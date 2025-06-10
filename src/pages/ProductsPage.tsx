@@ -7,14 +7,14 @@ import { LuxuryCard } from '@/components/ui/luxury-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { dashboardApi, DashboardProduct } from '@/services/dashboard';
+import { dashboardUSApi, DashboardProduct } from '@/services/dashboardUS';
 
 const ProductsPage = () => {
   const navigate = useNavigate();
   
   const { data: productsData, isLoading: productsLoading } = useQuery({
-    queryKey: ['dashboardProducts'],
-    queryFn: dashboardApi.getProducts,
+    queryKey: ['dashboardProductsUS'],
+    queryFn: dashboardUSApi.getProducts,
     refetchInterval: 120000, // Refetch every 2 minutes
   });
 
@@ -85,15 +85,15 @@ const ProductsPage = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/dashboard-us')}
             className="text-luxury-gold hover:bg-luxury-gold/10"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            Back to US Dashboard
           </Button>
           <div>
-            <h1 className="text-3xl font-display text-luxury-gold">Product Management</h1>
-            <p className="text-luxury-cream/60">Comprehensive overview of your product inventory and status</p>
+            <h1 className="text-3xl font-display text-luxury-gold">US Product Management</h1>
+            <p className="text-luxury-cream/60">Comprehensive overview of your US product inventory and status</p>
           </div>
         </div>
 

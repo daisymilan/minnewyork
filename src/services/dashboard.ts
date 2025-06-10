@@ -1,3 +1,4 @@
+
 // Dashboard API service for comprehensive dashboard data
 export interface DashboardOrder {
   id: string;
@@ -73,8 +74,46 @@ export const dashboardApi = {
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/overview');
       const result = await response.json();
       
-      if (result.success && result.data) {
-        return result.data;
+      console.log('📊 Raw overview response:', result);
+      
+      // Handle the new response structure - it's an array with one object
+      let overviewData = result;
+      if (Array.isArray(result) && result.length > 0) {
+        overviewData = result[0];
+      }
+      
+      if (overviewData.success && overviewData.data) {
+        const data = overviewData.data;
+        
+        // Map the new structure to our expected interface
+        const mappedOverview: DashboardOverview = {
+          summary_cards: {
+            revenue: parseFloat(data.summary_cards?.total_revenue?.value?.replace('$', '').replace(',', '') || '0'),
+            orders: parseInt(data.summary_cards?.total_orders?.value || '0'),
+            customers: parseInt(data.summary_cards?.total_customers?.value || '0'),
+            products: data.quick_stats?.low_stock_alerts || 89 // Use low stock alerts as product indicator
+          },
+          regional_breakdown: {},
+          fulfillment_status: {},
+          recent_activity: data.recent_activity || []
+        };
+        
+        // Map regional breakdown to percentage values
+        if (data.regional_breakdown) {
+          Object.entries(data.regional_breakdown).forEach(([key, region]: [string, any]) => {
+            mappedOverview.regional_breakdown[region.name] = parseFloat(region.percentage);
+          });
+        }
+        
+        // Map fulfillment status
+        if (data.fulfillment_status) {
+          Object.entries(data.fulfillment_status).forEach(([key, fulfillment]: [string, any]) => {
+            mappedOverview.fulfillment_status[fulfillment.name] = fulfillment.pending_orders || 0;
+          });
+        }
+        
+        console.log('📊 Mapped overview data:', mappedOverview);
+        return mappedOverview;
       }
       
       // Return fallback data if API fails

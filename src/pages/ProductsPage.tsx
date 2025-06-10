@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -29,6 +28,8 @@ const ProductsPage = () => {
 
   const getStockStatusColor = (stockQuantity: number, stockStatus?: string) => {
     if (stockStatus === 'outofstock') return 'bg-red-500/10 text-red-500';
+    // If stock status is 'instock' but no quantity specified, treat as in stock
+    if (stockStatus === 'instock' && (stockQuantity === null || stockQuantity === undefined)) return 'bg-green-500/10 text-green-500';
     if (stockQuantity <= 5) return 'bg-amber-500/10 text-amber-500';
     return 'bg-green-500/10 text-green-500';
   };
@@ -36,9 +37,23 @@ const ProductsPage = () => {
   const products = productsData?.products || [];
   const insights = productsData?.insights || { total_products: 0, low_stock_alerts: 0 };
   
-  const lowStockProducts = products.filter(p => p.stock_quantity <= 5 || p.stock_status === 'outofstock');
+  // Updated filtering logic
+  const lowStockProducts = products.filter(p => {
+    // Only include in low stock if quantity is specified and <= 5, or explicitly out of stock
+    if (p.stock_status === 'outofstock') return true;
+    if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity <= 5) return true;
+    return false;
+  });
+  
   const outOfStockProducts = products.filter(p => p.stock_quantity === 0 || p.stock_status === 'outofstock');
-  const inStockProducts = products.filter(p => p.stock_quantity > 5 && p.stock_status !== 'outofstock');
+  
+  const inStockProducts = products.filter(p => {
+    // Include products that are explicitly in stock but don't have quantity specified
+    if (p.stock_status === 'instock' && (p.stock_quantity === null || p.stock_quantity === undefined)) return true;
+    // Include products with stock quantity > 5 and not out of stock
+    if (p.stock_quantity > 5 && p.stock_status !== 'outofstock') return true;
+    return false;
+  });
 
   const handleStatClick = (filterType: string) => {
     console.log('Stat clicked:', filterType);
@@ -78,7 +93,7 @@ const ProductsPage = () => {
             className="p-6 text-center cursor-pointer hover:bg-luxury-gold/5 transition-colors"
             onClick={() => handleStatClick('low_stock')}
           >
-            <div className="text-3xl font-bold text-red-400">{insights.low_stock_alerts}</div>
+            <div className="text-3xl font-bold text-red-400">{lowStockProducts.length}</div>
             <div className="text-sm text-luxury-cream/60">Low Stock</div>
           </LuxuryCard>
           <LuxuryCard 
@@ -113,7 +128,7 @@ const ProductsPage = () => {
                     </Badge>
                   </div>
                   <div className="text-sm text-luxury-cream/60 space-y-1">
-                    <p>Stock: {product.stock_quantity}</p>
+                    <p>Stock: {product.stock_quantity ?? 'Not specified'}</p>
                     <p className="text-luxury-gold">${product.price}</p>
                   </div>
                 </div>
@@ -151,7 +166,7 @@ const ProductsPage = () => {
                   <div className="text-sm text-luxury-cream/60 space-y-1 mb-3">
                     <div className="flex justify-between">
                       <span>Stock:</span>
-                      <span>{product.stock_quantity}</span>
+                      <span>{product.stock_quantity ?? 'Not specified'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Sales:</span>
@@ -170,7 +185,9 @@ const ProductsPage = () => {
                       {product.status}
                     </Badge>
                     <Badge className={getStockStatusColor(product.stock_quantity, product.stock_status)}>
-                      {product.stock_quantity === 0 || product.stock_status === 'outofstock' ? 'Out' : product.stock_quantity <= 5 ? 'Low' : 'Good'}
+                      {product.stock_quantity === 0 || product.stock_status === 'outofstock' ? 'Out' : 
+                       (product.stock_status === 'instock' && (product.stock_quantity === null || product.stock_quantity === undefined)) ? 'Good' :
+                       product.stock_quantity <= 5 ? 'Low' : 'Good'}
                     </Badge>
                   </div>
                 </div>

@@ -8,13 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { dashboardApi, DashboardProduct } from '@/services/dashboard';
-import ProductDetailsSheet from '@/components/dashboard/ProductDetailsSheet';
 
 const ProductsPage = () => {
   const navigate = useNavigate();
-  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
-  const [filteredProducts, setFilteredProducts] = useState<DashboardProduct[]>([]);
-  const [sheetOpen, setSheetOpen] = useState(false);
   
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['dashboardProducts'],
@@ -45,38 +41,8 @@ const ProductsPage = () => {
   const inStockProducts = products.filter(p => p.stock_quantity > 5 && p.stock_status !== 'outofstock');
 
   const handleStatClick = (filterType: string) => {
-    let filtered: DashboardProduct[] = [];
-    
     console.log('Stat clicked:', filterType);
-    
-    switch (filterType) {
-      case 'total':
-        filtered = products;
-        break;
-      case 'low_stock':
-        filtered = lowStockProducts;
-        break;
-      case 'out_of_stock':
-        filtered = outOfStockProducts;
-        break;
-      case 'in_stock':
-        filtered = inStockProducts;
-        break;
-    }
-    
-    setSelectedFilter(filterType);
-    setFilteredProducts(filtered);
-    setSheetOpen(true);
-  };
-
-  const getFilterTitle = (filterType: string) => {
-    switch (filterType) {
-      case 'total': return 'All Products';
-      case 'low_stock': return 'Low Stock Products';
-      case 'out_of_stock': return 'Out of Stock Products';
-      case 'in_stock': return 'In Stock Products';
-      default: return 'Products';
-    }
+    navigate(`/products/details?filter=${filterType}`);
   };
 
   return (
@@ -216,21 +182,6 @@ const ProductsPage = () => {
             </div>
           )}
         </LuxuryCard>
-
-        {/* Product Details Sheet */}
-        <ProductDetailsSheet
-          open={sheetOpen}
-          onOpenChange={setSheetOpen}
-          products={filteredProducts}
-          insights={{
-            total_products: filteredProducts.length,
-            low_stock_alerts: filteredProducts.filter(p => p.stock_quantity <= 5 || p.stock_status === 'outofstock').length
-          }}
-          isLoading={false}
-          title={selectedFilter ? getFilterTitle(selectedFilter) : 'Products'}
-        >
-          <div />
-        </ProductDetailsSheet>
       </div>
     </div>
   );

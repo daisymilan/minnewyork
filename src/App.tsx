@@ -10,6 +10,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Dashboard from "./pages/Dashboard";
 import OrdersPage from "./pages/OrdersPage";
 import ProductsPage from "./pages/ProductsPage";
+import ProductDetailsPage from "./pages/ProductDetailsPage";
 import NotFound from "./pages/NotFound";
 import { SignInPage } from "./components/auth/SignInPage";
 import { SignUpPage } from "./components/auth/SignUpPage";
@@ -33,6 +34,7 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/products" element={<ProductsPage />} />
+      <Route path="/products/details" element={<ProductDetailsPage />} />
       <Route path="/b2b" element={<B2BDashboard />} />
       <Route path="/b2bking" element={<B2BKingDashboard />} />
       <Route path="/marketing" element={<MarketingDashboard />} />

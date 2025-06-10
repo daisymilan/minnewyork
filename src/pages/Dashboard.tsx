@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -6,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import KpiCard from '@/components/dashboard/KpiCard';
+import KpiDetailsModal from '@/components/dashboard/KpiDetailsModal';
 import WarehouseDetailsSheet from '@/components/dashboard/WarehouseDetailsSheet';
 import { LuxuryCard } from '@/components/ui/luxury-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,6 +19,8 @@ const Dashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [warehouseDetailsOpen, setWarehouseDetailsOpen] = useState(false);
+  const [kpiDetailsOpen, setKpiDetailsOpen] = useState(false);
+  const [selectedKpiType, setSelectedKpiType] = useState<'revenue' | 'orders' | 'conversion' | 'averageOrder' | null>(null);
   
   // Initialize webhook event listeners
   useWebhookEvents();
@@ -195,6 +197,11 @@ const Dashboard = () => {
     setSelectedWarehouse(enhancedWarehouse);
     setWarehouseDetailsOpen(true);
   };
+
+  const handleKpiClick = (kpiType: 'revenue' | 'orders' | 'conversion' | 'averageOrder') => {
+    setSelectedKpiType(kpiType);
+    setKpiDetailsOpen(true);
+  };
   
   return (
     <div className="flex h-screen bg-luxury-black text-luxury-cream">
@@ -229,62 +236,74 @@ const Dashboard = () => {
                   ))
                 ) : (
                   <>
-                    <KpiCard
-                      title="Total Revenue"
-                      value={kpiData.revenue.value}
-                      trend={kpiData.revenue.trend}
-                      type={kpiData.revenue.type}
-                      icon={
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-                          <path d="M12 6v2" />
-                          <path d="M12 16v2" />
-                        </svg>
-                      }
-                    />
+                    <div onClick={() => handleKpiClick('revenue')} className="cursor-pointer">
+                      <KpiCard
+                        title="Total Revenue"
+                        value={kpiData.revenue.value}
+                        trend={kpiData.revenue.trend}
+                        type={kpiData.revenue.type}
+                        className="hover:scale-105 transition-transform"
+                        icon={
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                            <path d="M12 6v2" />
+                            <path d="M12 16v2" />
+                          </svg>
+                        }
+                      />
+                    </div>
                     
-                    <KpiCard
-                      title="Orders"
-                      value={kpiData.orders.value}
-                      trend={kpiData.orders.trend}
-                      type={kpiData.orders.type}
-                      icon={
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                          <path d="M3 6h18" />
-                          <path d="M16 10a4 4 0 0 1-8 0" />
-                        </svg>
-                      }
-                    />
+                    <div onClick={() => handleKpiClick('orders')} className="cursor-pointer">
+                      <KpiCard
+                        title="Orders"
+                        value={kpiData.orders.value}
+                        trend={kpiData.orders.trend}
+                        type={kpiData.orders.type}
+                        className="hover:scale-105 transition-transform"
+                        icon={
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                            <path d="M3 6h18" />
+                            <path d="M16 10a4 4 0 0 1-8 0" />
+                          </svg>
+                        }
+                      />
+                    </div>
                     
-                    <KpiCard
-                      title="Conversion Rate"
-                      value={kpiData.conversion.value}
-                      trend={kpiData.conversion.trend}
-                      type={kpiData.conversion.type}
-                      icon={
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="m2 4 3 12h14l3-12-6 7-4 7-4 7-6-7Z" />
-                          <path d="m5 16 3 4" />
-                          <path d="m16 16 3 4" />
-                        </svg>
-                      }
-                    />
+                    <div onClick={() => handleKpiClick('conversion')} className="cursor-pointer">
+                      <KpiCard
+                        title="Conversion Rate"
+                        value={kpiData.conversion.value}
+                        trend={kpiData.conversion.trend}
+                        type={kpiData.conversion.type}
+                        className="hover:scale-105 transition-transform"
+                        icon={
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="m2 4 3 12h14l3-12-6 7-4 7-4 7-6-7Z" />
+                            <path d="m5 16 3 4" />
+                            <path d="m16 16 3 4" />
+                          </svg>
+                        }
+                      />
+                    </div>
                     
-                    <KpiCard
-                      title="Average Order Value"
-                      value={kpiData.averageOrder.value}
-                      trend={kpiData.averageOrder.trend}
-                      type={kpiData.averageOrder.type}
-                      icon={
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect width="18" height="18" x="3" y="3" rx="2" />
-                          <path d="M3 9h18" />
-                          <path d="M9 21V9" />
-                        </svg>
-                      }
-                    />
+                    <div onClick={() => handleKpiClick('averageOrder')} className="cursor-pointer">
+                      <KpiCard
+                        title="Average Order Value"
+                        value={kpiData.averageOrder.value}
+                        trend={kpiData.averageOrder.trend}
+                        type={kpiData.averageOrder.type}
+                        className="hover:scale-105 transition-transform"
+                        icon={
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect width="18" height="18" x="3" y="3" rx="2" />
+                            <path d="M3 9h18" />
+                            <path d="M9 21V9" />
+                          </svg>
+                        }
+                      />
+                    </div>
                   </>
                 )}
               </div>
@@ -655,6 +674,14 @@ const Dashboard = () => {
         warehouse={selectedWarehouse}
         isOpen={warehouseDetailsOpen}
         onClose={() => setWarehouseDetailsOpen(false)}
+      />
+
+      {/* KPI Details Modal */}
+      <KpiDetailsModal
+        isOpen={kpiDetailsOpen}
+        onClose={() => setKpiDetailsOpen(false)}
+        kpiType={selectedKpiType}
+        data={kpiData}
       />
     </div>
   );

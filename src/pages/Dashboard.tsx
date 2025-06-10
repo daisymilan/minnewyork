@@ -8,6 +8,7 @@ import KpiCard from '@/components/dashboard/KpiCard';
 import KpiDetailsModal from '@/components/dashboard/KpiDetailsModal';
 import WarehouseDetailsSheet from '@/components/dashboard/WarehouseDetailsSheet';
 import { LuxuryCard } from '@/components/ui/luxury-card';
+import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { dashboardApi } from '@/services/dashboard';
 import { orderRoutingApi } from '@/services/orderRouting';
@@ -161,7 +162,24 @@ const Dashboard = () => {
       case 'optimal': return 'bg-green-500/10 text-green-500';
       case 'low': return 'bg-red-500/10 text-red-500';
       case 'medium': return 'bg-amber-500/10 text-amber-500';
+      case 'active': return 'bg-green-500/10 text-green-500';
       default: return 'bg-gray-500/10 text-gray-500';
+    }
+  };
+
+  const getWarehouseTypeColor = (type?: string) => {
+    switch (type) {
+      case 'manufacturing': return 'bg-purple-500/10 text-purple-500';
+      case 'fulfillment': return 'bg-blue-500/10 text-blue-500';
+      default: return 'bg-gray-500/10 text-gray-500';
+    }
+  };
+
+  const getWarehouseTypeLabel = (type?: string) => {
+    switch (type) {
+      case 'manufacturing': return 'Manufacturing';
+      case 'fulfillment': return 'Fulfillment';
+      default: return 'Warehouse';
     }
   };
 
@@ -169,9 +187,15 @@ const Dashboard = () => {
     // Enhance warehouse data with mock additional details for demonstration
     const enhancedWarehouse = {
       ...warehouse,
-      inventory_value: Math.round(warehouse.total_items * 45 + Math.random() * 50000),
-      low_stock_count: Math.round(warehouse.total_items * 0.05 + Math.random() * 10),
-      categories: ['Fragrances', 'Accessories', 'Gift Sets'],
+      inventory_value: warehouse.warehouse_type === 'manufacturing' 
+        ? Math.round(warehouse.total_items * 125 + Math.random() * 25000) // Higher value for manufacturing components
+        : Math.round(warehouse.total_items * 45 + Math.random() * 50000),
+      low_stock_count: warehouse.warehouse_type === 'manufacturing'
+        ? Math.round(warehouse.total_items * 0.08 + Math.random() * 5) // Different calculation for components
+        : Math.round(warehouse.total_items * 0.05 + Math.random() * 10),
+      categories: warehouse.warehouse_type === 'manufacturing' 
+        ? ['Raw Materials', 'Components', 'Packaging', 'Chemicals']
+        : ['Fragrances', 'Accessories', 'Gift Sets'],
       last_updated: new Date().toISOString()
     };
     
@@ -413,7 +437,7 @@ const Dashboard = () => {
                     )}
                   </LuxuryCard>
                   
-                  {/* Warehouse Overview */}
+                  {/* Enhanced Warehouse Overview with Manufacturing Distinction */}
                   {warehouseLoading ? (
                     <LuxuryCard className="p-6">
                       <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Overview</h3>
@@ -442,47 +466,104 @@ const Dashboard = () => {
                     </LuxuryCard>
                   ) : warehouseOverview ? (
                     <LuxuryCard className="p-6">
-                      <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Overview</h3>
+                      <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Network</h3>
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <div className="text-center">
                           <div className="text-2xl font-bold text-luxury-gold">{warehouseOverview.total_warehouses}</div>
-                          <div className="text-sm text-luxury-cream/60">Total Warehouses</div>
+                          <div className="text-sm text-luxury-cream/60">Total Locations</div>
                         </div>
                         <div className="text-center">
                           <div className="text-2xl font-bold text-green-500">{warehouseOverview.active_warehouses}</div>
                           <div className="text-sm text-luxury-cream/60">Active</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-luxury-gold">${warehouseOverview.total_inventory_value.toLocaleString()}</div>
-                          <div className="text-sm text-luxury-cream/60">Inventory Value</div>
+                          <div className="text-2xl font-bold text-purple-400">{warehouseOverview.manufacturing_warehouses}</div>
+                          <div className="text-sm text-luxury-cream/60">Manufacturing</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-red-400">{warehouseOverview.low_stock_alerts}</div>
-                          <div className="text-sm text-luxury-cream/60">Low Stock Alerts</div>
+                          <div className="text-2xl font-bold text-luxury-gold">${warehouseOverview.total_inventory_value.toLocaleString()}</div>
+                          <div className="text-sm text-luxury-cream/60">Total Value</div>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {warehouseOverview.warehouses.map((warehouse) => (
-                          <div 
-                            key={warehouse.name} 
-                            className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4 cursor-pointer hover:bg-luxury-gold/5 transition-colors"
-                            onClick={() => handleWarehouseClick(warehouse)}
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <h4 className="font-medium text-luxury-cream">{warehouse.name}</h4>
-                                <p className="text-sm text-luxury-cream/60">{warehouse.location}</p>
-                              </div>
-                              <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
-                                {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
-                              </span>
-                            </div>
-                            <div className="text-sm text-luxury-cream/60">
-                              {warehouse.total_items.toLocaleString()} items
-                            </div>
+                      {/* Separate Manufacturing and Fulfillment Warehouses */}
+                      <div className="space-y-6">
+                        {/* Manufacturing Section */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                            <h4 className="font-medium text-luxury-gold">Manufacturing Facilities</h4>
                           </div>
-                        ))}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {warehouseOverview.warehouses
+                              .filter(warehouse => warehouse.warehouse_type === 'manufacturing')
+                              .map((warehouse) => (
+                                <div 
+                                  key={warehouse.name} 
+                                  className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-4 cursor-pointer hover:bg-purple-500/10 transition-colors"
+                                  onClick={() => handleWarehouseClick(warehouse)}
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                      <h5 className="font-medium text-luxury-cream flex items-center gap-2">
+                                        {warehouse.name}
+                                        <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
+                                          {getWarehouseTypeLabel(warehouse.warehouse_type)}
+                                        </Badge>
+                                      </h5>
+                                      <p className="text-sm text-luxury-cream/60">{warehouse.location}</p>
+                                    </div>
+                                    <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
+                                      {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
+                                    </span>
+                                  </div>
+                                  <div className="text-sm text-luxury-cream/60">
+                                    {warehouse.total_items === 0 ? 'Ready for production' : `${warehouse.total_items.toLocaleString()} components`}
+                                  </div>
+                                  <div className="text-xs text-purple-400 mt-1">
+                                    Receives from DSL → Ships to DSL
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+
+                        {/* Fulfillment Section */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <h4 className="font-medium text-luxury-gold">Fulfillment Centers</h4>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {warehouseOverview.warehouses
+                              .filter(warehouse => warehouse.warehouse_type === 'fulfillment')
+                              .map((warehouse) => (
+                                <div 
+                                  key={warehouse.name} 
+                                  className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4 cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+                                  onClick={() => handleWarehouseClick(warehouse)}
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                      <h5 className="font-medium text-luxury-cream flex items-center gap-2">
+                                        {warehouse.name}
+                                        <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
+                                          {getWarehouseTypeLabel(warehouse.warehouse_type)}
+                                        </Badge>
+                                      </h5>
+                                      <p className="text-sm text-luxury-cream/60">{warehouse.location}</p>
+                                    </div>
+                                    <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
+                                      {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
+                                    </span>
+                                  </div>
+                                  <div className="text-sm text-luxury-cream/60">
+                                    {warehouse.total_items.toLocaleString()} finished products
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
                       </div>
                     </LuxuryCard>
                   ) : null}

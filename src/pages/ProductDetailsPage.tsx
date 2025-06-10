@@ -28,13 +28,13 @@ const ProductDetailsPage = () => {
       case 'total':
         return products;
       case 'low_stock':
-        // Only products with actual quantity between 1-5 AND not marked as instock
+        // Products with quantity between 1-5 (regardless of stock_status unless explicitly outofstock)
         return products.filter(p => {
-          if (p.stock_status === 'instock') return false; // Never include instock products in low stock
+          if (p.stock_status === 'outofstock') return false; // Never include outofstock products in low stock
           return p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 0 && p.stock_quantity <= 5;
         });
       case 'out_of_stock':
-        // Products explicitly marked as outofstock OR (quantity 0 AND not marked as instock)
+        // Products explicitly marked as outofstock OR quantity 0 (but not if marked as instock)
         return products.filter(p => {
           if (p.stock_status === 'outofstock') return true;
           if (p.stock_status === 'instock') return false; // Never include instock products in out of stock
@@ -42,7 +42,7 @@ const ProductDetailsPage = () => {
           return false;
         });
       case 'in_stock':
-        // Products marked as instock (regardless of quantity) OR products with quantity > 5
+        // Products marked as instock (regardless of quantity) OR products with quantity > 5 and not outofstock
         return products.filter(p => {
           // If explicitly marked as instock, always include
           if (p.stock_status === 'instock') return true;

@@ -5,8 +5,7 @@ import {
   SheetContent, 
   SheetDescription, 
   SheetHeader, 
-  SheetTitle, 
-  SheetTrigger 
+  SheetTitle
 } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LuxuryCard } from '@/components/ui/luxury-card';
@@ -22,13 +21,19 @@ interface ProductDetailsSheetProps {
     low_stock_alerts: number;
   };
   isLoading: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  title?: string;
 }
 
 const ProductDetailsSheet: React.FC<ProductDetailsSheetProps> = ({
   children,
   products,
   insights,
-  isLoading
+  isLoading,
+  open,
+  onOpenChange,
+  title = "Product Details"
 }) => {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -52,15 +57,12 @@ const ProductDetailsSheet: React.FC<ProductDetailsSheetProps> = ({
   console.log('ProductDetailsSheet - Low stock:', lowStockProducts.length);
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        {children}
-      </SheetTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-[90vw] max-w-4xl bg-luxury-black border-luxury-gold/20">
         <SheetHeader>
-          <SheetTitle className="text-luxury-gold font-display">Product Details</SheetTitle>
+          <SheetTitle className="text-luxury-gold font-display">{title}</SheetTitle>
           <SheetDescription className="text-luxury-cream/60">
-            Comprehensive overview of your product inventory and status
+            Detailed view of selected products and inventory status
           </SheetDescription>
         </SheetHeader>
 
@@ -115,7 +117,7 @@ const ProductDetailsSheet: React.FC<ProductDetailsSheetProps> = ({
 
             {/* All Products */}
             <LuxuryCard className="p-6">
-              <h3 className="text-lg font-display text-luxury-gold mb-4">All Products ({products.length})</h3>
+              <h3 className="text-lg font-display text-luxury-gold mb-4">Products ({products.length})</h3>
               {isLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 5 }).map((_, i) => (

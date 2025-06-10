@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -8,9 +8,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { dashboardApi, DashboardProduct } from '@/services/dashboard';
+import ProductDetailsSheet from '@/components/dashboard/ProductDetailsSheet';
 
 const ProductsPage = () => {
   const navigate = useNavigate();
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [filteredProducts, setFilteredProducts] = useState<DashboardProduct[]>([]);
+  const [sheetOpen, setSheetOpen] = useState(false);
   
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['dashboardProducts'],
@@ -38,6 +42,40 @@ const ProductsPage = () => {
   
   const lowStockProducts = products.filter(p => p.stock_quantity <= 5 || p.stock_status === 'outofstock');
   const outOfStockProducts = products.filter(p => p.stock_quantity === 0 || p.stock_status === 'outofstock');
+  const inStockProducts = products.filter(p => p.stock_quantity > 5 && p.stock_status !== 'outofstock');
+
+  const handleStatClick = (filterType: string) => {
+    let filtered: DashboardProduct[] = [];
+    
+    switch (filterType) {
+      case 'total':
+        filtered = products;
+        break;
+      case 'low_stock':
+        filtered = lowStockProducts;
+        break;
+      case 'out_of_stock':
+        filtered = outOfStockProducts;
+        break;
+      case 'in_stock':
+        filtered = inStockProducts;
+        break;
+    }
+    
+    setSelectedFilter(filterType);
+    setFilteredProducts(filtered);
+    setSheetOpen(true);
+  };
+
+  const getFilterTitle = (filterType: string) => {
+    switch (filterType) {
+      case 'total': return 'All Products';
+      case 'low_stock': return 'Low Stock Products';
+      case 'out_of_stock': return 'Out of Stock Products';
+      case 'in_stock': return 'In Stock Products';
+      default: return 'Products';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-luxury-black text-luxury-cream p-6">
@@ -59,23 +97,35 @@ const ProductsPage = () => {
           </div>
         </div>
 
-        {/* Summary Stats */}
+        {/* Summary Stats - Now Clickable */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <LuxuryCard className="p-6 text-center">
+          <LuxuryCard 
+            className="p-6 text-center cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+            onClick={() => handleStatClick('total')}
+          >
             <div className="text-3xl font-bold text-luxury-gold">{insights.total_products}</div>
             <div className="text-sm text-luxury-cream/60">Total Products</div>
           </LuxuryCard>
-          <LuxuryCard className="p-6 text-center">
+          <LuxuryCard 
+            className="p-6 text-center cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+            onClick={() => handleStatClick('low_stock')}
+          >
             <div className="text-3xl font-bold text-red-400">{insights.low_stock_alerts}</div>
             <div className="text-sm text-luxury-cream/60">Low Stock</div>
           </LuxuryCard>
-          <LuxuryCard className="p-6 text-center">
+          <LuxuryCard 
+            className="p-6 text-center cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+            onClick={() => handleStatClick('out_of_stock')}
+          >
             <div className="text-3xl font-bold text-red-500">{outOfStockProducts.length}</div>
             <div className="text-sm text-luxury-cream/60">Out of Stock</div>
           </LuxuryCard>
-          <LuxuryCard className="p-6 text-center">
+          <LuxuryCard 
+            className="p-6 text-center cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+            onClick={() => handleStatClick('in_stock')}
+          >
             <div className="text-3xl font-bold text-green-500">
-              {products.filter(p => p.stock_quantity > 5 && p.stock_status !== 'outofstock').length}
+              {inStockProducts.length}
             </div>
             <div className="text-sm text-luxury-cream/60">In Stock</div>
           </LuxuryCard>
@@ -164,6 +214,20 @@ const ProductsPage = () => {
             </div>
           )}
         </LuxuryCard>
+
+        {/* Product Details Sheet */}
+        {sheetOpen && (
+          <ProductDetailsSheet
+            products={filteredProducts}
+            insights={{
+              total_products: filteredProducts.length,
+              low_stock_alerts: filteredProducts.filter(p => p.stock_quantity <= 5 || p.stock_status === 'outofstock').length
+            }}
+            isLoading={false}
+          >
+            <div />
+          </ProductDetailsSheet>
+        )}
       </div>
     </div>
   );

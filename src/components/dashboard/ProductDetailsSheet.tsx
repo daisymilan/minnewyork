@@ -50,123 +50,124 @@ const ProductDetailsSheet: React.FC<ProductDetailsSheetProps> = ({
     return 'bg-green-500/10 text-green-500';
   };
 
-  const lowStockProducts = products.filter(p => p.stock_quantity <= 5 || p.stock_status === 'outofstock');
-  const outOfStockProducts = products.filter(p => p.stock_quantity === 0 || p.stock_status === 'outofstock');
-
   console.log('ProductDetailsSheet - Products:', products.length);
-  console.log('ProductDetailsSheet - Low stock:', lowStockProducts.length);
+  console.log('ProductDetailsSheet - Title:', title);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[90vw] max-w-4xl bg-luxury-black border-luxury-gold/20">
+      <SheetContent className="w-[90vw] max-w-6xl bg-luxury-black border-luxury-gold/20">
         <SheetHeader>
-          <SheetTitle className="text-luxury-gold font-display">{title}</SheetTitle>
+          <SheetTitle className="text-luxury-gold font-display text-2xl">{title}</SheetTitle>
           <SheetDescription className="text-luxury-cream/60">
-            Detailed view of selected products and inventory status
+            {products.length} products found - Detailed product information and inventory status
           </SheetDescription>
         </SheetHeader>
 
         <ScrollArea className="h-[calc(100vh-120px)] mt-6">
           <div className="space-y-6 pr-4">
-            {/* Summary Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <LuxuryCard className="p-4 text-center">
-                <div className="text-2xl font-bold text-luxury-gold">{insights.total_products}</div>
-                <div className="text-sm text-luxury-cream/60">Total Products</div>
-              </LuxuryCard>
-              <LuxuryCard className="p-4 text-center">
-                <div className="text-2xl font-bold text-red-400">{insights.low_stock_alerts}</div>
-                <div className="text-sm text-luxury-cream/60">Low Stock</div>
-              </LuxuryCard>
-              <LuxuryCard className="p-4 text-center">
-                <div className="text-2xl font-bold text-red-500">{outOfStockProducts.length}</div>
-                <div className="text-sm text-luxury-cream/60">Out of Stock</div>
-              </LuxuryCard>
-              <LuxuryCard className="p-4 text-center">
-                <div className="text-2xl font-bold text-green-500">
-                  {products.filter(p => p.stock_quantity > 5 && p.stock_status !== 'outofstock').length}
-                </div>
-                <div className="text-sm text-luxury-cream/60">In Stock</div>
-              </LuxuryCard>
-            </div>
-
-            {/* Low Stock Alerts */}
-            {lowStockProducts.length > 0 && (
-              <LuxuryCard className="p-6">
-                <h3 className="text-lg font-display text-luxury-gold mb-4">⚠️ Low Stock Alerts</h3>
-                <ScrollArea className="h-48">
-                  <div className="space-y-3 pr-4">
-                    {lowStockProducts.map((product) => (
-                      <div key={product.id} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md">
-                        <div>
-                          <h4 className="font-medium text-luxury-cream">{product.name}</h4>
-                          <p className="text-sm text-luxury-cream/60">Stock: {product.stock_quantity}</p>
+            {/* Products Grid */}
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="p-6 border border-luxury-gold/10 rounded-lg">
+                    <Skeleton className="h-6 w-full mb-3" />
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-4 w-20 mb-2" />
+                    <div className="flex gap-2 mb-3">
+                      <Skeleton className="h-5 w-16" />
+                      <Skeleton className="h-5 w-12" />
+                    </div>
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                ))}
+              </div>
+            ) : products && products.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {products.map((product) => (
+                  <LuxuryCard key={product.id} className="p-6 hover:bg-luxury-gold/5 transition-colors">
+                    <div className="space-y-4">
+                      {/* Product Header */}
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-medium text-luxury-cream mb-1">{product.name}</h3>
+                          {product.sku && (
+                            <p className="text-sm text-luxury-cream/60">SKU: {product.sku}</p>
+                          )}
                         </div>
                         <div className="text-right">
-                          <p className="text-luxury-gold">${product.price}</p>
-                          <Badge className={getStockStatusColor(product.stock_quantity, product.stock_status)}>
-                            {product.stock_quantity === 0 || product.stock_status === 'outofstock' ? 'Out of Stock' : 'Low Stock'}
-                          </Badge>
+                          <p className="text-xl font-bold text-luxury-gold">${product.price}</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </LuxuryCard>
-            )}
 
-            {/* All Products */}
-            <LuxuryCard className="p-6">
-              <h3 className="text-lg font-display text-luxury-gold mb-4">Products ({products.length})</h3>
-              {isLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md">
-                      <div className="flex-1">
-                        <Skeleton className="h-4 w-48 mb-2" />
-                        <Skeleton className="h-3 w-24" />
+                      {/* Product Details */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-luxury-cream/60">Stock Quantity</p>
+                          <p className="text-lg font-medium text-luxury-cream">{product.stock_quantity}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-luxury-cream/60">Sales Count</p>
+                          <p className="text-lg font-medium text-luxury-cream">{product.sales_count || 0}</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <Skeleton className="h-4 w-16 mb-1" />
-                        <Skeleton className="h-5 w-20" />
+
+                      {/* Stock Status Alert */}
+                      {(product.stock_quantity <= 5 || product.stock_status === 'outofstock') && (
+                        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-md">
+                          <p className="text-red-400 font-medium text-sm">
+                            ⚠️ {product.stock_quantity === 0 || product.stock_status === 'outofstock' 
+                              ? 'Out of Stock' 
+                              : 'Low Stock Alert'}
+                          </p>
+                          <p className="text-red-400/80 text-xs mt-1">
+                            {product.stock_quantity === 0 
+                              ? 'This product is currently unavailable'
+                              : 'Stock level is running low - consider restocking'
+                            }
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Status Badges */}
+                      <div className="flex gap-2">
+                        <Badge className={getStatusColor(product.status)}>
+                          {product.status}
+                        </Badge>
+                        <Badge className={getStockStatusColor(product.stock_quantity, product.stock_status)}>
+                          {product.stock_quantity === 0 || product.stock_status === 'outofstock' 
+                            ? 'Out of Stock' 
+                            : product.stock_quantity <= 5 
+                            ? 'Low Stock' 
+                            : 'In Stock'
+                          }
+                        </Badge>
+                      </div>
+
+                      {/* Additional Info */}
+                      <div className="pt-2 border-t border-luxury-gold/10">
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="text-luxury-cream/60">Stock Status: </span>
+                            <span className="text-luxury-cream">{product.stock_status}</span>
+                          </div>
+                          <div>
+                            <span className="text-luxury-cream/60">Product ID: </span>
+                            <span className="text-luxury-cream">{product.id}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  ))}
+                  </LuxuryCard>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-luxury-cream/60">
+                  <p className="text-lg mb-2">No products found</p>
+                  <p className="text-sm">Try adjusting your filter criteria</p>
                 </div>
-              ) : products && products.length > 0 ? (
-                <ScrollArea className="h-96">
-                  <div className="space-y-3 pr-4">
-                    {products.map((product) => (
-                      <div key={product.id} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md hover:bg-luxury-gold/5 transition-colors">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-luxury-cream">{product.name}</h4>
-                          <div className="flex items-center gap-4 text-sm text-luxury-cream/60">
-                            <span>Stock: {product.stock_quantity}</span>
-                            <span>Sales: {product.sales_count || 0}</span>
-                            {product.sku && <span>SKU: {product.sku}</span>}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-luxury-gold font-medium">${product.price}</p>
-                          <div className="flex gap-2 mt-1">
-                            <Badge className={getStatusColor(product.status)}>
-                              {product.status}
-                            </Badge>
-                            <Badge className={getStockStatusColor(product.stock_quantity, product.stock_status)}>
-                              {product.stock_quantity === 0 || product.stock_status === 'outofstock' ? 'Out' : product.stock_quantity <= 5 ? 'Low' : 'Good'}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              ) : (
-                <div className="text-center py-8 text-luxury-cream/60">
-                  No products found
-                </div>
-              )}
-            </LuxuryCard>
+              </div>
+            )}
           </div>
         </ScrollArea>
       </SheetContent>

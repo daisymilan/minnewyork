@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -28,8 +29,8 @@ const ProductsPage = () => {
 
   const getStockStatusColor = (stockQuantity: number, stockStatus?: string) => {
     if (stockStatus === 'outofstock') return 'bg-red-500/10 text-red-500';
-    // If stock status is 'instock' but no quantity specified, treat as in stock
-    if (stockStatus === 'instock' && (stockQuantity === null || stockQuantity === undefined)) return 'bg-green-500/10 text-green-500';
+    // If stock status is 'instock', treat as in stock regardless of quantity
+    if (stockStatus === 'instock') return 'bg-green-500/10 text-green-500';
     if (stockQuantity !== null && stockQuantity !== undefined && stockQuantity <= 5 && stockQuantity > 0) return 'bg-amber-500/10 text-amber-500';
     return 'bg-green-500/10 text-green-500';
   };
@@ -37,24 +38,26 @@ const ProductsPage = () => {
   const products = productsData?.products || [];
   const insights = productsData?.insights || { total_products: 0, low_stock_alerts: 0 };
   
-  // Low Stock: only products with actual quantity between 1-5
+  // Low Stock: only products with actual quantity between 1-5 AND not marked as instock
   const lowStockProducts = products.filter(p => {
+    if (p.stock_status === 'instock') return false; // Never include instock products in low stock
     return p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 0 && p.stock_quantity <= 5;
   });
   
-  // Out of Stock: products with quantity 0 OR explicitly marked as outofstock
+  // Out of Stock: products explicitly marked as outofstock OR (quantity 0 AND not marked as instock)
   const outOfStockProducts = products.filter(p => {
     if (p.stock_status === 'outofstock') return true;
+    if (p.stock_status === 'instock') return false; // Never include instock products in out of stock
     if (p.stock_quantity === 0) return true;
     return false;
   });
   
-  // In Stock: products with quantity > 5 OR marked as instock without quantity specified
+  // In Stock: products marked as instock (regardless of quantity) OR products with quantity > 5
   const inStockProducts = products.filter(p => {
-    // Products marked as instock but no quantity specified
-    if (p.stock_status === 'instock' && (p.stock_quantity === null || p.stock_quantity === undefined)) return true;
-    // Products with stock quantity > 5
-    if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 5) return true;
+    // If explicitly marked as instock, always include
+    if (p.stock_status === 'instock') return true;
+    // Products with stock quantity > 5 (and not marked as outofstock)
+    if (p.stock_status !== 'outofstock' && p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 5) return true;
     return false;
   });
 
@@ -200,8 +203,8 @@ const ProductsPage = () => {
                     </Badge>
                     <Badge className={getStockStatusColor(product.stock_quantity, product.stock_status)}>
                       {/* Updated badge logic */}
-                      {product.stock_status === 'outofstock' || (product.stock_quantity === 0 && product.stock_status !== 'instock') ? 'Out' : 
-                       (product.stock_status === 'instock' && (product.stock_quantity === null || product.stock_quantity === undefined)) ? 'Good' :
+                      {product.stock_status === 'outofstock' ? 'Out' : 
+                       product.stock_status === 'instock' ? 'Good' :
                        product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 5 && product.stock_quantity > 0 ? 'Low' : 'Good'}
                     </Badge>
                   </div>

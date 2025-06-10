@@ -34,7 +34,7 @@ interface DashboardSidebarProps {
 const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
 
   const menuItems = [
     { 
@@ -175,7 +175,7 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
 
       <div className="p-4">
         <Button variant="outline" className="w-full" onClick={() => {
-          logout();
+          signOut();
           navigate('/login');
         }}>
           Logout

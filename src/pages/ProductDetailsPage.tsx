@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -28,25 +27,24 @@ const ProductDetailsPage = () => {
       case 'total':
         return products;
       case 'low_stock':
+        // Only products with actual quantity between 1-5
         return products.filter(p => {
-          // Only include products with actual quantity between 1-5
-          if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 0 && p.stock_quantity <= 5) return true;
-          return false;
+          return p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 0 && p.stock_quantity <= 5;
         });
       case 'out_of_stock':
+        // Products with quantity 0 OR explicitly marked as outofstock
         return products.filter(p => {
-          // If explicitly marked as outofstock, include it
           if (p.stock_status === 'outofstock') return true;
-          // If quantity is 0 and NOT marked as instock, include it
-          if (p.stock_quantity === 0 && p.stock_status !== 'instock') return true;
+          if (p.stock_quantity === 0) return true;
           return false;
         });
       case 'in_stock':
+        // Products with quantity > 5 OR marked as instock without quantity specified
         return products.filter(p => {
-          // Include products that are explicitly in stock but don't have quantity specified
+          // Products marked as instock but no quantity specified
           if (p.stock_status === 'instock' && (p.stock_quantity === null || p.stock_quantity === undefined)) return true;
-          // Include products with stock quantity > 5 and not out of stock
-          if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 5 && p.stock_status !== 'outofstock') return true;
+          // Products with stock quantity > 5
+          if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 5) return true;
           return false;
         });
       default:
@@ -55,6 +53,11 @@ const ProductDetailsPage = () => {
   };
 
   const filteredProducts = getFilteredProducts();
+
+  console.log('ProductDetailsPage filtering debug:');
+  console.log('Filter:', filter);
+  console.log('Total products:', products.length);
+  console.log('Filtered products:', filteredProducts.length);
 
   const getFilterTitle = () => {
     switch (filter) {

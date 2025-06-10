@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -38,29 +37,37 @@ const ProductsPage = () => {
   const products = productsData?.products || [];
   const insights = productsData?.insights || { total_products: 0, low_stock_alerts: 0 };
   
-  // Updated filtering logic - only include products with actual low stock quantities (1-5)
+  // Low Stock: only products with actual quantity between 1-5
   const lowStockProducts = products.filter(p => {
-    // Only include products with actual quantity between 1-5
-    if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 0 && p.stock_quantity <= 5) return true;
-    return false;
+    return p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 0 && p.stock_quantity <= 5;
   });
   
-  // Out of stock: only products with quantity 0 OR explicitly marked as outofstock (but NOT instock)
+  // Out of Stock: products with quantity 0 OR explicitly marked as outofstock
   const outOfStockProducts = products.filter(p => {
-    // If explicitly marked as outofstock, include it
     if (p.stock_status === 'outofstock') return true;
-    // If quantity is 0 and NOT marked as instock, include it
-    if (p.stock_quantity === 0 && p.stock_status !== 'instock') return true;
+    if (p.stock_quantity === 0) return true;
     return false;
   });
   
+  // In Stock: products with quantity > 5 OR marked as instock without quantity specified
   const inStockProducts = products.filter(p => {
-    // Include products that are explicitly in stock but don't have quantity specified
+    // Products marked as instock but no quantity specified
     if (p.stock_status === 'instock' && (p.stock_quantity === null || p.stock_quantity === undefined)) return true;
-    // Include products with stock quantity > 5 and not out of stock
-    if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 5 && p.stock_status !== 'outofstock') return true;
+    // Products with stock quantity > 5
+    if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 5) return true;
     return false;
   });
+
+  console.log('Products filtering debug:');
+  console.log('Total products:', products.length);
+  console.log('Low stock products:', lowStockProducts.length);
+  console.log('Out of stock products:', outOfStockProducts.length);
+  console.log('In stock products:', inStockProducts.length);
+  console.log('Sample products:', products.slice(0, 3).map(p => ({
+    name: p.name,
+    stock_quantity: p.stock_quantity,
+    stock_status: p.stock_status
+  })));
 
   const handleStatClick = (filterType: string) => {
     console.log('Stat clicked:', filterType);

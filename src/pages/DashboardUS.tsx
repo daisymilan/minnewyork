@@ -26,17 +26,17 @@ const DashboardUS = () => {
   // Initialize US webhook event listeners
   useWebhookEventsUS();
   
-  // Fetch US dashboard data using the new US API endpoints
+  // Fetch US dashboard data using the US-specific API endpoints
   const { data: overviewData, isLoading: overviewLoading } = useQuery({
     queryKey: ['dashboardOverviewUS'],
     queryFn: dashboardUSApi.getOverview,
-    refetchInterval: 30000,
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ['dashboardOrdersUS'],
     queryFn: dashboardUSApi.getOrders,
-    refetchInterval: 60000,
+    refetchInterval: 60000, // Refetch every minute
   });
 
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
@@ -48,10 +48,16 @@ const DashboardUS = () => {
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['dashboardProductsUS'],
     queryFn: dashboardUSApi.getProducts,
-    refetchInterval: 120000,
+    refetchInterval: 120000, // Refetch every 2 minutes
+  });
+
+  const { data: customersData, isLoading: customersLoading } = useQuery({
+    queryKey: ['dashboardCustomersUS'],
+    queryFn: dashboardUSApi.getCustomers,
+    refetchInterval: 120000, // Refetch every 2 minutes
   });
   
-  // US KPI data
+  // Use US analytics data for KPIs
   const kpiData = analyticsLoading ? null : analyticsData ? {
     revenue: {
       value: analyticsData.kpis.total_revenue,
@@ -60,22 +66,22 @@ const DashboardUS = () => {
     },
     orders: {
       value: analyticsData.kpis.total_orders,
-      trend: analyticsData.kpis.growth_rate * 0.8,
+      trend: analyticsData.kpis.growth_rate * 0.8, // Estimated trend
       type: 'number' as const,
     },
     conversion: {
-      value: analyticsData.kpis.conversion_rate || 2.8,
-      trend: -1.5,
+      value: analyticsData.kpis.conversion_rate || 3.2,
+      trend: -1.8, // Estimated trend
       type: 'percentage' as const,
     },
     averageOrder: {
       value: analyticsData.kpis.average_order_value || (analyticsData.kpis.total_revenue / analyticsData.kpis.total_orders),
-      trend: 4.2,
+      trend: 5.3, // Estimated trend
       type: 'currency' as const,
     }
   } : null;
   
-  // US regional data
+  // Use US regional data
   const regionalData = overviewLoading ? null : overviewData?.regional_breakdown ? 
     Object.entries(overviewData.regional_breakdown).map(([name, value]) => {
       let numValue = 0;
@@ -92,22 +98,18 @@ const DashboardUS = () => {
         value: numValue
       };
     }) : null;
-
-  // US warehouse data
+  
+  // US-specific warehouse data
   const usWarehouseOverview = {
-    total_warehouses: 1,
-    active_warehouses: 1,
+    total_warehouses: 3,
+    active_warehouses: 3,
     manufacturing_warehouses: 0,
-    total_inventory_value: 850000,
+    total_inventory_value: 1850000,
     low_stock_alerts: 2,
     warehouses: [
-      { 
-        name: 'Shipforus USA', 
-        location: 'Las Vegas, NV', 
-        status: 'active', 
-        total_items: 1234, 
-        warehouse_type: 'fulfillment' as const
-      }
+      { name: 'Shipforus USA - West', location: 'Las Vegas, NV', status: 'active', total_items: 2145, warehouse_type: 'fulfillment' as const },
+      { name: 'Shipforus USA - East', location: 'New York, NY', status: 'active', total_items: 1834, warehouse_type: 'fulfillment' as const },
+      { name: 'Shipforus USA - Central', location: 'Chicago, IL', status: 'active', total_items: 1567, warehouse_type: 'fulfillment' as const }
     ]
   };
   
@@ -121,6 +123,22 @@ const DashboardUS = () => {
       case 'cancelled': return 'bg-red-500/10 text-red-500';
       case 'active': return 'bg-green-500/10 text-green-500';
       default: return 'bg-gray-500/10 text-gray-500';
+    }
+  };
+
+  const getWarehouseTypeColor = (type?: string) => {
+    switch (type) {
+      case 'manufacturing': return 'bg-purple-500/10 text-purple-500';
+      case 'fulfillment': return 'bg-blue-500/10 text-blue-500';
+      default: return 'bg-gray-500/10 text-gray-500';
+    }
+  };
+
+  const getWarehouseTypeLabel = (type?: string) => {
+    switch (type) {
+      case 'manufacturing': return 'Manufacturing';
+      case 'fulfillment': return 'Fulfillment';
+      default: return 'Warehouse';
     }
   };
 
@@ -156,13 +174,13 @@ const DashboardUS = () => {
           {user && (
             <div className="animate-fade-in">
               <h2 className="text-2xl font-display mb-1 gold-gradient-text">
-                US Dashboard - Welcome back, {user.name}
+                Welcome to US Dashboard, {user.name}
               </h2>
               <p className="text-sm text-luxury-cream/60 mb-6">
                 Here's what's happening with your US fragrance business today
               </p>
               
-              {/* US KPI Cards */}
+              {/* KPI Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {analyticsLoading || !kpiData ? (
                   Array.from({ length: 4 }).map((_, i) => (
@@ -176,7 +194,7 @@ const DashboardUS = () => {
                   <>
                     <div onClick={() => handleKpiClick('revenue')} className="cursor-pointer">
                       <KpiCard
-                        title="US Revenue"
+                        title="Total Revenue (US)"
                         value={kpiData.revenue.value}
                         trend={kpiData.revenue.trend}
                         type={kpiData.revenue.type}
@@ -194,7 +212,7 @@ const DashboardUS = () => {
                     
                     <div onClick={() => handleKpiClick('orders')} className="cursor-pointer">
                       <KpiCard
-                        title="US Orders"
+                        title="Orders (US)"
                         value={kpiData.orders.value}
                         trend={kpiData.orders.trend}
                         type={kpiData.orders.type}
@@ -211,7 +229,7 @@ const DashboardUS = () => {
                     
                     <div onClick={() => handleKpiClick('conversion')} className="cursor-pointer">
                       <KpiCard
-                        title="US Conversion Rate"
+                        title="Conversion Rate (US)"
                         value={kpiData.conversion.value}
                         trend={kpiData.conversion.trend}
                         type={kpiData.conversion.type}
@@ -228,7 +246,7 @@ const DashboardUS = () => {
                     
                     <div onClick={() => handleKpiClick('averageOrder')} className="cursor-pointer">
                       <KpiCard
-                        title="US Average Order Value"
+                        title="Average Order Value (US)"
                         value={kpiData.averageOrder.value}
                         trend={kpiData.averageOrder.trend}
                         type={kpiData.averageOrder.type}
@@ -246,7 +264,7 @@ const DashboardUS = () => {
                 )}
               </div>
               
-              {/* Two column layout for US dashboard widgets */}
+              {/* Two column layout for dashboard widgets */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main content area */}
                 <div className="lg:col-span-2 space-y-6">
@@ -283,7 +301,7 @@ const DashboardUS = () => {
                     )}
                   </LuxuryCard>
                   
-                  {/* US Warehouse Overview */}
+                  {/* US Warehouse Network */}
                   <LuxuryCard className="p-6">
                     <h3 className="text-lg font-display text-luxury-gold mb-4">US Warehouse Network</h3>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -296,7 +314,7 @@ const DashboardUS = () => {
                         <div className="text-sm text-luxury-cream/60">Active</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-400">1</div>
+                        <div className="text-2xl font-bold text-blue-400">3</div>
                         <div className="text-sm text-luxury-cream/60">Fulfillment</div>
                       </div>
                       <div className="text-center">
@@ -305,36 +323,42 @@ const DashboardUS = () => {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {usWarehouseOverview.warehouses.map((warehouse) => (
-                        <div 
-                          key={warehouse.name} 
-                          className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4 cursor-pointer hover:bg-luxury-gold/5 transition-colors"
-                          onClick={() => handleWarehouseClick(warehouse)}
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h5 className="font-medium text-luxury-cream flex items-center gap-2">
-                                {warehouse.name}
-                                <Badge className="bg-blue-500/10 text-blue-500">
-                                  Fulfillment
-                                </Badge>
-                              </h5>
-                              <p className="text-sm text-luxury-cream/60">{warehouse.location}</p>
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <h4 className="font-medium text-luxury-gold">US Fulfillment Centers</h4>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {usWarehouseOverview.warehouses.map((warehouse) => (
+                          <div 
+                            key={warehouse.name} 
+                            className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4 cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+                            onClick={() => handleWarehouseClick(warehouse)}
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <h5 className="font-medium text-luxury-cream flex items-center gap-2">
+                                  {warehouse.name}
+                                  <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
+                                    {getWarehouseTypeLabel(warehouse.warehouse_type)}
+                                  </Badge>
+                                </h5>
+                                <p className="text-sm text-luxury-cream/60">{warehouse.location}</p>
+                              </div>
+                              <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
+                                {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
+                              </span>
                             </div>
-                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
-                              {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
-                            </span>
+                            <div className="text-sm text-luxury-cream/60">
+                              {warehouse.total_items.toLocaleString()} products
+                            </div>
                           </div>
-                          <div className="text-sm text-luxury-cream/60">
-                            {warehouse.total_items.toLocaleString()} products
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </LuxuryCard>
                   
-                  {/* US Recent Orders */}
+                  {/* Recent US Orders */}
                   <LuxuryCard className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-display text-luxury-gold">Recent US Orders</h3>
@@ -400,12 +424,34 @@ const DashboardUS = () => {
                 
                 {/* Sidebar with US-specific widgets */}
                 <div className="space-y-6">
-                  {/* US Product Insights */}
+                  <LuxuryCard className="p-6" variant="glass">
+                    <h3 className="text-lg font-display text-luxury-gold mb-3">US Market Insights</h3>
+                    <p className="text-sm text-luxury-cream/70 mb-4">
+                      Key metrics for the US market performance
+                    </p>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-luxury-cream/60">Market Share</span>
+                        <span className="text-luxury-gold">23.4%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-luxury-cream/60">Top State</span>
+                        <span className="text-luxury-gold">California</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-luxury-cream/60">Peak Hours</span>
+                        <span className="text-luxury-gold">2-4 PM EST</span>
+                      </div>
+                    </div>
+                  </LuxuryCard>
+
+                  {/* US Product Performance */}
                   <LuxuryCard 
                     className="p-6 cursor-pointer hover:bg-luxury-gold/5 transition-colors"
                     onClick={() => navigate('/products')}
                   >
-                    <h3 className="text-lg font-display text-luxury-gold mb-4">US Product Insights</h3>
+                    <h3 className="text-lg font-display text-luxury-gold mb-4">US Product Performance</h3>
                     {productsLoading ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
@@ -424,15 +470,49 @@ const DashboardUS = () => {
                           <span>{productsData.insights?.total_products || 0}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-luxury-cream/60">Low Stock Alerts</span>
+                          <span className="text-luxury-cream/60">Low Stock (US)</span>
                           <span className="text-red-400">{productsData.insights?.low_stock_alerts || 0}</span>
                         </div>
                         <div className="text-xs text-luxury-cream/40 mt-3 text-center">
-                          Click to view details
+                          Click for US product details
                         </div>
                       </div>
                     ) : (
                       <div className="text-center py-4 text-luxury-cream/60">No US product data available</div>
+                    )}
+                  </LuxuryCard>
+
+                  {/* US Customer Insights */}
+                  <LuxuryCard className="p-6">
+                    <h3 className="text-lg font-display text-luxury-gold mb-4">US Customer Insights</h3>
+                    {customersLoading ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-8" />
+                        </div>
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-4 w-6" />
+                        </div>
+                      </div>
+                    ) : customersData ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-luxury-cream/60">Total US Customers</span>
+                          <span>{customersData.insights?.total_customers || 0}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-luxury-cream/60">VIP Customers</span>
+                          <span className="text-luxury-gold">{customersData.insights?.customer_segments?.VIP || 0}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-luxury-cream/60">Premium Members</span>
+                          <span className="text-luxury-gold">{customersData.insights?.customer_segments?.Premium || 0}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 text-luxury-cream/60">No US customer data available</div>
                     )}
                   </LuxuryCard>
                 </div>

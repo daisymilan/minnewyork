@@ -47,6 +47,8 @@ const ProductsPage = () => {
   const handleStatClick = (filterType: string) => {
     let filtered: DashboardProduct[] = [];
     
+    console.log('Stat clicked:', filterType);
+    
     switch (filterType) {
       case 'total':
         filtered = products;
@@ -216,18 +218,19 @@ const ProductsPage = () => {
         </LuxuryCard>
 
         {/* Product Details Sheet */}
-        {sheetOpen && (
-          <ProductDetailsSheet
-            products={filteredProducts}
-            insights={{
-              total_products: filteredProducts.length,
-              low_stock_alerts: filteredProducts.filter(p => p.stock_quantity <= 5 || p.stock_status === 'outofstock').length
-            }}
-            isLoading={false}
-          >
-            <div />
-          </ProductDetailsSheet>
-        )}
+        <ProductDetailsSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          products={filteredProducts}
+          insights={{
+            total_products: filteredProducts.length,
+            low_stock_alerts: filteredProducts.filter(p => p.stock_quantity <= 5 || p.stock_status === 'outofstock').length
+          }}
+          isLoading={false}
+          title={selectedFilter ? getFilterTitle(selectedFilter) : 'Products'}
+        >
+          <div />
+        </ProductDetailsSheet>
       </div>
     </div>
   );

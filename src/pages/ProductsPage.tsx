@@ -30,18 +30,18 @@ const ProductsPage = () => {
     if (stockStatus === 'outofstock') return 'bg-red-500/10 text-red-500';
     // If stock status is 'instock' but no quantity specified, treat as in stock
     if (stockStatus === 'instock' && (stockQuantity === null || stockQuantity === undefined)) return 'bg-green-500/10 text-green-500';
-    if (stockQuantity <= 5) return 'bg-amber-500/10 text-amber-500';
+    if (stockQuantity !== null && stockQuantity !== undefined && stockQuantity <= 5) return 'bg-amber-500/10 text-amber-500';
     return 'bg-green-500/10 text-green-500';
   };
 
   const products = productsData?.products || [];
   const insights = productsData?.insights || { total_products: 0, low_stock_alerts: 0 };
   
-  // Updated filtering logic
+  // Updated filtering logic - only include products with actual low stock quantities
   const lowStockProducts = products.filter(p => {
-    // Only include in low stock if quantity is specified and <= 5, or explicitly out of stock
+    // Only include out of stock products or products with actual quantity <= 5
     if (p.stock_status === 'outofstock') return true;
-    if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity <= 5) return true;
+    if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity <= 5 && p.stock_quantity > 0) return true;
     return false;
   });
   
@@ -51,7 +51,7 @@ const ProductsPage = () => {
     // Include products that are explicitly in stock but don't have quantity specified
     if (p.stock_status === 'instock' && (p.stock_quantity === null || p.stock_quantity === undefined)) return true;
     // Include products with stock quantity > 5 and not out of stock
-    if (p.stock_quantity > 5 && p.stock_status !== 'outofstock') return true;
+    if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 5 && p.stock_status !== 'outofstock') return true;
     return false;
   });
 

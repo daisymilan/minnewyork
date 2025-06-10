@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 
 // Pages
 import Dashboard from "./pages/Dashboard";
+import DashboardUS from "./pages/DashboardUS";
 import OrdersPage from "./pages/OrdersPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
@@ -32,6 +33,7 @@ const AppRoutes = () => {
       <Route path="/login" element={<SignInPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard-us" element={<DashboardUS />} />
       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/products" element={<ProductsPage />} />
       <Route path="/products/details" element={<ProductDetailsPage />} />

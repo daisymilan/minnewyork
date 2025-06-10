@@ -15,6 +15,7 @@ export interface InventoryStatus {
   stock_quantity: number;
   stock_status: string;
   last_updated: string;
+  warehouse_type?: 'fulfillment' | 'manufacturing';
 }
 
 export interface OrderRoutingStats {
@@ -25,12 +26,14 @@ export interface OrderRoutingStats {
     Europe: number;
   };
   active_warehouses: string[];
+  manufacturing_locations: string[];
   last_sync: string;
 }
 
 export interface WarehouseOverview {
   total_warehouses: number;
   active_warehouses: number;
+  manufacturing_warehouses: number;
   total_inventory_value: number;
   low_stock_alerts: number;
   warehouses: Array<{
@@ -38,6 +41,7 @@ export interface WarehouseOverview {
     location: string;
     status: string;
     total_items: number;
+    warehouse_type?: 'fulfillment' | 'manufacturing';
   }>;
 }
 
@@ -86,7 +90,8 @@ export const orderRoutingApi = {
             warehouse: `${shipforus.warehouse_id} (${shipforus.region})`,
             stock_quantity: shipforus.total_products,
             stock_status: shipforus.status,
-            last_updated: shipforus.last_sync
+            last_updated: shipforus.last_sync,
+            warehouse_type: 'fulfillment'
           });
         }
         
@@ -98,7 +103,21 @@ export const orderRoutingApi = {
             warehouse: `${dsl.warehouse_id} (${dsl.region})`,
             stock_quantity: dsl.total_products,
             stock_status: dsl.status,
-            last_updated: dsl.last_sync
+            last_updated: dsl.last_sync,
+            warehouse_type: 'fulfillment'
+          });
+        }
+        
+        // Process SCM warehouse (manufacturing)
+        if (inventoryData.warehouses.scm) {
+          const scm = inventoryData.warehouses.scm;
+          inventoryList.push({
+            provider: scm.provider || 'SCM',
+            warehouse: `${scm.warehouse_id || 'SCM-MAIN'} (France Manufacturing)`,
+            stock_quantity: scm.total_components || 0,
+            stock_status: scm.status || 'active',
+            last_updated: scm.last_sync || new Date().toISOString(),
+            warehouse_type: 'manufacturing'
           });
         }
         
@@ -112,7 +131,8 @@ export const orderRoutingApi = {
                 warehouse: `${subWarehouse.warehouse_id} (${subWarehouse.name})`,
                 stock_quantity: subWarehouse.products,
                 stock_status: oto.status,
-                last_updated: oto.last_sync
+                last_updated: oto.last_sync,
+                warehouse_type: 'fulfillment'
               });
             });
           } else {
@@ -122,7 +142,8 @@ export const orderRoutingApi = {
               warehouse: `${oto.warehouse_id} (${oto.region})`,
               stock_quantity: oto.total_products,
               stock_status: oto.status,
-              last_updated: oto.last_sync
+              last_updated: oto.last_sync,
+              warehouse_type: 'fulfillment'
             });
           }
         }
@@ -131,35 +152,47 @@ export const orderRoutingApi = {
         return inventoryList;
       }
       
-      // Fallback data if parsing fails
+      // Fallback data if parsing fails - include SCM France
       return [
         {
           provider: 'Shipforus',
           warehouse: 'USA-MAIN',
           stock_quantity: 1234,
           stock_status: 'optimal',
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
+          warehouse_type: 'fulfillment'
         },
         {
           provider: 'OTO',
           warehouse: 'WM-008 (UAE)',
           stock_quantity: 856,
           stock_status: 'low',
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
+          warehouse_type: 'fulfillment'
         },
         {
           provider: 'OTO',
           warehouse: 'WM-010 (KSA)', 
           stock_quantity: 2145,
           stock_status: 'optimal',
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
+          warehouse_type: 'fulfillment'
         },
         {
           provider: 'DSL',
-          warehouse: 'EU-MAIN',
+          warehouse: 'EU-MAIN (France)',
           stock_quantity: 984,
           stock_status: 'medium',
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
+          warehouse_type: 'fulfillment'
+        },
+        {
+          provider: 'SCM',
+          warehouse: 'SCM-MAIN (France Manufacturing)',
+          stock_quantity: 0,
+          stock_status: 'active',
+          last_updated: new Date().toISOString(),
+          warehouse_type: 'manufacturing'
         }
       ];
     } catch (error) {
@@ -202,15 +235,24 @@ export const orderRoutingApi = {
               case 'shipforus': return 'Shipforus-USA';
               case 'oto': return 'OTO-UAE, OTO-KSA';
               case 'dsl': return 'DSL-EU';
+              case 'scm': return 'SCM-France-Manufacturing';
               default: return name;
             }
           })
           .join(', ').split(', '); // Convert back to array for consistency
         
+        // Build manufacturing locations list
+        const manufacturingLocations = Object.entries(fulfillmentProviders)
+          .filter(([name, provider]: [string, any]) => 
+            name === 'scm' && provider.status === 'operational'
+          )
+          .map(() => 'SCM-France');
+        
         const routingStats: OrderRoutingStats = {
           total_orders_routed: summary.total_orders,
           orders_by_region: ordersByRegion,
           active_warehouses: activeWarehouses,
+          manufacturing_locations: manufacturingLocations,
           last_sync: statsData.timestamp
         };
         
@@ -220,7 +262,10 @@ export const orderRoutingApi = {
       
       // Return result directly if it matches the expected format
       if (result.total_orders_routed && result.orders_by_region) {
-        return result;
+        return {
+          ...result,
+          manufacturing_locations: result.manufacturing_locations || ['SCM-France']
+        };
       }
       
       // Fallback data
@@ -232,6 +277,7 @@ export const orderRoutingApi = {
           Europe: 275
         },
         active_warehouses: ['Shipforus-USA', 'OTO-UAE', 'OTO-KSA', 'DSL-EU'],
+        manufacturing_locations: ['SCM-France'],
         last_sync: new Date().toISOString()
       };
     } catch (error) {
@@ -266,17 +312,25 @@ export const orderRoutingApi = {
         // Count low stock alerts
         const lowStockAlerts = overviewData.alerts?.length || 0;
         
+        // Count manufacturing warehouses
+        const manufacturingWarehouses = warehouses.filter((warehouse: any) => 
+          warehouse.warehouse_type === 'manufacturing' || warehouse.name?.toLowerCase().includes('scm')
+        ).length;
+        
         // Map warehouses to the expected format
         const warehouseList = warehouses.map((warehouse: any) => ({
           name: warehouse.name,
           location: `${warehouse.country} (${warehouse.region})`,
           status: warehouse.status,
-          total_items: warehouse.orders_today || 0 // Using orders as proxy for activity
+          total_items: warehouse.orders_today || 0, // Using orders as proxy for activity
+          warehouse_type: warehouse.warehouse_type || 
+            (warehouse.name?.toLowerCase().includes('scm') ? 'manufacturing' : 'fulfillment')
         }));
         
         const warehouseOverview: WarehouseOverview = {
           total_warehouses: overview.total_warehouses,
           active_warehouses: overview.operational_warehouses,
+          manufacturing_warehouses: manufacturingWarehouses,
           total_inventory_value: totalInventoryValue,
           low_stock_alerts: lowStockAlerts,
           warehouses: warehouseList
@@ -288,20 +342,25 @@ export const orderRoutingApi = {
       
       // Return result directly if it matches the expected format
       if (result.total_warehouses !== undefined) {
-        return result;
+        return {
+          ...result,
+          manufacturing_warehouses: result.manufacturing_warehouses || 1
+        };
       }
       
-      // Fallback data
+      // Fallback data - include SCM France
       return {
-        total_warehouses: 4,
-        active_warehouses: 4,
+        total_warehouses: 5,
+        active_warehouses: 5,
+        manufacturing_warehouses: 1,
         total_inventory_value: 2850000,
         low_stock_alerts: 3,
         warehouses: [
-          { name: 'Shipforus USA', location: 'Las Vegas, NV', status: 'active', total_items: 1234 },
-          { name: 'OTO UAE', location: 'Dubai, UAE', status: 'active', total_items: 856 },
-          { name: 'OTO KSA', location: 'Riyadh, KSA', status: 'active', total_items: 2145 },
-          { name: 'DSL Europe', location: 'Nice, France', status: 'active', total_items: 984 }
+          { name: 'Shipforus USA', location: 'Las Vegas, NV', status: 'active', total_items: 1234, warehouse_type: 'fulfillment' },
+          { name: 'OTO UAE', location: 'Dubai, UAE', status: 'active', total_items: 856, warehouse_type: 'fulfillment' },
+          { name: 'OTO KSA', location: 'Riyadh, KSA', status: 'active', total_items: 2145, warehouse_type: 'fulfillment' },
+          { name: 'DSL Europe', location: 'Nice, France', status: 'active', total_items: 984, warehouse_type: 'fulfillment' },
+          { name: 'SCM France', location: 'Nice, France', status: 'active', total_items: 0, warehouse_type: 'manufacturing' }
         ]
       };
     } catch (error) {

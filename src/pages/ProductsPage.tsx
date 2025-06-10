@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -44,7 +45,14 @@ const ProductsPage = () => {
     return false;
   });
   
-  const outOfStockProducts = products.filter(p => p.stock_quantity === 0 || p.stock_status === 'outofstock');
+  // Out of stock: only products with quantity 0 OR explicitly marked as outofstock (but NOT instock)
+  const outOfStockProducts = products.filter(p => {
+    // If explicitly marked as outofstock, include it
+    if (p.stock_status === 'outofstock') return true;
+    // If quantity is 0 and NOT marked as instock, include it
+    if (p.stock_quantity === 0 && p.stock_status !== 'instock') return true;
+    return false;
+  });
   
   const inStockProducts = products.filter(p => {
     // Include products that are explicitly in stock but don't have quantity specified
@@ -184,7 +192,8 @@ const ProductsPage = () => {
                       {product.status}
                     </Badge>
                     <Badge className={getStockStatusColor(product.stock_quantity, product.stock_status)}>
-                      {product.stock_quantity === 0 || product.stock_status === 'outofstock' ? 'Out' : 
+                      {/* Updated badge logic */}
+                      {product.stock_status === 'outofstock' || (product.stock_quantity === 0 && product.stock_status !== 'instock') ? 'Out' : 
                        (product.stock_status === 'instock' && (product.stock_quantity === null || product.stock_quantity === undefined)) ? 'Good' :
                        product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 5 && product.stock_quantity > 0 ? 'Low' : 'Good'}
                     </Badge>

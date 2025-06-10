@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -33,7 +34,13 @@ const ProductDetailsPage = () => {
           return false;
         });
       case 'out_of_stock':
-        return products.filter(p => p.stock_quantity === 0 || p.stock_status === 'outofstock');
+        return products.filter(p => {
+          // If explicitly marked as outofstock, include it
+          if (p.stock_status === 'outofstock') return true;
+          // If quantity is 0 and NOT marked as instock, include it
+          if (p.stock_quantity === 0 && p.stock_status !== 'instock') return true;
+          return false;
+        });
       case 'in_stock':
         return products.filter(p => {
           // Include products that are explicitly in stock but don't have quantity specified
@@ -145,15 +152,17 @@ const ProductDetailsPage = () => {
                   </div>
 
                   {/* Stock Status Alert - Updated logic */}
-                  {((product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 5 && product.stock_quantity > 0) || product.stock_quantity === 0 || product.stock_status === 'outofstock') && (
+                  {((product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 5 && product.stock_quantity > 0) || 
+                    product.stock_status === 'outofstock' || 
+                    (product.stock_quantity === 0 && product.stock_status !== 'instock')) && (
                     <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-md">
                       <p className="text-red-400 font-medium text-sm">
-                        ⚠️ {product.stock_quantity === 0 || product.stock_status === 'outofstock' 
+                        ⚠️ {(product.stock_status === 'outofstock' || (product.stock_quantity === 0 && product.stock_status !== 'instock'))
                           ? 'Out of Stock' 
                           : 'Low Stock Alert'}
                       </p>
                       <p className="text-red-400/80 text-xs mt-1">
-                        {product.stock_quantity === 0 || product.stock_status === 'outofstock'
+                        {(product.stock_status === 'outofstock' || (product.stock_quantity === 0 && product.stock_status !== 'instock'))
                           ? 'This product is currently unavailable'
                           : 'Stock level is running low - consider restocking'
                         }
@@ -167,14 +176,10 @@ const ProductDetailsPage = () => {
                       {product.status}
                     </Badge>
                     <Badge className={getStockStatusColor(product.stock_quantity, product.stock_status)}>
-                      {product.stock_quantity === 0 || product.stock_status === 'outofstock' 
-                        ? 'Out of Stock' 
-                        : (product.stock_status === 'instock' && (product.stock_quantity === null || product.stock_quantity === undefined))
-                        ? 'In Stock'
-                        : product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 5 && product.stock_quantity > 0
-                        ? 'Low Stock' 
-                        : 'In Stock'
-                      }
+                      {/* Updated badge logic */}
+                      {product.stock_status === 'outofstock' || (product.stock_quantity === 0 && product.stock_status !== 'instock') ? 'Out of Stock' : 
+                       (product.stock_status === 'instock' && (product.stock_quantity === null || product.stock_quantity === undefined)) ? 'In Stock' :
+                       product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 5 && product.stock_quantity > 0 ? 'Low Stock' : 'In Stock'}
                     </Badge>
                   </div>
 

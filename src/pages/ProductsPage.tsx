@@ -30,18 +30,17 @@ const ProductsPage = () => {
     if (stockStatus === 'outofstock') return 'bg-red-500/10 text-red-500';
     // If stock status is 'instock' but no quantity specified, treat as in stock
     if (stockStatus === 'instock' && (stockQuantity === null || stockQuantity === undefined)) return 'bg-green-500/10 text-green-500';
-    if (stockQuantity !== null && stockQuantity !== undefined && stockQuantity <= 5) return 'bg-amber-500/10 text-amber-500';
+    if (stockQuantity !== null && stockQuantity !== undefined && stockQuantity <= 5 && stockQuantity > 0) return 'bg-amber-500/10 text-amber-500';
     return 'bg-green-500/10 text-green-500';
   };
 
   const products = productsData?.products || [];
   const insights = productsData?.insights || { total_products: 0, low_stock_alerts: 0 };
   
-  // Updated filtering logic - only include products with actual low stock quantities
+  // Updated filtering logic - only include products with actual low stock quantities (1-5)
   const lowStockProducts = products.filter(p => {
-    // Only include out of stock products or products with actual quantity <= 5
-    if (p.stock_status === 'outofstock') return true;
-    if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity <= 5 && p.stock_quantity > 0) return true;
+    // Only include products with actual quantity between 1-5
+    if (p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 0 && p.stock_quantity <= 5) return true;
     return false;
   });
   
@@ -124,7 +123,7 @@ const ProductsPage = () => {
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-medium text-luxury-cream">{product.name}</h3>
                     <Badge className={getStockStatusColor(product.stock_quantity, product.stock_status)}>
-                      {product.stock_quantity === 0 || product.stock_status === 'outofstock' ? 'Out of Stock' : 'Low Stock'}
+                      Low Stock
                     </Badge>
                   </div>
                   <div className="text-sm text-luxury-cream/60 space-y-1">
@@ -187,7 +186,7 @@ const ProductsPage = () => {
                     <Badge className={getStockStatusColor(product.stock_quantity, product.stock_status)}>
                       {product.stock_quantity === 0 || product.stock_status === 'outofstock' ? 'Out' : 
                        (product.stock_status === 'instock' && (product.stock_quantity === null || product.stock_quantity === undefined)) ? 'Good' :
-                       product.stock_quantity <= 5 ? 'Low' : 'Good'}
+                       product.stock_quantity !== null && product.stock_quantity !== undefined && product.stock_quantity <= 5 && product.stock_quantity > 0 ? 'Low' : 'Good'}
                     </Badge>
                   </div>
                 </div>

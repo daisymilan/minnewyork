@@ -341,7 +341,9 @@ const Dashboard = () => {
                             <div className="text-sm text-gray-600">Manufacturing</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-primary">${warehouseData.total_inventory_value?.toLocaleString() || '0'}</div>
+                            <div className="text-2xl font-bold text-primary">
+                              ${typeof warehouseData.total_inventory_value === 'number' ? warehouseData.total_inventory_value.toLocaleString() : '0'}
+                            </div>
                             <div className="text-sm text-gray-600">Total Value</div>
                           </div>
                         </div>

@@ -5,7 +5,9 @@ export interface WarehouseOverviewResponse {
   message: string;
   total_warehouses: number;
   active_warehouses: number;
+  manufacturing_warehouses?: number;
   total_capacity: string;
+  total_inventory_value?: number;
   warehouses: DashboardWarehouse[];
   timestamp: string;
 }
@@ -146,6 +148,42 @@ export const orderRoutingApi = {
       throw new Error('Failed to route order');
     } catch (error) {
       console.error('Error routing order:', error);
+      throw error;
+    }
+  },
+
+  async getInventoryStatus(): Promise<any> {
+    try {
+      const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/inventory/status');
+      const result = await response.json();
+      
+      console.log('📦 Raw inventory status response:', result);
+      
+      if (result.success) {
+        return result;
+      }
+      
+      throw new Error('Failed to fetch inventory status');
+    } catch (error) {
+      console.error('Error fetching inventory status:', error);
+      throw error;
+    }
+  },
+
+  async getRoutingStats(): Promise<any> {
+    try {
+      const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/routing/stats');
+      const result = await response.json();
+      
+      console.log('📊 Raw routing stats response:', result);
+      
+      if (result.success) {
+        return result;
+      }
+      
+      throw new Error('Failed to fetch routing stats');
+    } catch (error) {
+      console.error('Error fetching routing stats:', error);
       throw error;
     }
   }

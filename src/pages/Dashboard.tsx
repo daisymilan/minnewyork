@@ -337,11 +337,11 @@ const Dashboard = () => {
                             <div className="text-sm text-gray-600">Active</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-purple-500">{warehouseData.manufacturing_warehouses}</div>
+                            <div className="text-2xl font-bold text-purple-500">{warehouseData.manufacturing_warehouses || 0}</div>
                             <div className="text-sm text-gray-600">Manufacturing</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-primary">${warehouseData.total_inventory_value?.toLocaleString()}</div>
+                            <div className="text-2xl font-bold text-primary">${warehouseData.total_inventory_value?.toLocaleString() || '0'}</div>
                             <div className="text-sm text-gray-600">Total Value</div>
                           </div>
                         </div>

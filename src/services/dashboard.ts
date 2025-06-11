@@ -1,3 +1,4 @@
+
 // Dashboard API service for comprehensive dashboard data
 export interface DashboardOrder {
   id: string;
@@ -233,10 +234,33 @@ export const dashboardApi = {
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/customers');
       const result = await response.json();
       
-      if (result.success && result.data) {
+      console.log('👥 Raw customers response:', result);
+      
+      // Handle the new response structure - it's an array with one object
+      let customersData = result;
+      if (Array.isArray(result) && result.length > 0) {
+        customersData = result[0];
+      }
+      
+      if (customersData.success && customersData.data) {
+        const data = customersData.data;
+        
+        // Map the customer data to our interface
+        const mappedCustomers: DashboardCustomer[] = (data.top_customers || []).map((customer: any) => ({
+          id: customer.name || 'unknown',
+          name: customer.name || 'Unknown Customer',
+          email: customer.email || '',
+          total_spent: customer.total_spent || 0,
+          orders_count: customer.orders_count || 0,
+          segment: customer.customer_segment || 'New'
+        }));
+        
+        console.log('👥 Processed customers:', mappedCustomers.length);
+        console.log('👥 Customer insights:', data.customer_insights);
+        
         return {
-          customers: result.data.top_customers || result.data.customers || [],
-          insights: result.data.customer_insights || {}
+          customers: mappedCustomers,
+          insights: data.customer_insights || {}
         };
       }
       

@@ -91,7 +91,7 @@ export const dashboardApi = {
             revenue: parseFloat(data.summary_cards?.total_revenue?.value?.replace('$', '').replace(',', '') || '0'),
             orders: parseInt(data.summary_cards?.total_orders?.value || '0'),
             customers: parseInt(data.summary_cards?.total_customers?.value || '0'),
-            products: data.quick_stats?.low_stock_alerts || 89 // Use low stock alerts as product indicator
+            products: data.quick_stats?.low_stock_alerts || 0
           },
           regional_breakdown: {},
           fulfillment_status: {},
@@ -116,27 +116,7 @@ export const dashboardApi = {
         return mappedOverview;
       }
       
-      // Return fallback data if API fails
-      return {
-        summary_cards: {
-          revenue: 283450,
-          orders: 1254,
-          customers: 892,
-          products: 89
-        },
-        regional_breakdown: {
-          'North America': 42,
-          'Europe': 28,
-          'Middle East': 18,
-          'Asia': 12
-        },
-        fulfillment_status: {
-          'Processing': 23,
-          'Shipped': 156,
-          'Delivered': 1075
-        },
-        recent_activity: []
-      };
+      throw new Error('Invalid API response structure');
     } catch (error) {
       console.error('Error fetching dashboard overview:', error);
       throw error;
@@ -153,14 +133,7 @@ export const dashboardApi = {
       // Check if there's an error in the response
       if (result.error) {
         console.log('📦 Orders API returned error:', result.error);
-        return {
-          orders: [],
-          summary: {
-            total_orders: 0,
-            total_revenue: 0,
-            orders_by_region: {}
-          }
-        };
+        throw new Error(result.error);
       }
       
       // Handle the actual webhook structure - it's an array with one object
@@ -175,7 +148,7 @@ export const dashboardApi = {
           id: order.order_number || order.id.toString(),
           customer_name: order.customer_name || 'Unknown Customer',
           customer_email: order.customer_email,
-          product_name: `Order #${order.order_number || order.id}`, // Since product name isn't in the response
+          product_name: `Order #${order.order_number || order.id}`,
           amount: parseFloat(order.total) || 0,
           status: order.status || 'unknown',
           date_created: order.date_created || new Date().toISOString(),
@@ -186,7 +159,7 @@ export const dashboardApi = {
         const summary = {
           total_orders: ordersData.count || ordersData.orders.length,
           total_revenue: ordersData.orders.reduce((sum: number, order: any) => sum + (parseFloat(order.total) || 0), 0),
-          orders_by_region: {} // Could be calculated if needed
+          orders_by_region: {}
         };
         
         console.log('📦 Processed orders:', mappedOrders);
@@ -196,25 +169,10 @@ export const dashboardApi = {
         };
       }
       
-      // Return empty data if parsing fails
-      return {
-        orders: [],
-        summary: {
-          total_orders: 0,
-          total_revenue: 0,
-          orders_by_region: {}
-        }
-      };
+      throw new Error('No orders data available');
     } catch (error) {
       console.error('Error fetching dashboard orders:', error);
-      return {
-        orders: [],
-        summary: {
-          total_orders: 0,
-          total_revenue: 0,
-          orders_by_region: {}
-        }
-      };
+      throw error;
     }
   },
 
@@ -262,24 +220,10 @@ export const dashboardApi = {
         };
       }
       
-      // Return empty data if parsing fails
-      return {
-        products: [],
-        insights: {
-          total_products: 0,
-          low_stock_alerts: 0
-        }
-      };
+      throw new Error('No products data available');
     } catch (error) {
       console.error('Error fetching dashboard products:', error);
-      // Return fallback data instead of throwing
-      return {
-        products: [],
-        insights: {
-          total_products: 89,
-          low_stock_alerts: 5
-        }
-      };
+      throw error;
     }
   },
 
@@ -295,13 +239,7 @@ export const dashboardApi = {
         };
       }
       
-      return {
-        customers: [],
-        insights: {
-          total_customers: 1234,
-          customer_segments: { 'VIP': 45, 'Premium': 156 }
-        }
-      };
+      throw new Error('No customers data available');
     } catch (error) {
       console.error('Error fetching dashboard customers:', error);
       throw error;
@@ -317,23 +255,7 @@ export const dashboardApi = {
         return result.data;
       }
       
-      return {
-        revenue_chart: {
-          labels: ['Jan 1', 'Jan 2', 'Jan 3', 'Jan 4', 'Jan 5'],
-          datasets: [{
-            label: 'Revenue',
-            data: [120, 135, 142, 158, 175]
-          }]
-        },
-        kpis: {
-          total_revenue: 283450,
-          total_orders: 1254,
-          total_customers: 892,
-          growth_rate: 8.9,
-          conversion_rate: 3.2,
-          average_order_value: 226
-        }
-      };
+      throw new Error('No analytics data available');
     } catch (error) {
       console.error('Error fetching dashboard analytics:', error);
       throw error;

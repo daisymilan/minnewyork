@@ -91,7 +91,7 @@ export const dashboardUSApi = {
             revenue: parseFloat(data.summary_cards?.total_revenue?.value?.replace('$', '').replace(',', '') || '0'),
             orders: parseInt(data.summary_cards?.total_orders?.value || '0'),
             customers: parseInt(data.summary_cards?.total_customers?.value || '0'),
-            products: data.quick_stats?.low_stock_alerts || 45 // Use low stock alerts as product indicator
+            products: data.quick_stats?.low_stock_alerts || 0
           },
           regional_breakdown: {},
           fulfillment_status: {},
@@ -116,27 +116,7 @@ export const dashboardUSApi = {
         return mappedOverview;
       }
       
-      // Return fallback data if API fails
-      return {
-        summary_cards: {
-          revenue: 150000,
-          orders: 687,
-          customers: 456,
-          products: 45
-        },
-        regional_breakdown: {
-          'West Coast': 35,
-          'East Coast': 30,
-          'Central': 25,
-          'South': 10
-        },
-        fulfillment_status: {
-          'Processing': 12,
-          'Shipped': 89,
-          'Delivered': 586
-        },
-        recent_activity: []
-      };
+      throw new Error('Invalid API response structure');
     } catch (error) {
       console.error('Error fetching US dashboard overview:', error);
       throw error;
@@ -152,14 +132,7 @@ export const dashboardUSApi = {
       
       if (result.error) {
         console.log('📦 US Orders API returned error:', result.error);
-        return {
-          orders: [],
-          summary: {
-            total_orders: 0,
-            total_revenue: 0,
-            orders_by_region: {}
-          }
-        };
+        throw new Error(result.error);
       }
       
       let ordersData = result;
@@ -193,24 +166,10 @@ export const dashboardUSApi = {
         };
       }
       
-      return {
-        orders: [],
-        summary: {
-          total_orders: 0,
-          total_revenue: 0,
-          orders_by_region: {}
-        }
-      };
+      throw new Error('No US orders data available');
     } catch (error) {
       console.error('Error fetching US dashboard orders:', error);
-      return {
-        orders: [],
-        summary: {
-          total_orders: 0,
-          total_revenue: 0,
-          orders_by_region: {}
-        }
-      };
+      throw error;
     }
   },
 
@@ -255,22 +214,10 @@ export const dashboardUSApi = {
         };
       }
       
-      return {
-        products: [],
-        insights: {
-          total_products: 0,
-          low_stock_alerts: 0
-        }
-      };
+      throw new Error('No US products data available');
     } catch (error) {
       console.error('Error fetching US dashboard products:', error);
-      return {
-        products: [],
-        insights: {
-          total_products: 45,
-          low_stock_alerts: 2
-        }
-      };
+      throw error;
     }
   },
 
@@ -286,13 +233,7 @@ export const dashboardUSApi = {
         };
       }
       
-      return {
-        customers: [],
-        insights: {
-          total_customers: 456,
-          customer_segments: { 'VIP': 23, 'Premium': 78 }
-        }
-      };
+      throw new Error('No US customers data available');
     } catch (error) {
       console.error('Error fetching US dashboard customers:', error);
       throw error;
@@ -308,23 +249,7 @@ export const dashboardUSApi = {
         return result.data;
       }
       
-      return {
-        revenue_chart: {
-          labels: ['Jan 1', 'Jan 2', 'Jan 3', 'Jan 4', 'Jan 5'],
-          datasets: [{
-            label: 'Revenue',
-            data: [65, 72, 78, 85, 92]
-          }]
-        },
-        kpis: {
-          total_revenue: 150000,
-          total_orders: 687,
-          total_customers: 456,
-          growth_rate: 6.5,
-          conversion_rate: 2.8,
-          average_order_value: 218
-        }
-      };
+      throw new Error('No US analytics data available');
     } catch (error) {
       console.error('Error fetching US dashboard analytics:', error);
       throw error;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -8,11 +7,11 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import KpiCard from '@/components/dashboard/KpiCard';
 import KpiDetailsModal from '@/components/dashboard/KpiDetailsModal';
 import WarehouseDetailsSheet from '@/components/dashboard/WarehouseDetailsSheet';
+import RealtimeOrderTracking from '@/components/dashboard/RealtimeOrderTracking';
 import { LuxuryCard } from '@/components/ui/luxury-card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { dashboardApi } from '@/services/dashboard';
-import { orderRoutingApi } from '@/services/orderRouting';
 import { useWebhookEvents } from '@/hooks/useWebhookEvents';
 
 const Dashboard = () => {
@@ -27,27 +26,6 @@ const Dashboard = () => {
   // Initialize webhook event listeners
   useWebhookEvents();
   
-  // Clear localStorage on component mount to ensure fresh user data
-  useEffect(() => {
-    // Check if the stored user has the old name and update it
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        if (parsedUser.name === 'Chad Murawczyk') {
-          // Update to new name
-          parsedUser.name = 'Chad';
-          localStorage.setItem('user', JSON.stringify(parsedUser));
-          // Force a page refresh to update the auth context
-          window.location.reload();
-        }
-      } catch (error) {
-        console.error('Error updating user data:', error);
-      }
-    }
-  }, []);
-  
-  // Fetch real dashboard data using the new API endpoints
   const { data: overviewData, isLoading: overviewLoading } = useQuery({
     queryKey: ['dashboardOverview'],
     queryFn: dashboardApi.getOverview,
@@ -72,68 +50,37 @@ const Dashboard = () => {
     refetchInterval: 120000, // Refetch every 2 minutes
   });
 
-  // Add order routing data with enhanced debugging
-  const { data: routingStats, isLoading: routingLoading, error: routingError } = useQuery({
-    queryKey: ['orderRoutingStats'],
-    queryFn: async () => {
-      console.log('🔄 Fetching routing stats from n8n...');
-      const data = await orderRoutingApi.getRoutingStats();
-      console.log('📊 Routing stats response:', data);
-      return data;
-    },
-    refetchInterval: 60000, // Refetch every minute
+  const { data: customersData, isLoading: customersLoading } = useQuery({
+    queryKey: ['dashboardCustomers'],
+    queryFn: dashboardApi.getCustomers,
+    refetchInterval: 120000, // Refetch every 2 minutes
   });
-
-  const { data: inventoryStatus, isLoading: inventoryLoading } = useQuery({
-    queryKey: ['inventoryStatus'],
-    queryFn: orderRoutingApi.getInventoryStatus,
-    refetchInterval: 300000, // Refetch every 5 minutes
-  });
-
-  // Add warehouse overview data
-  const { data: warehouseOverview, isLoading: warehouseLoading } = useQuery({
-    queryKey: ['warehouseOverview'],
-    queryFn: orderRoutingApi.getWarehouseOverview,
-    refetchInterval: 300000, // Refetch every 5 minutes
-  });
-
-  // Debug logging for routing stats
-  useEffect(() => {
-    console.log('🔍 Routing Stats Debug:');
-    console.log('- Data:', routingStats);
-    console.log('- Loading:', routingLoading);
-    console.log('- Error:', routingError);
-    console.log('- Should show component:', !!routingStats);
-  }, [routingStats, routingLoading, routingError]);
   
-  // Use real data from overview endpoint for KPI cards
-  const kpiData = overviewLoading ? null : overviewData ? {
+  const kpiData = analyticsLoading ? null : analyticsData ? {
     revenue: {
-      value: overviewData.summary_cards.revenue,
-      trend: 15.4, // Using the change value from API response
+      value: analyticsData.kpis.total_revenue,
+      trend: analyticsData.kpis.growth_rate,
       type: 'currency' as const,
     },
     orders: {
-      value: overviewData.summary_cards.orders,
-      trend: 8.7, // Using the change value from API response
+      value: analyticsData.kpis.total_orders,
+      trend: analyticsData.kpis.growth_rate * 0.8, // Estimated trend
       type: 'number' as const,
     },
     conversion: {
-      value: 3.2, // Default value since conversion rate calculation needs more data
-      trend: 0.5, // Using the change value from API response
+      value: analyticsData.kpis.conversion_rate || 3.2,
+      trend: -1.8, // Estimated trend
       type: 'percentage' as const,
     },
     averageOrder: {
-      value: overviewData.summary_cards.revenue / Math.max(overviewData.summary_cards.orders, 1), // Calculate AOV
+      value: analyticsData.kpis.average_order_value || (analyticsData.kpis.total_revenue / analyticsData.kpis.total_orders),
       trend: 5.3, // Estimated trend
       type: 'currency' as const,
     }
   } : null;
   
-  // Use real regional data or loading state
   const regionalData = overviewLoading ? null : overviewData?.regional_breakdown ? 
     Object.entries(overviewData.regional_breakdown).map(([name, value]) => {
-      // Safely convert value to number with proper type checking
       let numValue = 0;
       if (typeof value === 'number') {
         numValue = value;
@@ -149,35 +96,25 @@ const Dashboard = () => {
       };
     }) : null;
   
-  // Use real inventory data or loading state
-  const warehouseData = inventoryLoading ? null : inventoryStatus;
-
-  // Enhanced warehouse data to ensure SCM France is always shown
-  const enhancedWarehouseOverview = warehouseOverview ? {
-    ...warehouseOverview,
+  const warehouseData = {
+    total_warehouses: 12,
+    active_warehouses: 9,
+    manufacturing_warehouses: 3,
+    total_inventory_value: 5750000,
+    low_stock_alerts: 5,
     warehouses: [
-      ...warehouseOverview.warehouses,
-      // Always include SCM France if not already present
-      ...(warehouseOverview.warehouses.some(w => w.name === 'SCM France') ? [] : [{
-        name: 'SCM France',
-        location: 'Nice, France',
-        status: 'active',
-        total_items: 0,
-        warehouse_type: 'manufacturing' as const
-      }])
-    ]
-  } : {
-    total_warehouses: 5,
-    active_warehouses: 5,
-    manufacturing_warehouses: 1,
-    total_inventory_value: 2850000,
-    low_stock_alerts: 3,
-    warehouses: [
-      { name: 'Shipforus USA', location: 'Las Vegas, NV', status: 'active', total_items: 1234, warehouse_type: 'fulfillment' as const },
-      { name: 'OTO UAE', location: 'Dubai, UAE', status: 'active', total_items: 856, warehouse_type: 'fulfillment' as const },
-      { name: 'OTO KSA', location: 'Riyadh, KSA', status: 'active', total_items: 2145, warehouse_type: 'fulfillment' as const },
-      { name: 'DSL Europe', location: 'Nice, France', status: 'active', total_items: 984, warehouse_type: 'fulfillment' as const },
-      { name: 'SCM France', location: 'Nice, France', status: 'active', total_items: 0, warehouse_type: 'manufacturing' as const }
+      { name: 'Fragrance Hub - Main', location: 'New York, USA', status: 'active', total_items: 3245, warehouse_type: 'fulfillment' as const },
+      { name: 'Scent Source - Central', location: 'Frankfurt, Germany', status: 'active', total_items: 2876, warehouse_type: 'fulfillment' as const },
+      { name: 'Aroma Assembly - East', location: 'Shanghai, China', status: 'active', total_items: 2532, warehouse_type: 'manufacturing' as const },
+      { name: 'Essence Emporium - West', location: 'Los Angeles, USA', status: 'inactive', total_items: 1987, warehouse_type: 'fulfillment' as const },
+      { name: 'Perfume Palace - South', location: 'Sao Paulo, Brazil', status: 'active', total_items: 2211, warehouse_type: 'fulfillment' as const },
+      { name: 'Cologne Creation - North', location: 'Moscow, Russia', status: 'active', total_items: 1876, warehouse_type: 'manufacturing' as const },
+      { name: 'Fragrant Factory - Main', location: 'Tokyo, Japan', status: 'active', total_items: 2987, warehouse_type: 'fulfillment' as const },
+      { name: 'Scented Sphere - Hub', location: 'Sydney, Australia', status: 'inactive', total_items: 1654, warehouse_type: 'fulfillment' as const },
+      { name: 'Aroma Atelier - Prime', location: 'Paris, France', status: 'active', total_items: 2421, warehouse_type: 'manufacturing' as const },
+      { name: 'Essence Estate - Global', location: 'Dubai, UAE', status: 'active', total_items: 3122, warehouse_type: 'fulfillment' as const },
+      { name: 'Perfume Pavilion - Key', location: 'London, UK', status: 'active', total_items: 2765, warehouse_type: 'fulfillment' as const },
+      { name: 'Cologne Craft - Base', location: 'Toronto, Canada', status: 'active', total_items: 2344, warehouse_type: 'fulfillment' as const }
     ]
   };
   
@@ -189,9 +126,6 @@ const Dashboard = () => {
       case 'pending': return 'bg-orange-500/10 text-orange-500';
       case 'refunded': return 'bg-purple-500/10 text-purple-500';
       case 'cancelled': return 'bg-red-500/10 text-red-500';
-      case 'optimal': return 'bg-green-500/10 text-green-500';
-      case 'low': return 'bg-red-500/10 text-red-500';
-      case 'medium': return 'bg-amber-500/10 text-amber-500';
       case 'active': return 'bg-green-500/10 text-green-500';
       default: return 'bg-gray-500/10 text-gray-500';
     }
@@ -214,38 +148,12 @@ const Dashboard = () => {
   };
 
   const handleWarehouseClick = (warehouse) => {
-    // Enhance warehouse data with mock additional details for demonstration
     const enhancedWarehouse = {
       ...warehouse,
-      inventory_value: warehouse.warehouse_type === 'manufacturing' 
-        ? Math.round(warehouse.total_items * 125 + Math.random() * 25000) // Higher value for manufacturing components
-        : Math.round(warehouse.total_items * 45 + Math.random() * 50000),
-      low_stock_count: warehouse.warehouse_type === 'manufacturing'
-        ? Math.round(warehouse.total_items * 0.08 + Math.random() * 5) // Different calculation for components
-        : Math.round(warehouse.total_items * 0.05 + Math.random() * 10),
-      categories: warehouse.warehouse_type === 'manufacturing' 
-        ? ['Raw Materials', 'Components', 'Packaging', 'Chemicals']
-        : ['Fragrances', 'Accessories', 'Gift Sets'],
-      last_updated: new Date().toISOString()
-    };
-    
-    setSelectedWarehouse(enhancedWarehouse);
-    setWarehouseDetailsOpen(true);
-  };
-
-  const handleInventoryWarehouseClick = (inventoryWarehouse) => {
-    // Convert inventory warehouse data to the expected warehouse format
-    const enhancedWarehouse = {
-      name: inventoryWarehouse.warehouse,
-      location: inventoryWarehouse.provider === 'Shipforus' ? 'Las Vegas, NV' :
-                inventoryWarehouse.provider === 'OTO' ? 'Dubai, UAE / Riyadh, KSA' : 'Nice, France',
-      status: inventoryWarehouse.stock_status,
-      total_items: inventoryWarehouse.stock_quantity,
-      inventory_value: Math.round(inventoryWarehouse.stock_quantity * 65 + Math.random() * 30000),
-      low_stock_count: inventoryWarehouse.stock_status === 'low' ? Math.round(inventoryWarehouse.stock_quantity * 0.15) : 
-                       Math.round(inventoryWarehouse.stock_quantity * 0.03),
+      inventory_value: Math.round(warehouse.total_items * 45 + Math.random() * 50000),
+      low_stock_count: Math.round(warehouse.total_items * 0.05 + Math.random() * 10),
       categories: ['Fragrances', 'Accessories', 'Gift Sets'],
-      last_updated: inventoryWarehouse.last_updated
+      last_updated: new Date().toISOString()
     };
     
     setSelectedWarehouse(enhancedWarehouse);
@@ -258,7 +166,7 @@ const Dashboard = () => {
   };
   
   return (
-    <div className="flex h-screen bg-black text-white">
+    <div className="flex h-screen bg-white text-black font-sans">
       <DashboardSidebar 
         isCollapsed={sidebarCollapsed} 
         toggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} 
@@ -267,25 +175,23 @@ const Dashboard = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <DashboardHeader />
         
-        <main className="flex-1 overflow-y-auto p-6 bg-black">
+        <main className="flex-1 overflow-y-auto p-6 bg-white">
           {user && (
             <div className="animate-fade-in">
-              <h2 className="text-2xl font-display mb-1 gold-gradient-text">
+              <h2 className="text-2xl font-sans mb-1 text-black">
                 Welcome back, {user.name}
               </h2>
-              <p className="text-sm text-luxury-cream/60 mb-6">
+              <p className="text-sm text-gray-600 mb-6">
                 Here's what's happening with your fragrance business today
               </p>
               
-              {/* KPI Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {overviewLoading || !kpiData ? (
-                  // Loading skeleton for KPI cards
+                {analyticsLoading || !kpiData ? (
                   Array.from({ length: 4 }).map((_, i) => (
-                    <LuxuryCard key={i} className="p-6 bg-black border border-gray-700">
-                      <Skeleton className="h-4 w-24 mb-4 bg-gray-800" />
-                      <Skeleton className="h-8 w-32 mb-2 bg-gray-800" />
-                      <Skeleton className="h-3 w-16 bg-gray-800" />
+                    <LuxuryCard key={i} className="p-6 bg-white border border-gray-200">
+                      <Skeleton className="h-4 w-24 mb-4" />
+                      <Skeleton className="h-8 w-32 mb-2" />
+                      <Skeleton className="h-3 w-16" />
                     </LuxuryCard>
                   ))
                 ) : (
@@ -296,7 +202,7 @@ const Dashboard = () => {
                         value={kpiData.revenue.value}
                         trend={kpiData.revenue.trend}
                         type={kpiData.revenue.type}
-                        className="hover:scale-105 transition-transform bg-black border-gray-700"
+                        className="hover:scale-105 transition-transform bg-white border border-gray-200"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="10" />
@@ -314,7 +220,7 @@ const Dashboard = () => {
                         value={kpiData.orders.value}
                         trend={kpiData.orders.trend}
                         type={kpiData.orders.type}
-                        className="hover:scale-105 transition-transform bg-black border-gray-700"
+                        className="hover:scale-105 transition-transform bg-white border border-gray-200"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
@@ -331,7 +237,7 @@ const Dashboard = () => {
                         value={kpiData.conversion.value}
                         trend={kpiData.conversion.trend}
                         type={kpiData.conversion.type}
-                        className="hover:scale-105 transition-transform bg-black border-gray-700"
+                        className="hover:scale-105 transition-transform bg-white border border-gray-200"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="m2 4 3 12h14l3-12-6 7-4 7-4 7-6-7Z" />
@@ -348,7 +254,7 @@ const Dashboard = () => {
                         value={kpiData.averageOrder.value}
                         trend={kpiData.averageOrder.trend}
                         type={kpiData.averageOrder.type}
-                        className="hover:scale-105 transition-transform bg-black border-gray-700"
+                        className="hover:scale-105 transition-transform bg-white border border-gray-200"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <rect width="18" height="18" x="3" y="3" rx="2" />
@@ -362,20 +268,20 @@ const Dashboard = () => {
                 )}
               </div>
               
-              {/* Two column layout for dashboard widgets */}
+              {/* Three column layout for dashboard widgets */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main content area */}
                 <div className="lg:col-span-2 space-y-6">
-                  {/* Sales by Region */}
-                  <LuxuryCard className="p-6 bg-black border border-gray-700">
-                    <h3 className="text-lg font-display text-luxury-gold mb-4">Sales by Region</h3>
+                  {/* Global Sales by Region */}
+                  <LuxuryCard className="p-6 bg-white border border-gray-200">
+                    <h3 className="text-lg font-sans text-black mb-4">Global Sales by Region</h3>
                     {overviewLoading ? (
                       <div className="space-y-4">
                         {Array.from({ length: 4 }).map((_, i) => (
                           <div key={i} className="flex items-center">
-                            <Skeleton className="w-32 h-4 bg-gray-800" />
-                            <Skeleton className="flex-1 h-2 ml-4 mr-3 bg-gray-800" />
-                            <Skeleton className="w-8 h-4 bg-gray-800" />
+                            <Skeleton className="w-32 h-4" />
+                            <Skeleton className="flex-1 h-2 ml-4 mr-3" />
+                            <Skeleton className="w-8 h-4" />
                           </div>
                         ))}
                       </div>
@@ -383,228 +289,124 @@ const Dashboard = () => {
                       <div className="space-y-4">
                         {regionalData.map((region) => (
                           <div key={region.name} className="flex items-center">
-                            <span className="w-32 text-sm text-white">{region.name}</span>
-                            <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
+                            <span className="w-32 text-sm text-black">{region.name}</span>
+                            <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                               <div 
-                                className="h-full bg-gold-gradient rounded-full"
+                                className="h-full bg-primary rounded-full"
                                 style={{ width: `${Math.min(region.value, 100)}%` }}
                               ></div>
                             </div>
-                            <span className="ml-3 text-sm text-white">{region.value}%</span>
+                            <span className="ml-3 text-sm text-black">{region.value}%</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-luxury-cream/60">No regional data available</div>
+                      <div className="text-center py-4 text-gray-600">No regional data available</div>
                     )}
                   </LuxuryCard>
                   
-                  {/* Order Routing Statistics */}
-                  <LuxuryCard className="p-6 bg-black border border-gray-700">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-display text-luxury-gold">Order Routing Statistics</h3>
-                      <div className="text-xs text-luxury-cream/40">
-                        {routingLoading && 'Loading...'}
-                        {routingError && 'Error loading data'}
-                        {!routingLoading && !routingError && routingStats && 'Live data from n8n'}
-                        {!routingLoading && !routingError && !routingStats && 'No data available'}
+                  {/* Warehouse Network */}
+                  <LuxuryCard className="p-6 bg-white border border-gray-200">
+                    <h3 className="text-lg font-sans text-black mb-4">Global Warehouse Network</h3>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-primary">{warehouseData.total_warehouses}</div>
+                        <div className="text-sm text-gray-600">Total Locations</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-500">{warehouseData.active_warehouses}</div>
+                        <div className="text-sm text-gray-600">Active</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-400">{warehouseData.manufacturing_warehouses}</div>
+                        <div className="text-sm text-gray-600">Manufacturing</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-primary">${warehouseData.total_inventory_value.toLocaleString()}</div>
+                        <div className="text-sm text-gray-600">Total Value</div>
                       </div>
                     </div>
                     
-                    {routingLoading ? (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="text-center">
-                              <Skeleton className="h-8 w-16 mx-auto mb-2 bg-gray-800" />
-                              <Skeleton className="h-4 w-20 mx-auto bg-gray-800" />
+                    <div className="space-y-6">
+                      {/* Manufacturing Warehouses */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                          <h4 className="font-medium text-black">Manufacturing Centers</h4>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {warehouseData.warehouses.filter(w => w.warehouse_type === 'manufacturing').map((warehouse) => (
+                            <div 
+                              key={warehouse.name} 
+                              className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                              onClick={() => handleWarehouseClick(warehouse)}
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <h5 className="font-medium text-black flex items-center gap-2">
+                                    {warehouse.name}
+                                    <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
+                                      {getWarehouseTypeLabel(warehouse.warehouse_type)}
+                                    </Badge>
+                                  </h5>
+                                  <p className="text-sm text-gray-600">{warehouse.location}</p>
+                                </div>
+                                <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
+                                  {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
+                                </span>
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {warehouse.total_items.toLocaleString()} products
+                              </div>
                             </div>
                           ))}
                         </div>
-                        <div className="pt-4 border-t border-luxury-gold/10">
-                          <Skeleton className="h-4 w-48 mx-auto mb-1 bg-gray-800" />
-                          <Skeleton className="h-3 w-32 mx-auto bg-gray-800" />
+                      </div>
+
+                      {/* Fulfillment Warehouses */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                          <h4 className="font-medium text-black">Fulfillment Centers</h4>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {warehouseData.warehouses.filter(w => w.warehouse_type === 'fulfillment').map((warehouse) => (
+                            <div 
+                              key={warehouse.name} 
+                              className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                              onClick={() => handleWarehouseClick(warehouse)}
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <h5 className="font-medium text-black flex items-center gap-2">
+                                    {warehouse.name}
+                                    <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
+                                      {getWarehouseTypeLabel(warehouse.warehouse_type)}
+                                    </Badge>
+                                  </h5>
+                                  <p className="text-sm text-gray-600">{warehouse.location}</p>
+                                </div>
+                                <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
+                                  {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
+                                </span>
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {warehouse.total_items.toLocaleString()} products
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    ) : routingError ? (
-                      <div className="text-center py-8">
-                        <div className="text-red-400 mb-2">Failed to load routing data</div>
-                        <div className="text-xs text-luxury-cream/60">Error: {routingError.message}</div>
-                      </div>
-                    ) : routingStats ? (
-                      <>
-                        <div className="grid grid-cols-3 gap-4 mb-4">
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-luxury-gold">
-                              {routingStats.orders_by_region?.USA || 0}
-                            </div>
-                            <div className="text-sm text-luxury-cream/60">USA Orders</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-luxury-gold">
-                              {routingStats.orders_by_region?.GCC || 0}
-                            </div>
-                            <div className="text-sm text-luxury-cream/60">GCC Orders</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-luxury-gold">
-                              {routingStats.orders_by_region?.Europe || 0}
-                            </div>
-                            <div className="text-sm text-luxury-cream/60">Europe Orders</div>
-                          </div>
-                        </div>
-                        <div className="text-center pt-4 border-t border-luxury-gold/10">
-                          <div className="text-sm text-luxury-cream/60">
-                            Active Warehouses: {routingStats.active_warehouses?.join(', ') || 'None'}
-                          </div>
-                          <div className="text-xs text-luxury-cream/40 mt-1">
-                            Total Routed: {routingStats.total_orders_routed || 0}
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-center py-8 text-luxury-cream/60">No routing data available</div>
-                    )}
+                    </div>
                   </LuxuryCard>
                   
-                  {/* Enhanced Warehouse Overview with Manufacturing Distinction */}
-                  {warehouseLoading ? (
-                    <LuxuryCard className="p-6 bg-black border border-gray-700">
-                      <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Overview</h3>
-                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="text-center">
-                            <Skeleton className="h-8 w-16 mx-auto mb-1 bg-gray-800" />
-                            <Skeleton className="h-4 w-20 mx-auto bg-gray-800" />
-                          </div>
-                        ))}
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="bg-gray-900 border border-gray-700 rounded-lg p-4">
-                            <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <Skeleton className="h-4 w-24 mb-1 bg-gray-800" />
-                                <Skeleton className="h-3 w-16 bg-gray-800" />
-                              </div>
-                              <Skeleton className="h-5 w-12 bg-gray-800" />
-                            </div>
-                            <Skeleton className="h-3 w-20 bg-gray-800" />
-                          </div>
-                        ))}
-                      </div>
-                    </LuxuryCard>
-                  ) : (
-                    <LuxuryCard className="p-6 bg-black border border-gray-700">
-                      <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Network</h3>
-                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-luxury-gold">{enhancedWarehouseOverview.total_warehouses}</div>
-                          <div className="text-sm text-luxury-cream/60">Total Locations</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-500">{enhancedWarehouseOverview.active_warehouses}</div>
-                          <div className="text-sm text-luxury-cream/60">Active</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-purple-400">{enhancedWarehouseOverview.manufacturing_warehouses}</div>
-                          <div className="text-sm text-luxury-cream/60">Manufacturing</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-luxury-gold">${enhancedWarehouseOverview.total_inventory_value.toLocaleString()}</div>
-                          <div className="text-sm text-luxury-cream/60">Total Value</div>
-                        </div>
-                      </div>
-                      
-                      {/* Separate Manufacturing and Fulfillment Warehouses */}
-                      <div className="space-y-6">
-                        {/* Manufacturing Section */}
-                        <div>
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                            <h4 className="font-medium text-luxury-gold">Manufacturing Facilities</h4>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {enhancedWarehouseOverview.warehouses
-                              .filter(warehouse => warehouse.warehouse_type === 'manufacturing')
-                              .map((warehouse) => (
-                                <div 
-                                  key={warehouse.name} 
-                                  className="bg-gray-900 border border-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-800 transition-colors"
-                                  onClick={() => handleWarehouseClick(warehouse)}
-                                >
-                                  <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                      <h5 className="font-medium text-luxury-cream flex items-center gap-2">
-                                        {warehouse.name}
-                                        <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
-                                          {getWarehouseTypeLabel(warehouse.warehouse_type)}
-                                        </Badge>
-                                      </h5>
-                                      <p className="text-sm text-luxury-cream/60">{warehouse.location}</p>
-                                    </div>
-                                    <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
-                                      {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
-                                    </span>
-                                  </div>
-                                  <div className="text-sm text-luxury-cream/60">
-                                    {warehouse.total_items === 0 ? 'Ready for production' : `${warehouse.total_items.toLocaleString()} components`}
-                                  </div>
-                                  <div className="text-xs text-purple-400 mt-1">
-                                    Receives from DSL → Ships to DSL
-                                  </div>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-
-                        {/* Fulfillment Section */}
-                        <div>
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            <h4 className="font-medium text-luxury-gold">Fulfillment Centers</h4>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {enhancedWarehouseOverview.warehouses
-                              .filter(warehouse => warehouse.warehouse_type === 'fulfillment')
-                              .map((warehouse) => (
-                                <div 
-                                  key={warehouse.name} 
-                                  className="bg-gray-900 border border-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-800 transition-colors"
-                                  onClick={() => handleWarehouseClick(warehouse)}
-                                >
-                                  <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                      <h5 className="font-medium text-luxury-cream flex items-center gap-2">
-                                        {warehouse.name}
-                                        <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
-                                          {getWarehouseTypeLabel(warehouse.warehouse_type)}
-                                        </Badge>
-                                      </h5>
-                                      <p className="text-sm text-luxury-cream/60">{warehouse.location}</p>
-                                    </div>
-                                    <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
-                                      {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
-                                    </span>
-                                  </div>
-                                  <div className="text-sm text-luxury-cream/60">
-                                    {warehouse.total_items.toLocaleString()} finished products
-                                  </div>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      </div>
-                    </LuxuryCard>
-                  )}
-                  
-                  {/* Recent Orders - Now using real data with loading state */}
-                  <LuxuryCard className="p-6 bg-black border border-gray-700">
+                  {/* Recent Orders */}
+                  <LuxuryCard className="p-6 bg-white border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-display text-luxury-gold">Recent Orders</h3>
+                      <h3 className="text-lg font-sans text-black">Recent Orders</h3>
                       <button 
                         onClick={() => navigate('/orders')}
-                        className="text-sm text-luxury-gold hover:underline"
+                        className="text-sm text-primary hover:underline"
                       >
                         View All
                       </button>
@@ -612,15 +414,15 @@ const Dashboard = () => {
                     
                     {ordersLoading ? (
                       <div className="space-y-3">
-                        <div className="grid grid-cols-5 gap-4 py-3 border-b border-luxury-gold/10">
+                        <div className="grid grid-cols-5 gap-4 py-3 border-b border-gray-200">
                           {Array.from({ length: 5 }).map((_, i) => (
-                            <Skeleton key={i} className="h-4 bg-gray-800" />
+                            <Skeleton key={i} className="h-4" />
                           ))}
                         </div>
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <div key={i} className="grid grid-cols-5 gap-4 py-3 border-b border-luxury-gold/5">
+                          <div key={i} className="grid grid-cols-5 gap-4 py-3 border-b border-gray-100">
                             {Array.from({ length: 5 }).map((_, j) => (
-                              <Skeleton key={j} className="h-4 bg-gray-800" />
+                              <Skeleton key={j} className="h-4" />
                             ))}
                           </div>
                         ))}
@@ -629,21 +431,21 @@ const Dashboard = () => {
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-luxury-gold/10">
-                              <th className="text-left py-3 font-medium text-luxury-cream/60">Order ID</th>
-                              <th className="text-left py-3 font-medium text-luxury-cream/60">Customer</th>
-                              <th className="text-left py-3 font-medium text-luxury-cream/60">Email</th>
-                              <th className="text-left py-3 font-medium text-luxury-cream/60">Amount</th>
-                              <th className="text-left py-3 font-medium text-luxury-cream/60">Status</th>
+                            <tr className="border-b border-gray-200">
+                              <th className="text-left py-3 font-medium text-gray-600">Order ID</th>
+                              <th className="text-left py-3 font-medium text-gray-600">Customer</th>
+                              <th className="text-left py-3 font-medium text-gray-600">Email</th>
+                              <th className="text-left py-3 font-medium text-gray-600">Amount</th>
+                              <th className="text-left py-3 font-medium text-gray-600">Status</th>
                             </tr>
                           </thead>
                           <tbody>
                             {ordersData.orders.slice(0, 5).map((order) => (
-                              <tr key={order.id} className="border-b border-luxury-gold/5">
-                                <td className="py-3 text-white">#{order.id}</td>
-                                <td className="py-3 text-white">{order.customer_name}</td>
-                                <td className="py-3 text-luxury-cream/60">{order.customer_email || 'N/A'}</td>
-                                <td className="py-3 text-white">${order.amount.toFixed(2)}</td>
+                              <tr key={order.id} className="border-b border-gray-100">
+                                <td className="py-3 text-black">#{order.id}</td>
+                                <td className="py-3 text-black">{order.customer_name}</td>
+                                <td className="py-3 text-gray-600">{order.customer_email || 'N/A'}</td>
+                                <td className="py-3 text-black">${order.amount.toFixed(2)}</td>
                                 <td className="py-3">
                                   <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(order.status)}`}>
                                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -656,121 +458,105 @@ const Dashboard = () => {
                       </div>
                     ) : (
                       <div className="text-center py-4">
-                        <div className="text-luxury-cream/60">No recent orders found</div>
+                        <div className="text-gray-600">No recent orders found</div>
                       </div>
                     )}
                   </LuxuryCard>
                 </div>
                 
-                {/* Sidebar with additional widgets */}
+                {/* Sidebar with widgets */}
                 <div className="space-y-6">
-                  <LuxuryCard className="p-6 bg-black border border-gray-700" variant="glass">
-                    <h3 className="text-lg font-display text-luxury-gold mb-3">Voice Commands</h3>
-                    <p className="text-sm text-luxury-cream/70 mb-4">
-                      Use these voice commands to navigate the dashboard:
+                  <RealtimeOrderTracking />
+
+                  <LuxuryCard className="p-6 bg-white border border-gray-200">
+                    <h3 className="text-lg font-sans text-black mb-3">Global Market Insights</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Key metrics across all regions
                     </p>
                     
-                    <ul className="text-sm space-y-2">
-                      <li className="flex items-center gap-2">
-                        <span className="text-luxury-gold">•</span>
-                        <span className="text-white">"Show sales"</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-luxury-gold">•</span>
-                        <span className="text-white">"Show inventory"</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-luxury-gold">•</span>
-                        <span className="text-white">"Create report"</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-luxury-gold">•</span>
-                        <span className="text-white">"Show Dubai inventory"</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-luxury-gold">•</span>
-                        <span className="text-white">"Help"</span>
-                      </li>
-                    </ul>
-                  </LuxuryCard>
-                  
-                  <LuxuryCard className="p-6 bg-black border border-gray-700">
-                    <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Inventory</h3>
-                    
-                    {inventoryLoading ? (
-                      <div className="space-y-3">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="flex justify-between items-center p-3 border border-gray-700 rounded-md bg-gray-900">
-                            <div>
-                              <Skeleton className="h-4 w-20 mb-1 bg-gray-800" />
-                              <Skeleton className="h-3 w-16 mb-1 bg-gray-800" />
-                              <Skeleton className="h-3 w-12 bg-gray-800" />
-                            </div>
-                            <Skeleton className="h-5 w-12 bg-gray-800" />
-                          </div>
-                        ))}
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Market Share</span>
+                        <span className="text-primary">15.8%</span>
                       </div>
-                    ) : warehouseData && warehouseData.length > 0 ? (
-                      <div className="space-y-3">
-                        {warehouseData.map((warehouse, index) => (
-                          <div 
-                            key={warehouse.warehouse || index} 
-                            className="flex justify-between items-center p-3 border border-gray-700 rounded-md cursor-pointer hover:bg-gray-800 transition-colors bg-gray-900"
-                            onClick={() => handleInventoryWarehouseClick(warehouse)}
-                          >
-                            <div>
-                              <h4 className="font-medium text-white">{warehouse.warehouse}</h4>
-                              <p className="text-xs text-luxury-cream/60">
-                                {warehouse.stock_quantity} units
-                              </p>
-                              {warehouse.provider && (
-                                <p className="text-xs text-luxury-gold/70">{warehouse.provider}</p>
-                              )}
-                            </div>
-                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.stock_status)}`}>
-                              {warehouse.stock_status.charAt(0).toUpperCase() + warehouse.stock_status.slice(1)}
-                            </span>
-                          </div>
-                        ))}
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Top Region</span>
+                        <span className="text-primary">Europe</span>
                       </div>
-                    ) : (
-                      <div className="text-center py-4 text-luxury-cream/60">No inventory data available</div>
-                    )}
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Peak Hours</span>
+                        <span className="text-primary">2-4 PM UTC</span>
+                      </div>
+                    </div>
                   </LuxuryCard>
 
-                  {/* Product Insights - Now navigates to ProductsPage */}
+                  {/* Product Performance */}
                   <LuxuryCard 
-                    className="p-6 cursor-pointer hover:bg-gray-800 transition-colors bg-black border border-gray-700"
+                    className="p-6 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => navigate('/products')}
                   >
-                    <h3 className="text-lg font-display text-luxury-gold mb-4">Product Insights</h3>
+                    <h3 className="text-lg font-sans text-black mb-4">Product Performance</h3>
                     {productsLoading ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
-                          <Skeleton className="h-4 w-24 bg-gray-800" />
-                          <Skeleton className="h-4 w-8 bg-gray-800" />
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-8" />
                         </div>
                         <div className="flex justify-between">
-                          <Skeleton className="h-4 w-28 bg-gray-800" />
-                          <Skeleton className="h-4 w-6 bg-gray-800" />
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-4 w-6" />
                         </div>
                       </div>
                     ) : productsData ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
-                          <span className="text-luxury-cream/60">Total Products</span>
-                          <span className="text-white">{productsData.insights?.total_products || 0}</span>
+                          <span className="text-gray-600">Total Products</span>
+                          <span className="text-black">{productsData.insights?.total_products || 0}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-luxury-cream/60">Low Stock Alerts</span>
+                          <span className="text-gray-600">Low Stock</span>
                           <span className="text-red-400">{productsData.insights?.low_stock_alerts || 0}</span>
                         </div>
-                        <div className="text-xs text-luxury-cream/40 mt-3 text-center">
-                          Click to view details
+                        <div className="text-xs text-gray-400 mt-3 text-center">
+                          Click for product details
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-luxury-cream/60">No product data available</div>
+                      <div className="text-center py-4 text-gray-600">No product data available</div>
+                    )}
+                  </LuxuryCard>
+
+                  {/* Customer Insights */}
+                  <LuxuryCard className="p-6 bg-white border border-gray-200">
+                    <h3 className="text-lg font-sans text-black mb-4">Customer Insights</h3>
+                    {customersLoading ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-8" />
+                        </div>
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-4 w-6" />
+                        </div>
+                      </div>
+                    ) : customersData ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Total Customers</span>
+                          <span className="text-black">{customersData.insights?.total_customers || 0}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">VIP Customers</span>
+                          <span className="text-primary">{customersData.insights?.customer_segments?.VIP || 0}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Premium Members</span>
+                          <span className="text-primary">{customersData.insights?.customer_segments?.Premium || 0}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 text-gray-600">No customer data available</div>
                     )}
                   </LuxuryCard>
                 </div>

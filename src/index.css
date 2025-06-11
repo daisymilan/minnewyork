@@ -1,6 +1,4 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -54,13 +52,14 @@
   }
 
   body {
-    @apply bg-white text-black font-sans;
+    @apply bg-white text-black;
+    font-family: Arial, sans-serif;
     background-image: none;
     background-size: auto;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-sans;
+    font-family: Arial, sans-serif;
   }
 }
 

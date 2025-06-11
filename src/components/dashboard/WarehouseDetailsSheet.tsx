@@ -50,6 +50,11 @@ const WarehouseDetailsSheet = ({ warehouse, isOpen, onClose }: WarehouseDetailsP
     }
   };
 
+  // Helper function to safely format numbers
+  const formatNumber = (value?: number): string => {
+    return typeof value === 'number' ? value.toLocaleString() : '0';
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-[400px] sm:w-[540px] bg-white border-gray-200">
@@ -85,12 +90,12 @@ const WarehouseDetailsSheet = ({ warehouse, isOpen, onClose }: WarehouseDetailsP
                   <span className="text-gray-600">
                     {warehouse.warehouse_type === 'manufacturing' ? 'Components:' : 'Total Items:'}
                   </span>
-                  <span className="text-black">{warehouse.total_items.toLocaleString()}</span>
+                  <span className="text-black">{formatNumber(warehouse.total_items)}</span>
                 </div>
                 {warehouse.inventory_value && (
                   <div className="flex justify-between">
                     <span className="text-gray-600">Inventory Value:</span>
-                    <span className="text-primary">${warehouse.inventory_value.toLocaleString()}</span>
+                    <span className="text-primary">${formatNumber(warehouse.inventory_value)}</span>
                   </div>
                 )}
                 {warehouse.low_stock_count !== undefined && (
@@ -98,7 +103,7 @@ const WarehouseDetailsSheet = ({ warehouse, isOpen, onClose }: WarehouseDetailsP
                     <span className="text-gray-600">
                       {warehouse.warehouse_type === 'manufacturing' ? 'Low Component Stock:' : 'Low Stock Items:'}
                     </span>
-                    <span className="text-red-400">{warehouse.low_stock_count}</span>
+                    <span className="text-red-400">{formatNumber(warehouse.low_stock_count)}</span>
                   </div>
                 )}
                 {warehouse.last_updated && (
@@ -160,8 +165,8 @@ const WarehouseDetailsSheet = ({ warehouse, isOpen, onClose }: WarehouseDetailsP
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <div className="text-xl font-bold text-primary">
                     {warehouse.warehouse_type === 'manufacturing' 
-                      ? Math.round(Math.max(0, (warehouse.total_items - (warehouse.low_stock_count || 0)) / Math.max(1, warehouse.total_items) * 100))
-                      : Math.round((warehouse.total_items - (warehouse.low_stock_count || 0)) / warehouse.total_items * 100)
+                      ? Math.round(Math.max(0, ((warehouse.total_items || 0) - (warehouse.low_stock_count || 0)) / Math.max(1, warehouse.total_items || 1) * 100))
+                      : Math.round(((warehouse.total_items || 0) - (warehouse.low_stock_count || 0)) / Math.max(1, warehouse.total_items || 1) * 100)
                     }%
                   </div>
                   <div className="text-sm text-gray-600">
@@ -170,8 +175,8 @@ const WarehouseDetailsSheet = ({ warehouse, isOpen, onClose }: WarehouseDetailsP
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <div className="text-xl font-bold text-primary">
-                    {warehouse.inventory_value && warehouse.total_items > 0 
-                      ? Math.round(warehouse.inventory_value / warehouse.total_items) 
+                    {warehouse.inventory_value && (warehouse.total_items || 0) > 0 
+                      ? Math.round(warehouse.inventory_value / (warehouse.total_items || 1))
                       : 'N/A'
                     }
                   </div>

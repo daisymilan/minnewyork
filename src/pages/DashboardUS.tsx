@@ -61,10 +61,10 @@ const DashboardUS = () => {
     refetchInterval: 120000, // Refetch every 2 minutes
   });
 
-  // US warehouse data from API
+  // US warehouse data from US-specific API
   const { data: warehouseData, isLoading: warehouseLoading } = useQuery({
     queryKey: ['warehouseOverviewUS'],
-    queryFn: () => orderRoutingApi.getWarehouseOverview(),
+    queryFn: () => orderRoutingApi.getWarehouseOverviewUS(),
     refetchInterval: 60000, // Refetch every minute
   });
 
@@ -334,24 +334,24 @@ const DashboardUS = () => {
                           ))}
                         </div>
                       </div>
-                    ) : warehouseData ? (
+                    ) : warehouseData?.overview ? (
                       <>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-primary">{warehouseData.total_warehouses}</div>
+                            <div className="text-2xl font-bold text-primary">{warehouseData.overview.total_warehouses}</div>
                             <div className="text-sm text-gray-600">US Locations</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-green-500">{warehouseData.active_warehouses}</div>
+                            <div className="text-2xl font-bold text-green-500">{warehouseData.overview.operational_warehouses}</div>
                             <div className="text-sm text-gray-600">Active</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-400">{warehouseData.warehouses?.filter(w => w.warehouse_type === 'fulfillment').length || 0}</div>
+                            <div className="text-2xl font-bold text-blue-400">{warehouseData.warehouses?.filter(w => w.country === 'US').length || 0}</div>
                             <div className="text-sm text-gray-600">Fulfillment</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-primary">${warehouseData.total_inventory_value?.toLocaleString()}</div>
-                            <div className="text-sm text-gray-600">Total Value</div>
+                            <div className="text-2xl font-bold text-primary">{warehouseData.overview.total_capacity || 'N/A'}</div>
+                            <div className="text-sm text-gray-600">Capacity</div>
                           </div>
                         </div>
                         
@@ -361,9 +361,9 @@ const DashboardUS = () => {
                             <h4 className="font-medium text-primary">US Fulfillment Centers</h4>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {warehouseData.warehouses?.map((warehouse) => (
+                            {warehouseData.warehouses?.filter(warehouse => warehouse.country === 'US').map((warehouse) => (
                               <div 
-                                key={warehouse.name} 
+                                key={warehouse.id || warehouse.name} 
                                 className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
                                 onClick={() => handleWarehouseClick(warehouse)}
                               >
@@ -375,22 +375,28 @@ const DashboardUS = () => {
                                         {getWarehouseTypeLabel(warehouse.warehouse_type)}
                                       </Badge>
                                     </h5>
-                                    <p className="text-sm text-gray-600">{warehouse.location}</p>
+                                    <p className="text-sm text-gray-600">{warehouse.region || 'USA'}</p>
                                   </div>
                                   <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
                                     {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
                                   </span>
                                 </div>
                                 <div className="text-sm text-gray-600">
-                                  {warehouse.total_items?.toLocaleString()} products
+                                  {warehouse.orders_pending || 0} pending orders
                                 </div>
                               </div>
                             ))}
                           </div>
+                          
+                          {(!warehouseData.warehouses?.filter(w => w.country === 'US').length) && (
+                            <div className="text-center py-4 text-gray-600">
+                              No US warehouses found
+                            </div>
+                          )}
                         </div>
                       </>
                     ) : (
-                      <div className="text-center py-4 text-gray-600">Loading...</div>
+                      <div className="text-center py-4 text-gray-600">Loading US warehouse data...</div>
                     )}
                   </LuxuryCard>
                   

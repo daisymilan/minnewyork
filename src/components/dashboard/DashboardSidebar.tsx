@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -111,7 +112,7 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
   return (
     <div
       className={cn(
-        "flex flex-col h-screen bg-luxury-black border-r border-luxury-gold/10 text-luxury-cream transition-all duration-300",
+        "flex flex-col h-screen bg-white border-r border-gray-200 text-black transition-all duration-300",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
@@ -129,7 +130,7 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
               <div>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start rounded-md hover:bg-luxury-gold/10"
+                  className="w-full justify-start rounded-md hover:bg-gray-100"
                   onClick={() => toggleSubMenu(item.label)}
                 >
                   <item.icon className="mr-2 h-4 w-4" />
@@ -143,10 +144,10 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
                         key={subItem.label}
                         to={subItem.path}
                         className={cn(
-                          "group flex items-center rounded-md px-2 py-1 text-sm font-medium hover:bg-luxury-gold/10",
+                          "group flex items-center rounded-md px-2 py-1 text-sm font-medium hover:bg-gray-100",
                           location.pathname === subItem.path
                             ? "bg-luxury-gold/10 text-luxury-gold"
-                            : "text-luxury-cream/80"
+                            : "text-gray-700"
                         )}
                       >
                         {subItem.label}
@@ -159,10 +160,10 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
               <Link
                 to={item.path}
                 className={cn(
-                  "group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-luxury-gold/10",
+                  "group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-gray-100",
                   location.pathname === item.path
                     ? "bg-luxury-gold/10 text-luxury-gold"
-                    : "text-luxury-cream/80"
+                    : "text-gray-700"
                 )}
               >
                 <item.icon className="mr-2 h-4 w-4" />

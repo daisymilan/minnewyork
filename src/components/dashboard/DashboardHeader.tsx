@@ -35,9 +35,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ className }) => {
   };
 
   return (
-    <header className={`py-4 px-6 bg-luxury-black border-b border-luxury-gold/10 flex items-center justify-between ${className}`}>
+    <header className={`py-4 px-6 bg-white border-b border-gray-200 flex items-center justify-between ${className}`}>
       <div className="flex items-center gap-4">
-        <h1 className="text-xl font-display text-luxury-gold">Dashboard</h1>
+        <h1 className="text-xl font-sans text-luxury-gold">MiN NEW YORK</h1>
         
         {/* Role badge */}
         {user && (
@@ -53,7 +53,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ className }) => {
           <input
             type="text"
             placeholder="Search..."
-            className="w-full bg-black/30 border border-luxury-gold/20 rounded-full py-2 px-4 text-sm text-luxury-cream focus:outline-none focus:border-luxury-gold/40"
+            className="w-full bg-gray-50 border border-gray-300 rounded-full py-2 px-4 text-sm text-black focus:outline-none focus:border-luxury-gold"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -67,7 +67,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ className }) => {
             strokeWidth="2" 
             strokeLinecap="round" 
             strokeLinejoin="round"
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-luxury-cream/40"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"
           >
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.3-4.3" />
@@ -81,7 +81,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ className }) => {
         />
         
         {/* Notifications */}
-        <button className="relative p-1 rounded-full hover:bg-luxury-gold/10">
+        <button className="relative p-1 rounded-full hover:bg-gray-100">
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
             width="20" 
@@ -107,8 +107,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ className }) => {
               {user.name.charAt(0)}
             </div>
             <div className="hidden lg:block">
-              <div className="text-luxury-cream">{user.name}</div>
-              <div className="text-xs text-luxury-cream/60">{user.role}</div>
+              <div className="text-black">{user.name}</div>
+              <div className="text-xs text-gray-600">{user.role}</div>
             </div>
           </div>
         )}

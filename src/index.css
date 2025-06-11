@@ -7,43 +7,43 @@
 
 @layer base {
   :root {
-    --background: 0 0% 3%;
-    --foreground: 48 30% 96%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
 
-    --card: 0 0% 5%;
-    --card-foreground: 48 30% 96%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 0%;
 
-    --popover: 0 0% 5%;
-    --popover-foreground: 48 30% 96%;
+    --popover: 0 0% 98%;
+    --popover-foreground: 0 0% 0%;
 
     --primary: 47 65% 52%;
-    --primary-foreground: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 48 30% 96%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
 
     --accent: 47 65% 52%;
-    --accent-foreground: 0 0% 0%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 48 30% 96%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
+    --border: 0 0% 89%;
+    --input: 0 0% 96%;
     --ring: 48 65% 50%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 5%;
-    --sidebar-foreground: 48 30% 96%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 0%;
     --sidebar-primary: 47 65% 52%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 10%;
-    --sidebar-accent-foreground: 48 30% 96%;
-    --sidebar-border: 0 0% 15%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 89%;
     --sidebar-ring: 47 65% 52%;
   }
 }
@@ -54,27 +54,27 @@
   }
 
   body {
-    @apply bg-luxury-black text-luxury-cream font-sans;
-    background-image: radial-gradient(circle at 1px 1px, rgba(212, 175, 55, 0.08) 1px, transparent 0);
-    background-size: 40px 40px;
+    @apply bg-white text-black font-sans;
+    background-image: none;
+    background-size: auto;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display;
+    @apply font-sans;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply backdrop-blur-lg bg-gradient-glass border border-white/10 shadow-xl;
+    @apply backdrop-blur-lg bg-gradient-glass border border-gray-200 shadow-xl;
   }
   
   .luxury-card {
-    @apply rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_15px_rgba(212,175,55,0.3)];
+    @apply rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg;
   }
   
   .gold-border {
-    @apply border border-luxury-gold/50;
+    @apply border border-gray-300;
   }
   
   .gold-text {
@@ -92,7 +92,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(10, 10, 10, 0.8);
+  background: rgba(240, 240, 240, 0.8);
 }
 
 ::-webkit-scrollbar-thumb {

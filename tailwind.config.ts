@@ -63,13 +63,13 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Luxury color scheme
+				// Updated luxury color scheme for light theme
 				luxury: {
-					black: '#0A0A0A',
+					black: '#000000',
 					gold: '#D4AF37',
-					cream: '#FFFCF2',
+					cream: '#000000',
 					white: '#FFFFFF',
-					gray: '#3A3A3A',
+					gray: '#666666',
 				},
 			},
 			borderRadius: {
@@ -150,8 +150,8 @@ export default {
 				'shimmer': 'shimmer 3s infinite linear'
 			},
 			fontFamily: {
-        'sans': ['Poppins', 'sans-serif'],
-        'display': ['Playfair Display', 'serif']
+        'sans': ['Arial', 'sans-serif'],
+        'display': ['Arial', 'sans-serif']
       },
 			backgroundImage: {
 				'gradient-glass': 'linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))',

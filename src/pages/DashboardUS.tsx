@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -61,7 +60,7 @@ const DashboardUS = () => {
   // US warehouse data from API
   const { data: warehouseData, isLoading: warehouseLoading } = useQuery({
     queryKey: ['warehouseOverviewUS'],
-    queryFn: () => orderRoutingApi.getWarehouseOverview('US'),
+    queryFn: () => orderRoutingApi.getWarehouseOverview(),
     refetchInterval: 60000, // Refetch every minute
   });
 

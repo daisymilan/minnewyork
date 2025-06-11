@@ -1,4 +1,3 @@
-
 // US Dashboard API service for US-specific dashboard data
 export interface DashboardOrder {
   id: string;
@@ -39,6 +38,8 @@ export interface DashboardKPIs {
   growth_rate: number;
   conversion_rate?: number;
   average_order_value?: number;
+  conversion_trend?: number;
+  aov_trend?: number;
 }
 
 export interface DashboardOverview {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -161,7 +160,7 @@ const DashboardUS = () => {
   };
   
   return (
-    <div className="flex h-screen bg-luxury-black text-luxury-cream">
+    <div className="flex h-screen bg-white text-black">
       <DashboardSidebar 
         isCollapsed={sidebarCollapsed} 
         toggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} 
@@ -170,21 +169,20 @@ const DashboardUS = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <DashboardHeader />
         
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 bg-white">
           {user && (
             <div className="animate-fade-in">
-              <h2 className="text-2xl font-display mb-1 gold-gradient-text">
+              <h2 className="text-2xl font-sans mb-1 text-primary">
                 Welcome to US Dashboard, {user.name}
               </h2>
-              <p className="text-sm text-luxury-cream/60 mb-6">
+              <p className="text-sm text-gray-600 mb-6">
                 Here's what's happening with your US fragrance business today
               </p>
               
-              {/* KPI Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {analyticsLoading || !kpiData ? (
                   Array.from({ length: 4 }).map((_, i) => (
-                    <LuxuryCard key={i} className="p-6">
+                    <LuxuryCard key={i} className="p-6 bg-white border border-gray-200">
                       <Skeleton className="h-4 w-24 mb-4" />
                       <Skeleton className="h-8 w-32 mb-2" />
                       <Skeleton className="h-3 w-16" />
@@ -269,8 +267,8 @@ const DashboardUS = () => {
                 {/* Main content area */}
                 <div className="lg:col-span-2 space-y-6">
                   {/* US Sales by Region */}
-                  <LuxuryCard className="p-6">
-                    <h3 className="text-lg font-display text-luxury-gold mb-4">US Sales by Region</h3>
+                  <LuxuryCard className="p-6 bg-white border border-gray-200">
+                    <h3 className="text-lg font-sans text-primary mb-4">US Sales by Region</h3>
                     {overviewLoading ? (
                       <div className="space-y-4">
                         {Array.from({ length: 4 }).map((_, i) => (
@@ -285,71 +283,71 @@ const DashboardUS = () => {
                       <div className="space-y-4">
                         {regionalData.map((region) => (
                           <div key={region.name} className="flex items-center">
-                            <span className="w-32 text-sm">{region.name}</span>
-                            <div className="flex-1 h-2 bg-luxury-black rounded-full overflow-hidden">
+                            <span className="w-32 text-sm text-black">{region.name}</span>
+                            <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                               <div 
-                                className="h-full bg-gold-gradient rounded-full"
+                                className="h-full bg-primary rounded-full"
                                 style={{ width: `${Math.min(region.value, 100)}%` }}
                               ></div>
                             </div>
-                            <span className="ml-3 text-sm">{region.value}%</span>
+                            <span className="ml-3 text-sm text-black">{region.value}%</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-luxury-cream/60">No US regional data available</div>
+                      <div className="text-center py-4 text-gray-600">No US regional data available</div>
                     )}
                   </LuxuryCard>
                   
                   {/* US Warehouse Network */}
-                  <LuxuryCard className="p-6">
-                    <h3 className="text-lg font-display text-luxury-gold mb-4">US Warehouse Network</h3>
+                  <LuxuryCard className="p-6 bg-white border border-gray-200">
+                    <h3 className="text-lg font-sans text-primary mb-4">US Warehouse Network</h3>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-luxury-gold">{usWarehouseOverview.total_warehouses}</div>
-                        <div className="text-sm text-luxury-cream/60">US Locations</div>
+                        <div className="text-2xl font-bold text-primary">{usWarehouseOverview.total_warehouses}</div>
+                        <div className="text-sm text-gray-600">US Locations</div>
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-green-500">{usWarehouseOverview.active_warehouses}</div>
-                        <div className="text-sm text-luxury-cream/60">Active</div>
+                        <div className="text-sm text-gray-600">Active</div>
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-blue-400">3</div>
-                        <div className="text-sm text-luxury-cream/60">Fulfillment</div>
+                        <div className="text-sm text-gray-600">Fulfillment</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-luxury-gold">${usWarehouseOverview.total_inventory_value.toLocaleString()}</div>
-                        <div className="text-sm text-luxury-cream/60">Total Value</div>
+                        <div className="text-2xl font-bold text-primary">${usWarehouseOverview.total_inventory_value.toLocaleString()}</div>
+                        <div className="text-sm text-gray-600">Total Value</div>
                       </div>
                     </div>
                     
                     <div>
                       <div className="flex items-center gap-2 mb-3">
                         <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <h4 className="font-medium text-luxury-gold">US Fulfillment Centers</h4>
+                        <h4 className="font-medium text-primary">US Fulfillment Centers</h4>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {usWarehouseOverview.warehouses.map((warehouse) => (
                           <div 
                             key={warehouse.name} 
-                            className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4 cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+                            className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
                             onClick={() => handleWarehouseClick(warehouse)}
                           >
                             <div className="flex justify-between items-start mb-2">
                               <div>
-                                <h5 className="font-medium text-luxury-cream flex items-center gap-2">
+                                <h5 className="font-medium text-black flex items-center gap-2">
                                   {warehouse.name}
                                   <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
                                     {getWarehouseTypeLabel(warehouse.warehouse_type)}
                                   </Badge>
                                 </h5>
-                                <p className="text-sm text-luxury-cream/60">{warehouse.location}</p>
+                                <p className="text-sm text-gray-600">{warehouse.location}</p>
                               </div>
                               <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
                                 {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
                               </span>
                             </div>
-                            <div className="text-sm text-luxury-cream/60">
+                            <div className="text-sm text-gray-600">
                               {warehouse.total_items.toLocaleString()} products
                             </div>
                           </div>
@@ -359,12 +357,12 @@ const DashboardUS = () => {
                   </LuxuryCard>
                   
                   {/* Recent US Orders */}
-                  <LuxuryCard className="p-6">
+                  <LuxuryCard className="p-6 bg-white border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-display text-luxury-gold">Recent US Orders</h3>
+                      <h3 className="text-lg font-sans text-primary">Recent US Orders</h3>
                       <button 
                         onClick={() => navigate('/orders')}
-                        className="text-sm text-luxury-gold hover:underline"
+                        className="text-sm text-primary hover:underline"
                       >
                         View All
                       </button>
@@ -372,13 +370,13 @@ const DashboardUS = () => {
                     
                     {ordersLoading ? (
                       <div className="space-y-3">
-                        <div className="grid grid-cols-5 gap-4 py-3 border-b border-luxury-gold/10">
+                        <div className="grid grid-cols-5 gap-4 py-3 border-b border-gray-200">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <Skeleton key={i} className="h-4" />
                           ))}
                         </div>
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <div key={i} className="grid grid-cols-5 gap-4 py-3 border-b border-luxury-gold/5">
+                          <div key={i} className="grid grid-cols-5 gap-4 py-3 border-b border-gray-100">
                             {Array.from({ length: 5 }).map((_, j) => (
                               <Skeleton key={j} className="h-4" />
                             ))}
@@ -389,21 +387,21 @@ const DashboardUS = () => {
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-luxury-gold/10">
-                              <th className="text-left py-3 font-medium text-luxury-cream/60">Order ID</th>
-                              <th className="text-left py-3 font-medium text-luxury-cream/60">Customer</th>
-                              <th className="text-left py-3 font-medium text-luxury-cream/60">Email</th>
-                              <th className="text-left py-3 font-medium text-luxury-cream/60">Amount</th>
-                              <th className="text-left py-3 font-medium text-luxury-cream/60">Status</th>
+                            <tr className="border-b border-gray-200">
+                              <th className="text-left py-3 font-medium text-gray-600">Order ID</th>
+                              <th className="text-left py-3 font-medium text-gray-600">Customer</th>
+                              <th className="text-left py-3 font-medium text-gray-600">Email</th>
+                              <th className="text-left py-3 font-medium text-gray-600">Amount</th>
+                              <th className="text-left py-3 font-medium text-gray-600">Status</th>
                             </tr>
                           </thead>
                           <tbody>
                             {ordersData.orders.slice(0, 5).map((order) => (
-                              <tr key={order.id} className="border-b border-luxury-gold/5">
-                                <td className="py-3">#{order.id}</td>
-                                <td className="py-3">{order.customer_name}</td>
-                                <td className="py-3 text-luxury-cream/60">{order.customer_email || 'N/A'}</td>
-                                <td className="py-3">${order.amount.toFixed(2)}</td>
+                              <tr key={order.id} className="border-b border-gray-100">
+                                <td className="py-3 text-black">#{order.id}</td>
+                                <td className="py-3 text-black">{order.customer_name}</td>
+                                <td className="py-3 text-gray-600">{order.customer_email || 'N/A'}</td>
+                                <td className="py-3 text-black">${order.amount.toFixed(2)}</td>
                                 <td className="py-3">
                                   <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(order.status)}`}>
                                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -416,7 +414,7 @@ const DashboardUS = () => {
                       </div>
                     ) : (
                       <div className="text-center py-4">
-                        <div className="text-luxury-cream/60">No recent US orders found</div>
+                        <div className="text-gray-600">No recent US orders found</div>
                       </div>
                     )}
                   </LuxuryCard>
@@ -424,34 +422,34 @@ const DashboardUS = () => {
                 
                 {/* Sidebar with US-specific widgets */}
                 <div className="space-y-6">
-                  <LuxuryCard className="p-6" variant="glass">
-                    <h3 className="text-lg font-display text-luxury-gold mb-3">US Market Insights</h3>
-                    <p className="text-sm text-luxury-cream/70 mb-4">
+                  <LuxuryCard className="p-6 bg-white border border-gray-200">
+                    <h3 className="text-lg font-sans text-primary mb-3">US Market Insights</h3>
+                    <p className="text-sm text-gray-600 mb-4">
                       Key metrics for the US market performance
                     </p>
                     
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-luxury-cream/60">Market Share</span>
-                        <span className="text-luxury-gold">23.4%</span>
+                        <span className="text-gray-600">Market Share</span>
+                        <span className="text-primary">23.4%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-luxury-cream/60">Top State</span>
-                        <span className="text-luxury-gold">California</span>
+                        <span className="text-gray-600">Top State</span>
+                        <span className="text-primary">California</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-luxury-cream/60">Peak Hours</span>
-                        <span className="text-luxury-gold">2-4 PM EST</span>
+                        <span className="text-gray-600">Peak Hours</span>
+                        <span className="text-primary">2-4 PM EST</span>
                       </div>
                     </div>
                   </LuxuryCard>
 
                   {/* US Product Performance */}
                   <LuxuryCard 
-                    className="p-6 cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+                    className="p-6 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => navigate('/products')}
                   >
-                    <h3 className="text-lg font-display text-luxury-gold mb-4">US Product Performance</h3>
+                    <h3 className="text-lg font-sans text-primary mb-4">US Product Performance</h3>
                     {productsLoading ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
@@ -466,25 +464,25 @@ const DashboardUS = () => {
                     ) : productsData ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
-                          <span className="text-luxury-cream/60">US Products</span>
-                          <span>{productsData.insights?.total_products || 0}</span>
+                          <span className="text-gray-600">US Products</span>
+                          <span className="text-black">{productsData.insights?.total_products || 0}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-luxury-cream/60">Low Stock (US)</span>
+                          <span className="text-gray-600">Low Stock (US)</span>
                           <span className="text-red-400">{productsData.insights?.low_stock_alerts || 0}</span>
                         </div>
-                        <div className="text-xs text-luxury-cream/40 mt-3 text-center">
+                        <div className="text-xs text-gray-400 mt-3 text-center">
                           Click for US product details
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-luxury-cream/60">No US product data available</div>
+                      <div className="text-center py-4 text-gray-600">No US product data available</div>
                     )}
                   </LuxuryCard>
 
                   {/* US Customer Insights */}
-                  <LuxuryCard className="p-6">
-                    <h3 className="text-lg font-display text-luxury-gold mb-4">US Customer Insights</h3>
+                  <LuxuryCard className="p-6 bg-white border border-gray-200">
+                    <h3 className="text-lg font-sans text-primary mb-4">US Customer Insights</h3>
                     {customersLoading ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
@@ -499,20 +497,20 @@ const DashboardUS = () => {
                     ) : customersData ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
-                          <span className="text-luxury-cream/60">Total US Customers</span>
-                          <span>{customersData.insights?.total_customers || 0}</span>
+                          <span className="text-gray-600">Total US Customers</span>
+                          <span className="text-black">{customersData.insights?.total_customers || 0}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-luxury-cream/60">VIP Customers</span>
-                          <span className="text-luxury-gold">{customersData.insights?.customer_segments?.VIP || 0}</span>
+                          <span className="text-gray-600">VIP Customers</span>
+                          <span className="text-primary">{customersData.insights?.customer_segments?.VIP || 0}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-luxury-cream/60">Premium Members</span>
-                          <span className="text-luxury-gold">{customersData.insights?.customer_segments?.Premium || 0}</span>
+                          <span className="text-gray-600">Premium Members</span>
+                          <span className="text-primary">{customersData.insights?.customer_segments?.Premium || 0}</span>
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-luxury-cream/60">No US customer data available</div>
+                      <div className="text-center py-4 text-gray-600">No US customer data available</div>
                     )}
                   </LuxuryCard>
                 </div>

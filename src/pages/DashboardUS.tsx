@@ -7,6 +7,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import KpiCard from '@/components/dashboard/KpiCard';
 import KpiDetailsModal from '@/components/dashboard/KpiDetailsModal';
 import WarehouseDetailsSheet from '@/components/dashboard/WarehouseDetailsSheet';
+import MarketInsightsModal from '@/components/dashboard/MarketInsightsModal';
 import { LuxuryCard } from '@/components/ui/luxury-card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,6 +23,7 @@ const DashboardUS = () => {
   const [warehouseDetailsOpen, setWarehouseDetailsOpen] = useState(false);
   const [kpiDetailsOpen, setKpiDetailsOpen] = useState(false);
   const [selectedKpiType, setSelectedKpiType] = useState<'revenue' | 'orders' | 'conversion' | 'averageOrder' | null>(null);
+  const [marketInsightsOpen, setMarketInsightsOpen] = useState(false);
   
   // Initialize US webhook event listeners
   useWebhookEventsUS();
@@ -161,6 +163,10 @@ const DashboardUS = () => {
   const handleKpiClick = (kpiType: 'revenue' | 'orders' | 'conversion' | 'averageOrder') => {
     setSelectedKpiType(kpiType);
     setKpiDetailsOpen(true);
+  };
+
+  const handleMarketInsightsClick = () => {
+    setMarketInsightsOpen(true);
   };
   
   return (
@@ -448,7 +454,11 @@ const DashboardUS = () => {
                 
                 {/* Sidebar with US-specific widgets */}
                 <div className="space-y-6">
-                  <LuxuryCard className="p-6 bg-white border border-gray-200">
+                  {/* Make US Market Insights clickable */}
+                  <LuxuryCard 
+                    className="p-6 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={handleMarketInsightsClick}
+                  >
                     <h3 className="text-lg font-sans text-primary mb-3">US Market Insights</h3>
                     <p className="text-sm text-gray-600 mb-4">
                       Key metrics for the US market performance
@@ -482,6 +492,9 @@ const DashboardUS = () => {
                         <div className="flex justify-between">
                           <span className="text-gray-600">Peak Hours</span>
                           <span className="text-primary">{marketInsightsData.peak_hours || 'N/A'}</span>
+                        </div>
+                        <div className="text-xs text-gray-400 mt-3 text-center">
+                          Click for detailed insights
                         </div>
                       </div>
                     ) : (
@@ -578,6 +591,14 @@ const DashboardUS = () => {
         onClose={() => setKpiDetailsOpen(false)}
         kpiType={selectedKpiType}
         data={kpiData}
+      />
+
+      {/* US Market Insights Modal */}
+      <MarketInsightsModal
+        isOpen={marketInsightsOpen}
+        onClose={() => setMarketInsightsOpen(false)}
+        data={marketInsightsData}
+        type="us"
       />
     </div>
   );

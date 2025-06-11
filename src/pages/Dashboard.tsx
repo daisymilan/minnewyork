@@ -7,6 +7,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import KpiCard from '@/components/dashboard/KpiCard';
 import KpiDetailsModal from '@/components/dashboard/KpiDetailsModal';
 import WarehouseDetailsSheet from '@/components/dashboard/WarehouseDetailsSheet';
+import MarketInsightsModal from '@/components/dashboard/MarketInsightsModal';
 import RealtimeOrderTracking from '@/components/dashboard/RealtimeOrderTracking';
 import { LuxuryCard } from '@/components/ui/luxury-card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +24,7 @@ const Dashboard = () => {
   const [warehouseDetailsOpen, setWarehouseDetailsOpen] = useState(false);
   const [kpiDetailsOpen, setKpiDetailsOpen] = useState(false);
   const [selectedKpiType, setSelectedKpiType] = useState<'revenue' | 'orders' | 'conversion' | 'averageOrder' | null>(null);
+  const [marketInsightsOpen, setMarketInsightsOpen] = useState(false);
   
   // Initialize webhook event listeners
   useWebhookEvents();
@@ -160,6 +162,10 @@ const Dashboard = () => {
     setSelectedKpiType(kpiType);
     setKpiDetailsOpen(true);
   };
+
+  const handleMarketInsightsClick = () => {
+    setMarketInsightsOpen(true);
+  };
   
   return (
     <div className="flex h-screen bg-white text-black font-sans">
@@ -268,7 +274,6 @@ const Dashboard = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main content area */}
                 <div className="lg:col-span-2 space-y-6">
-                  {/* Global Sales by Region */}
                   <LuxuryCard className="p-6 bg-white border border-gray-200">
                     <h3 className="text-lg font-sans text-black mb-4">Global Sales by Region</h3>
                     {overviewLoading ? (
@@ -521,7 +526,11 @@ const Dashboard = () => {
                 <div className="space-y-6">
                   <RealtimeOrderTracking />
 
-                  <LuxuryCard className="p-6 bg-white border border-gray-200">
+                  {/* Make Global Market Insights clickable */}
+                  <LuxuryCard 
+                    className="p-6 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={handleMarketInsightsClick}
+                  >
                     <h3 className="text-lg font-sans text-black mb-3">Global Market Insights</h3>
                     <p className="text-sm text-gray-600 mb-4">
                       Key metrics across all regions
@@ -555,6 +564,9 @@ const Dashboard = () => {
                         <div className="flex justify-between">
                           <span className="text-gray-600">Peak Hours</span>
                           <span className="text-primary">{marketInsightsData.peak_hours || 'N/A'}</span>
+                        </div>
+                        <div className="text-xs text-gray-400 mt-3 text-center">
+                          Click for detailed insights
                         </div>
                       </div>
                     ) : (
@@ -649,6 +661,14 @@ const Dashboard = () => {
         onClose={() => setKpiDetailsOpen(false)}
         kpiType={selectedKpiType}
         data={kpiData}
+      />
+
+      {/* Market Insights Modal */}
+      <MarketInsightsModal
+        isOpen={marketInsightsOpen}
+        onClose={() => setMarketInsightsOpen(false)}
+        data={marketInsightsData}
+        type="global"
       />
     </div>
   );

@@ -59,7 +59,7 @@ const Login = () => {
   };
   
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center bg-white p-4">
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-white p-4 font-sans">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute right-0 top-0 -rotate-12 w-96 h-96 bg-gold-gradient rounded-full opacity-[0.03] blur-3xl"></div>
@@ -67,14 +67,14 @@ const Login = () => {
       </div>
       
       <div className="text-center mb-10 z-10">
-        <h1 className="text-4xl md:text-5xl font-sans font-bold text-primary mb-2">
+        <h1 className="text-4xl md:text-5xl font-sans font-bold text-black mb-2">
           MiN NEW YORK
         </h1>
       </div>
       
-      <LuxuryCard className="w-full max-w-md glass-card z-10 p-8">
+      <LuxuryCard className="w-full max-w-md bg-white border border-gray-200 z-10 p-8">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-sans text-primary">Welcome Back</h2>
+          <h2 className="text-2xl font-sans text-black">Welcome Back</h2>
           <p className="text-gray-600 text-sm mt-1">Sign in to your account</p>
         </div>
         

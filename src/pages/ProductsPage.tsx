@@ -11,6 +11,7 @@ import { dashboardUSApi, DashboardProduct } from '@/services/dashboardUS';
 
 const ProductsPage = () => {
   const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['dashboardProductsUS'],
@@ -74,8 +75,27 @@ const ProductsPage = () => {
 
   const handleStatClick = (filterType: string) => {
     console.log('Stat clicked:', filterType);
+    setActiveFilter(filterType);
     // You can implement filtering logic here or navigate to a filtered view
   };
+
+  // Filter products based on active filter
+  const getFilteredProducts = () => {
+    if (!activeFilter) return products;
+    
+    switch (activeFilter) {
+      case 'low_stock':
+        return lowStockProducts;
+      case 'out_of_stock':
+        return outOfStockProducts;
+      case 'in_stock':
+        return inStockProducts;
+      default:
+        return products;
+    }
+  };
+
+  const filteredProducts = getFilteredProducts();
 
   return (
     <div className="min-h-screen bg-white text-black p-6">
@@ -97,31 +117,59 @@ const ProductsPage = () => {
           </div>
         </div>
 
+        {/* Active Filter Display */}
+        {activeFilter && (
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-sm text-gray-600">Showing:</span>
+            <Badge variant="outline" className="bg-white">
+              {activeFilter === 'low_stock' ? 'Low Stock Products' :
+               activeFilter === 'out_of_stock' ? 'Out of Stock Products' :
+               activeFilter === 'in_stock' ? 'In Stock Products' : 'All Products'}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setActiveFilter(null)}
+              className="text-sm text-primary hover:bg-primary/10"
+            >
+              Clear Filter
+            </Button>
+          </div>
+        )}
+
         {/* Summary Stats - Now Clickable */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <LuxuryCard 
-            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            className={`p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200 ${
+              activeFilter === 'total' ? 'ring-2 ring-primary' : ''
+            }`}
             onClick={() => handleStatClick('total')}
           >
             <div className="text-3xl font-bold text-primary">{insights.total_products}</div>
             <div className="text-sm text-gray-600">Total Products</div>
           </LuxuryCard>
           <LuxuryCard 
-            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            className={`p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200 ${
+              activeFilter === 'low_stock' ? 'ring-2 ring-primary' : ''
+            }`}
             onClick={() => handleStatClick('low_stock')}
           >
             <div className="text-3xl font-bold text-red-400">{lowStockProducts.length}</div>
             <div className="text-sm text-gray-600">Low Stock</div>
           </LuxuryCard>
           <LuxuryCard 
-            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            className={`p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200 ${
+              activeFilter === 'out_of_stock' ? 'ring-2 ring-primary' : ''
+            }`}
             onClick={() => handleStatClick('out_of_stock')}
           >
             <div className="text-3xl font-bold text-red-500">{outOfStockProducts.length}</div>
             <div className="text-sm text-gray-600">Out of Stock</div>
           </LuxuryCard>
           <LuxuryCard 
-            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            className={`p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200 ${
+              activeFilter === 'in_stock' ? 'ring-2 ring-primary' : ''
+            }`}
             onClick={() => handleStatClick('in_stock')}
           >
             <div className="text-3xl font-bold text-green-500">
@@ -132,7 +180,7 @@ const ProductsPage = () => {
         </div>
 
         {/* Low Stock Alerts */}
-        {lowStockProducts.length > 0 && (
+        {lowStockProducts.length > 0 && !activeFilter && (
           <LuxuryCard className="p-6 mb-8 bg-white border border-gray-200">
             <h2 className="text-xl font-sans text-primary mb-6">⚠️ Low Stock Alerts</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -156,7 +204,14 @@ const ProductsPage = () => {
 
         {/* All Products */}
         <LuxuryCard className="p-6 bg-white border border-gray-200">
-          <h2 className="text-xl font-sans text-primary mb-6">All Products ({products.length})</h2>
+          <h2 className="text-xl font-sans text-primary mb-6">
+            {activeFilter ? 
+              `${activeFilter === 'low_stock' ? 'Low Stock' :
+                activeFilter === 'out_of_stock' ? 'Out of Stock' :
+                activeFilter === 'in_stock' ? 'In Stock' : 'All'} Products (${filteredProducts.length})` :
+              `All Products (${products.length})`
+            }
+          </h2>
           {productsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 9 }).map((_, i) => (
@@ -171,9 +226,9 @@ const ProductsPage = () => {
                 </div>
               ))}
             </div>
-          ) : products && products.length > 0 ? (
+          ) : filteredProducts && filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <div key={product.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="font-medium text-black">{product.name}</h3>
@@ -213,7 +268,9 @@ const ProductsPage = () => {
             </div>
           ) : (
             <div className="text-center py-12 text-gray-600">
-              <p className="text-lg">No products found</p>
+              <p className="text-lg">
+                {activeFilter ? `No ${activeFilter.replace('_', ' ')} products found` : 'No products found'}
+              </p>
             </div>
           )}
         </LuxuryCard>

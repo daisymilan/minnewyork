@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardUS from "./pages/DashboardUS";
 import OrdersPage from "./pages/OrdersPage";
 import ProductsPage from "./pages/ProductsPage";
+import GlobalProductsPage from "./pages/GlobalProductsPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import NotFound from "./pages/NotFound";
 import { SignInPage } from "./components/auth/SignInPage";
@@ -42,7 +43,8 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/dashboard-us" element={<DashboardUS />} />
       <Route path="/orders" element={<OrdersPage />} />
-      <Route path="/products" element={<ProductsPage />} />
+      <Route path="/products" element={<GlobalProductsPage />} />
+      <Route path="/products/us" element={<ProductsPage />} />
       <Route path="/products/details" element={<ProductDetailsPage />} />
       <Route path="/b2b" element={<B2BKingDashboard />} />
       <Route path="/marketing" element={<MarketingDashboard />} />

@@ -68,17 +68,17 @@ export const SignUpPage: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-luxury-black flex items-center justify-center p-4">
-        <Card className="bg-black/30 border border-luxury-gold/20 w-full max-w-md">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <Card className="bg-white border border-gray-200 w-full max-w-md">
           <CardContent className="text-center p-8">
             <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-luxury-cream mb-2">Account Created!</h2>
-            <p className="text-luxury-cream/60 mb-6">
+            <h2 className="text-2xl font-bold text-black mb-2">Account Created!</h2>
+            <p className="text-gray-600 mb-6">
               Your account has been created successfully.
             </p>
             <Button
               onClick={() => navigate('/login')}
-              className="bg-gradient-to-r from-luxury-gold to-luxury-gold/80 hover:from-luxury-gold/80 hover:to-luxury-gold text-black font-semibold"
+              className="bg-primary hover:bg-primary/90 text-white font-semibold"
             >
               Go to Sign In
             </Button>
@@ -89,56 +89,56 @@ export const SignUpPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-luxury-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Logo/Brand */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-luxury-gold mb-2">
+          <h1 className="text-4xl font-bold text-primary mb-2">
             MiN NEW YORK
           </h1>
-          <p className="text-luxury-cream/60">Create Your Account</p>
+          <p className="text-gray-600">Create Your Account</p>
         </div>
 
         {/* Sign Up Form */}
-        <Card className="bg-black/30 border border-luxury-gold/20">
+        <Card className="bg-white border border-gray-200">
           <CardHeader>
-            <CardTitle className="text-luxury-cream text-center">Sign Up</CardTitle>
+            <CardTitle className="text-black text-center">Sign Up</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-luxury-cream/80">Full Name</Label>
+                <Label htmlFor="fullName" className="text-gray-700">Full Name</Label>
                 <Input
                   id="fullName"
                   type="text"
                   value={formData.fullName}
                   onChange={(e) => updateFormData('fullName', e.target.value)}
                   placeholder="Enter your full name"
-                  className="bg-black/30 border-luxury-gold/20 text-luxury-cream"
+                  className="bg-white border-gray-300 text-black"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-luxury-cream/80">Email</Label>
+                <Label htmlFor="email" className="text-gray-700">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => updateFormData('email', e.target.value)}
                   placeholder="Enter your email"
-                  className="bg-black/30 border-luxury-gold/20 text-luxury-cream"
+                  className="bg-white border-gray-300 text-black"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="role" className="text-luxury-cream/80">Role</Label>
+                <Label htmlFor="role" className="text-gray-700">Role</Label>
                 <Select value={formData.role} onValueChange={(value) => updateFormData('role', value as UserRole)}>
-                  <SelectTrigger className="bg-black/30 border-luxury-gold/20 text-luxury-cream">
+                  <SelectTrigger className="bg-white border-gray-300 text-black">
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-900 border-luxury-gold/20">
+                  <SelectContent className="bg-white border-gray-300">
                     {roles.map((role) => (
                       <SelectItem key={role.value} value={role.value}>
                         {role.label}
@@ -149,7 +149,7 @@ export const SignUpPage: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-luxury-cream/80">Password</Label>
+                <Label htmlFor="password" className="text-gray-700">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -157,14 +157,14 @@ export const SignUpPage: React.FC = () => {
                     value={formData.password}
                     onChange={(e) => updateFormData('password', e.target.value)}
                     placeholder="Enter your password"
-                    className="bg-black/30 border-luxury-gold/20 text-luxury-cream pr-10"
+                    className="bg-white border-gray-300 text-black pr-10"
                     required
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 text-luxury-cream/60"
+                    className="absolute right-0 top-0 h-full px-3 text-gray-400"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -173,7 +173,7 @@ export const SignUpPage: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-luxury-cream/80">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className="text-gray-700">Confirm Password</Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
@@ -181,14 +181,14 @@ export const SignUpPage: React.FC = () => {
                     value={formData.confirmPassword}
                     onChange={(e) => updateFormData('confirmPassword', e.target.value)}
                     placeholder="Confirm your password"
-                    className="bg-black/30 border-luxury-gold/20 text-luxury-cream pr-10"
+                    className="bg-white border-gray-300 text-black pr-10"
                     required
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 text-luxury-cream/60"
+                    className="absolute right-0 top-0 h-full px-3 text-gray-400"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -200,15 +200,15 @@ export const SignUpPage: React.FC = () => {
               </div>
 
               {error && (
-                <Alert className="bg-red-900/20 border-red-500/50">
-                  <AlertDescription className="text-red-400">{error}</AlertDescription>
+                <Alert className="bg-red-50 border-red-200">
+                  <AlertDescription className="text-red-600">{error}</AlertDescription>
                 </Alert>
               )}
 
               <Button
                 type="submit"
                 disabled={isLoading || formData.password !== formData.confirmPassword}
-                className="w-full bg-gradient-to-r from-luxury-gold to-luxury-gold/80 hover:from-luxury-gold/80 hover:to-luxury-gold text-black font-semibold"
+                className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
               >
                 {isLoading ? (
                   <>
@@ -225,9 +225,9 @@ export const SignUpPage: React.FC = () => {
 
         {/* Sign In Link */}
         <div className="text-center">
-          <p className="text-luxury-cream/60">
+          <p className="text-gray-600">
             Already have an account?{' '}
-            <a href="/login" className="text-luxury-gold hover:text-luxury-gold/80 font-medium">
+            <a href="/login" className="text-primary hover:text-primary/80 font-medium">
               Sign in
             </a>
           </p>

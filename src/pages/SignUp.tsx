@@ -77,36 +77,36 @@ const SignUp = () => {
   };
   
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center bg-luxury-black p-4">
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-white p-4">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute right-0 top-0 -rotate-12 w-96 h-96 bg-gold-gradient rounded-full opacity-[0.03] blur-3xl"></div>
-        <div className="absolute left-0 bottom-0 rotate-12 w-96 h-96 bg-gold-gradient rounded-full opacity-[0.03] blur-3xl"></div>
+        <div className="absolute right-0 top-0 -rotate-12 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute left-0 bottom-0 rotate-12 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
       </div>
       
       <div className="text-center mb-10 z-10">
-        <h1 className="text-4xl md:text-5xl font-display font-bold text-luxury-gold mb-2">
+        <h1 className="text-4xl md:text-5xl font-display font-bold text-primary mb-2">
           MiN NEW YORK
         </h1>
-        <p className="text-luxury-cream/60">Create Your Luxury Management Account</p>
+        <p className="text-gray-600">Create Your Luxury Management Account</p>
       </div>
       
-      <LuxuryCard className="w-full max-w-md glass-card z-10 p-8">
+      <LuxuryCard className="w-full max-w-md bg-white border border-gray-200 z-10 p-8">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-display gold-gradient-text">Join The Team</h2>
-          <p className="text-luxury-cream/60 text-sm mt-1">Register for platform access</p>
+          <h2 className="text-2xl font-display text-primary">Join The Team</h2>
+          <p className="text-gray-600 text-sm mt-1">Register for platform access</p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm text-luxury-cream/80">Email</Label>
+            <Label htmlFor="email" className="text-sm text-gray-700">Email</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-luxury-cream/60" />
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
                 id="email"
                 type="email"
                 placeholder="youremail@example.com"
-                className="pl-10 w-full bg-black/30 border border-luxury-gold/20 rounded-md py-2 px-3 text-luxury-cream focus:outline-none focus:border-luxury-gold"
+                className="pl-10 w-full bg-white border border-gray-300 rounded-md py-2 px-3 text-black focus:outline-none focus:border-primary"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -114,21 +114,21 @@ const SignUp = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm text-luxury-cream/80">Password</Label>
+            <Label htmlFor="password" className="text-sm text-gray-700">Password</Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-luxury-cream/60" />
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className="pl-10 w-full bg-black/30 border border-luxury-gold/20 rounded-md py-2 px-3 text-luxury-cream focus:outline-none focus:border-luxury-gold"
+                className="pl-10 w-full bg-white border border-gray-300 rounded-md py-2 px-3 text-black focus:outline-none focus:border-primary"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
-                className="absolute right-3 top-3 text-luxury-cream/60"
+                className="absolute right-3 top-3 text-gray-400"
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -140,14 +140,14 @@ const SignUp = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-sm text-luxury-cream/80">Confirm Password</Label>
+            <Label htmlFor="confirmPassword" className="text-sm text-gray-700">Confirm Password</Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-luxury-cream/60" />
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
                 id="confirmPassword"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className="pl-10 w-full bg-black/30 border border-luxury-gold/20 rounded-md py-2 px-3 text-luxury-cream focus:outline-none focus:border-luxury-gold"
+                className="pl-10 w-full bg-white border border-gray-300 rounded-md py-2 px-3 text-black focus:outline-none focus:border-primary"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
@@ -155,12 +155,12 @@ const SignUp = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="role" className="text-sm text-luxury-cream/80">Role</Label>
+            <Label htmlFor="role" className="text-sm text-gray-700">Role</Label>
             <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
-              <SelectTrigger className="w-full bg-black/30 border border-luxury-gold/20 text-luxury-cream">
+              <SelectTrigger className="w-full bg-white border border-gray-300 text-black">
                 <SelectValue placeholder="Select your role" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-luxury-gold/20">
+              <SelectContent className="bg-white border-gray-300">
                 <SelectItem value="CEO">CEO</SelectItem>
                 <SelectItem value="CCO">CCO</SelectItem>
                 <SelectItem value="Commercial Director">Commercial Director</SelectItem>
@@ -184,9 +184,9 @@ const SignUp = () => {
           </LuxuryButton>
         </form>
         
-        <div className="mt-6 text-center text-sm text-luxury-cream/60">
+        <div className="mt-6 text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link to="/login" className="text-luxury-gold hover:underline">
+          <Link to="/login" className="text-primary hover:underline">
             Sign in
           </Link>
         </div>

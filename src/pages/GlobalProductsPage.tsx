@@ -37,6 +37,11 @@ const GlobalProductsPage = () => {
   const products = productsData?.products || [];
   const insights = productsData?.insights || { total_products: 0, low_stock_alerts: 0 };
 
+  const handleStatClick = (filterType: string) => {
+    console.log('Global stat clicked:', filterType);
+    // You can implement filtering logic here or navigate to a filtered view
+  };
+
   return (
     <div className="min-h-screen bg-white text-black p-6">
       <div className="max-w-7xl mx-auto">
@@ -57,23 +62,35 @@ const GlobalProductsPage = () => {
           </div>
         </div>
 
-        {/* Summary Stats */}
+        {/* Summary Stats - Now Clickable */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <LuxuryCard className="p-6 text-center bg-white border border-gray-200">
+          <LuxuryCard 
+            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            onClick={() => handleStatClick('total')}
+          >
             <div className="text-3xl font-bold text-primary">{insights.total_products}</div>
             <div className="text-sm text-gray-600">Total Products</div>
           </LuxuryCard>
-          <LuxuryCard className="p-6 text-center bg-white border border-gray-200">
+          <LuxuryCard 
+            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            onClick={() => handleStatClick('low_stock')}
+          >
             <div className="text-3xl font-bold text-red-400">{insights.low_stock_alerts}</div>
             <div className="text-sm text-gray-600">Low Stock Alerts</div>
           </LuxuryCard>
-          <LuxuryCard className="p-6 text-center bg-white border border-gray-200">
+          <LuxuryCard 
+            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            onClick={() => handleStatClick('active')}
+          >
             <div className="text-3xl font-bold text-green-500">
               {products.filter(p => p.status === 'active').length}
             </div>
             <div className="text-sm text-gray-600">Active Products</div>
           </LuxuryCard>
-          <LuxuryCard className="p-6 text-center bg-white border border-gray-200">
+          <LuxuryCard 
+            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            onClick={() => handleStatClick('total_value')}
+          >
             <div className="text-3xl font-bold text-primary">
               ${products.reduce((sum, p) => sum + (p.price || 0), 0).toLocaleString()}
             </div>

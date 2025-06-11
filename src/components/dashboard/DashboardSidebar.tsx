@@ -17,7 +17,8 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronUp,
-  LucideIcon
+  LucideIcon,
+  Package
 } from 'lucide-react';
 
 interface NavItemProps {
@@ -61,6 +62,15 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
       label: 'Orders', 
       path: '/orders',
       subItems: []
+    },
+    { 
+      icon: Package, 
+      label: 'Products',
+      path: '',
+      subItems: [
+        { label: 'Global Products', path: '/products' },
+        { label: 'US Products', path: '/products/us' },
+      ],
     },
     { 
       icon: Calendar, 

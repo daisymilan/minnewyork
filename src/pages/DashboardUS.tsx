@@ -508,10 +508,10 @@ const DashboardUS = () => {
                     )}
                   </LuxuryCard>
 
-                  {/* US Product Performance */}
+                  {/* US Product Performance - Fixed routing */}
                   <LuxuryCard 
                     className="p-6 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
-                    onClick={() => navigate('/products')}
+                    onClick={() => navigate('/products/us')}
                   >
                     <h3 className="text-lg font-sans text-primary mb-4">US Product Performance</h3>
                     {productsLoading ? (

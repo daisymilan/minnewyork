@@ -22,17 +22,17 @@ export const B2BCustomersTable: React.FC<B2BCustomersTableProps> = ({ customers,
 
   if (isLoading) {
     return (
-      <LuxuryCard className="p-6">
-        <div className="text-center py-8">Loading B2B customers...</div>
+      <LuxuryCard className="p-6 bg-white border border-gray-200">
+        <div className="text-center py-8 text-black">Loading B2B customers...</div>
       </LuxuryCard>
     );
   }
 
   return (
-    <LuxuryCard className="p-6">
+    <LuxuryCard className="p-6 bg-white border border-gray-200">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-display text-luxury-gold">B2B Customers</h3>
-        <div className="text-sm text-luxury-cream/60">
+        <h3 className="text-lg font-sans text-primary">B2B Customers</h3>
+        <div className="text-sm text-gray-600">
           {customers.length} total customers
         </div>
       </div>
@@ -40,25 +40,25 @@ export const B2BCustomersTable: React.FC<B2BCustomersTableProps> = ({ customers,
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="border-luxury-gold/10">
-              <TableHead className="text-luxury-cream/60">Company</TableHead>
-              <TableHead className="text-luxury-cream/60">Contact</TableHead>
-              <TableHead className="text-luxury-cream/60">Email</TableHead>
-              <TableHead className="text-luxury-cream/60">Group</TableHead>
-              <TableHead className="text-luxury-cream/60">Orders</TableHead>
-              <TableHead className="text-luxury-cream/60">Total Spent</TableHead>
-              <TableHead className="text-luxury-cream/60">Status</TableHead>
+            <TableRow className="border-gray-200">
+              <TableHead className="text-gray-600">Company</TableHead>
+              <TableHead className="text-gray-600">Contact</TableHead>
+              <TableHead className="text-gray-600">Email</TableHead>
+              <TableHead className="text-gray-600">Group</TableHead>
+              <TableHead className="text-gray-600">Orders</TableHead>
+              <TableHead className="text-gray-600">Total Spent</TableHead>
+              <TableHead className="text-gray-600">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {customers.map((customer) => (
-              <TableRow key={customer.id} className="border-luxury-gold/5">
-                <TableCell className="font-medium">{customer.company_name}</TableCell>
-                <TableCell>{customer.contact_name}</TableCell>
-                <TableCell>{customer.email}</TableCell>
-                <TableCell>{customer.customer_group}</TableCell>
-                <TableCell>{customer.total_orders}</TableCell>
-                <TableCell>${customer.total_spent.toLocaleString()}</TableCell>
+              <TableRow key={customer.id} className="border-gray-100 hover:bg-gray-50">
+                <TableCell className="font-medium text-black">{customer.company_name}</TableCell>
+                <TableCell className="text-black">{customer.contact_name}</TableCell>
+                <TableCell className="text-black">{customer.email}</TableCell>
+                <TableCell className="text-black">{customer.customer_group}</TableCell>
+                <TableCell className="text-black">{customer.total_orders}</TableCell>
+                <TableCell className="text-black">${customer.total_spent.toLocaleString()}</TableCell>
                 <TableCell>
                   <Badge className={getStatusColor(customer.status)}>
                     {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}

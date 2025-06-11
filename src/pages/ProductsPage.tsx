@@ -74,7 +74,7 @@ const ProductsPage = () => {
 
   const handleStatClick = (filterType: string) => {
     console.log('Stat clicked:', filterType);
-    navigate(`/products/details?filter=${filterType}`);
+    // You can implement filtering logic here or navigate to a filtered view
   };
 
   return (

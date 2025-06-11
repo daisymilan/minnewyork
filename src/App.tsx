@@ -15,7 +15,6 @@ import ProductDetailsPage from "./pages/ProductDetailsPage";
 import NotFound from "./pages/NotFound";
 import { SignInPage } from "./components/auth/SignInPage";
 import { SignUpPage } from "./components/auth/SignUpPage";
-import B2BDashboard from "./components/b2b/B2BDashboard";
 import B2BKingDashboard from "./pages/B2BKingDashboard";
 import MarketingDashboard from "./pages/MarketingDashboard";
 import CalendarDashboard from "./pages/CalendarDashboard";
@@ -25,6 +24,14 @@ import SupportDashboard from "./pages/SupportDashboard";
 
 // Create a client
 const queryClient = new QueryClient();
+
+// Simple profile page component
+const ProfilePage = () => (
+  <div className="min-h-screen bg-white text-black p-6">
+    <h1 className="text-2xl font-sans text-black mb-4">Profile</h1>
+    <p className="text-gray-600">Profile page coming soon...</p>
+  </div>
+);
 
 // Define the AppRoutes component using useAuth hook
 const AppRoutes = () => {
@@ -37,13 +44,13 @@ const AppRoutes = () => {
       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/products" element={<ProductsPage />} />
       <Route path="/products/details" element={<ProductDetailsPage />} />
-      <Route path="/b2b" element={<B2BDashboard />} />
-      <Route path="/b2bking" element={<B2BKingDashboard />} />
+      <Route path="/b2b" element={<B2BKingDashboard />} />
       <Route path="/marketing" element={<MarketingDashboard />} />
       <Route path="/calendar" element={<CalendarDashboard />} />
       <Route path="/analytics" element={<AnalyticsDashboard />} />
       <Route path="/ad-creator" element={<AdCreatorDashboard />} />
       <Route path="/support" element={<SupportDashboard />} />
+      <Route path="/profile" element={<ProfilePage />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

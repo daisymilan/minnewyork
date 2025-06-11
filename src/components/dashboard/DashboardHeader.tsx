@@ -37,11 +37,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ className }) => {
   return (
     <header className={`py-4 px-6 bg-white border-b border-gray-200 flex items-center justify-between ${className}`}>
       <div className="flex items-center gap-4">
-        <h1 className="text-xl font-sans text-luxury-gold">MiN NEW YORK</h1>
+        <h1 className="text-xl font-sans text-black">MiN NEW YORK</h1>
         
         {/* Role badge */}
         {user && (
-          <div className="bg-luxury-gold/10 text-luxury-gold py-1 px-3 rounded-full text-xs">
+          <div className="bg-primary/10 text-primary py-1 px-3 rounded-full text-xs">
             {user.role}
           </div>
         )}
@@ -53,7 +53,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ className }) => {
           <input
             type="text"
             placeholder="Search..."
-            className="w-full bg-gray-50 border border-gray-300 rounded-full py-2 px-4 text-sm text-black focus:outline-none focus:border-luxury-gold"
+            className="w-full bg-gray-50 border border-gray-300 rounded-full py-2 px-4 text-sm text-black focus:outline-none focus:border-primary"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -92,7 +92,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ className }) => {
             strokeWidth="2" 
             strokeLinecap="round" 
             strokeLinejoin="round"
-            className="text-luxury-gold"
+            className="text-primary"
           >
             <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
             <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
@@ -103,7 +103,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ className }) => {
         {/* User avatar */}
         {user && (
           <div className="flex items-center gap-2 text-sm">
-            <div className="h-8 w-8 rounded-full bg-luxury-gold/20 flex items-center justify-center text-luxury-gold">
+            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
               {user.name.charAt(0)}
             </div>
             <div className="hidden lg:block">

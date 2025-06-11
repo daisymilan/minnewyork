@@ -57,7 +57,7 @@ const B2BKingDashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-luxury-black text-luxury-cream">
+    <div className="flex min-h-screen bg-white text-black">
       <DashboardSidebar 
         isCollapsed={sidebarCollapsed} 
         toggleSidebar={toggleSidebar}
@@ -67,46 +67,46 @@ const B2BKingDashboard = () => {
         <div className="p-6">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-display text-luxury-gold mb-2">B2BKing Dashboard</h1>
-            <p className="text-luxury-cream/60">Manage your B2B customers, quotes, and leads</p>
+            <h1 className="text-3xl font-sans text-primary mb-2">B2B Dashboard</h1>
+            <p className="text-gray-600">Manage your B2B customers, quotes, and leads</p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <LuxuryCard className="p-6">
+            <LuxuryCard className="p-6 bg-white border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-luxury-cream/60 text-sm">Total Customers</p>
-                  <p className="text-2xl font-bold text-luxury-gold">{stats.totalCustomers}</p>
+                  <p className="text-gray-600 text-sm">Total Customers</p>
+                  <p className="text-2xl font-bold text-primary">{stats.totalCustomers}</p>
                 </div>
-                <Users className="h-8 w-8 text-luxury-gold/60" />
+                <Users className="h-8 w-8 text-primary/60" />
               </div>
             </LuxuryCard>
 
-            <LuxuryCard className="p-6">
+            <LuxuryCard className="p-6 bg-white border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-luxury-cream/60 text-sm">Approved Customers</p>
+                  <p className="text-gray-600 text-sm">Approved Customers</p>
                   <p className="text-2xl font-bold text-green-500">{stats.approvedCustomers}</p>
                 </div>
                 <Building2 className="h-8 w-8 text-green-500/60" />
               </div>
             </LuxuryCard>
 
-            <LuxuryCard className="p-6">
+            <LuxuryCard className="p-6 bg-white border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-luxury-cream/60 text-sm">Pending Quotes</p>
+                  <p className="text-gray-600 text-sm">Pending Quotes</p>
                   <p className="text-2xl font-bold text-yellow-500">{stats.pendingQuotes}</p>
                 </div>
                 <FileText className="h-8 w-8 text-yellow-500/60" />
               </div>
             </LuxuryCard>
 
-            <LuxuryCard className="p-6">
+            <LuxuryCard className="p-6 bg-white border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-luxury-cream/60 text-sm">Total Leads</p>
+                  <p className="text-gray-600 text-sm">Total Leads</p>
                   <p className="text-2xl font-bold text-purple-500">{stats.totalLeads}</p>
                 </div>
                 <Target className="h-8 w-8 text-purple-500/60" />
@@ -116,22 +116,22 @@ const B2BKingDashboard = () => {
 
           {/* Tabs for different sections */}
           <Tabs defaultValue="customers" className="space-y-6">
-            <TabsList className="bg-luxury-black/50 border border-luxury-gold/20">
+            <TabsList className="bg-gray-100 border border-gray-200">
               <TabsTrigger 
                 value="customers" 
-                className="data-[state=active]:bg-luxury-gold data-[state=active]:text-luxury-black"
+                className="data-[state=active]:bg-primary data-[state=active]:text-white"
               >
                 B2B Customers
               </TabsTrigger>
               <TabsTrigger 
                 value="quotes"
-                className="data-[state=active]:bg-luxury-gold data-[state=active]:text-luxury-black"
+                className="data-[state=active]:bg-primary data-[state=active]:text-white"
               >
                 Quotes
               </TabsTrigger>
               <TabsTrigger 
                 value="leads"
-                className="data-[state=active]:bg-luxury-gold data-[state=active]:text-luxury-black"
+                className="data-[state=active]:bg-primary data-[state=active]:text-white"
               >
                 Leads
               </TabsTrigger>
@@ -147,10 +147,10 @@ const B2BKingDashboard = () => {
 
             <TabsContent value="leads" className="space-y-4">
               <div className="space-y-6">
-                <LuxuryCard className="p-6">
+                <LuxuryCard className="p-6 bg-white border border-gray-200">
                   <div className="mb-4">
-                    <h3 className="text-lg font-display text-luxury-gold mb-2">Upload Leads</h3>
-                    <p className="text-luxury-cream/60 text-sm">Upload Excel or CSV files to import new leads through N8N workflow</p>
+                    <h3 className="text-lg font-sans text-primary mb-2">Upload Leads</h3>
+                    <p className="text-gray-600 text-sm">Upload Excel or CSV files to import new leads through N8N workflow</p>
                   </div>
                   <LeadsUploader 
                     onUploadSuccess={handleUploadSuccess}
@@ -162,23 +162,23 @@ const B2BKingDashboard = () => {
 
                 {/* Show processed leads separately if any */}
                 {processedLeads.length > 0 && (
-                  <LuxuryCard className="p-6">
+                  <LuxuryCard className="p-6 bg-white border border-gray-200">
                     <div className="mb-4">
-                      <h3 className="text-lg font-display text-luxury-gold mb-2">Recently Processed Leads</h3>
-                      <p className="text-luxury-cream/60 text-sm">{processedLeads.length} leads processed from uploaded files</p>
+                      <h3 className="text-lg font-sans text-primary mb-2">Recently Processed Leads</h3>
+                      <p className="text-gray-600 text-sm">{processedLeads.length} leads processed from uploaded files</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {processedLeads.map((lead) => (
-                        <div key={lead.id} className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4">
+                        <div key={lead.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                           <div className="space-y-2">
-                            <div className="font-medium text-luxury-cream">{lead.name}</div>
-                            <div className="text-sm text-luxury-cream/60">{lead.company}</div>
-                            <div className="text-sm text-luxury-cream/60">{lead.email}</div>
+                            <div className="font-medium text-black">{lead.name}</div>
+                            <div className="text-sm text-gray-600">{lead.company}</div>
+                            <div className="text-sm text-gray-600">{lead.email}</div>
                             <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                              lead.priority === 'high' ? 'bg-red-500/20 text-red-400' :
-                              lead.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                              lead.priority === 'research' ? 'bg-blue-500/20 text-blue-400' :
-                              'bg-gray-500/20 text-gray-400'
+                              lead.priority === 'high' ? 'bg-red-500/20 text-red-600' :
+                              lead.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-600' :
+                              lead.priority === 'research' ? 'bg-blue-500/20 text-blue-600' :
+                              'bg-gray-500/20 text-gray-600'
                             }`}>
                               {lead.priority} priority
                             </div>

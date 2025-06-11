@@ -57,12 +57,6 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
       subItems: []
     },
     { 
-      icon: ListChecks, 
-      label: 'B2B King', 
-      path: '/b2bking',
-      subItems: []
-    },
-    { 
       icon: ShoppingCart, 
       label: 'Orders', 
       path: '/orders',
@@ -117,7 +111,7 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
       )}
     >
       <div className="flex items-center justify-between p-4">
-        {!isCollapsed && <span className="font-bold">Dashboard</span>}
+        {!isCollapsed && <span className="font-bold text-black">Dashboard</span>}
         <Button variant="ghost" size="icon" onClick={toggleSidebar}>
           {isCollapsed ? <ChevronDown /> : <ChevronUp />}
         </Button>
@@ -130,7 +124,7 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
               <div>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start rounded-md hover:bg-gray-100"
+                  className="w-full justify-start rounded-md hover:bg-gray-100 text-black"
                   onClick={() => toggleSubMenu(item.label)}
                 >
                   <item.icon className="mr-2 h-4 w-4" />
@@ -146,8 +140,8 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
                         className={cn(
                           "group flex items-center rounded-md px-2 py-1 text-sm font-medium hover:bg-gray-100",
                           location.pathname === subItem.path
-                            ? "bg-luxury-gold/10 text-luxury-gold"
-                            : "text-gray-700"
+                            ? "bg-primary/10 text-primary"
+                            : "text-black"
                         )}
                       >
                         {subItem.label}
@@ -162,8 +156,8 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
                 className={cn(
                   "group flex items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-gray-100",
                   location.pathname === item.path
-                    ? "bg-luxury-gold/10 text-luxury-gold"
-                    : "text-gray-700"
+                    ? "bg-primary/10 text-primary"
+                    : "text-black"
                 )}
               >
                 <item.icon className="mr-2 h-4 w-4" />
@@ -175,7 +169,7 @@ const DashboardSidebar = ({ isCollapsed, toggleSidebar }: DashboardSidebarProps)
       </nav>
 
       <div className="p-4">
-        <Button variant="outline" className="w-full" onClick={() => {
+        <Button variant="outline" className="w-full text-black border-gray-300" onClick={() => {
           signOut();
           navigate('/login');
         }}>

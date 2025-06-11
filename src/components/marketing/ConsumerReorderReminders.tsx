@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LuxuryCard } from '@/components/ui/luxury-card';
-import { LuxuryButton } from '@/components/ui/luxury-button';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/sonner';
 import { Clock, Mail, MessageSquare, Users, Target, Calendar, Send } from 'lucide-react';
@@ -113,10 +113,10 @@ export const ConsumerReorderReminders = () => {
 
   const getLikelihoodColor = (likelihood: string) => {
     switch (likelihood) {
-      case 'high': return 'text-green-400 bg-green-500/20';
-      case 'medium': return 'text-yellow-400 bg-yellow-500/20';
-      case 'low': return 'text-red-400 bg-red-500/20';
-      default: return 'text-gray-400 bg-gray-500/20';
+      case 'high': return 'text-green-500 bg-green-500/20';
+      case 'medium': return 'text-yellow-500 bg-yellow-500/20';
+      case 'low': return 'text-red-500 bg-red-500/20';
+      default: return 'text-gray-500 bg-gray-500/20';
     }
   };
 
@@ -124,99 +124,100 @@ export const ConsumerReorderReminders = () => {
     <div className="space-y-6">
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <LuxuryCard className="p-4">
+        <LuxuryCard className="p-4 bg-white border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-luxury-cream/60 text-sm">Due for Reorder</p>
-              <p className="text-2xl font-bold text-luxury-gold">{mockCustomers.length}</p>
+              <p className="text-gray-600 text-sm">Due for Reorder</p>
+              <p className="text-2xl font-bold text-primary">{mockCustomers.length}</p>
             </div>
-            <Clock className="h-6 w-6 text-luxury-gold/60" />
+            <Clock className="h-6 w-6 text-primary/60" />
           </div>
         </LuxuryCard>
 
-        <LuxuryCard className="p-4">
+        <LuxuryCard className="p-4 bg-white border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-luxury-cream/60 text-sm">High Likelihood</p>
-              <p className="text-2xl font-bold text-green-400">{getCustomersByLikelihood('high').length}</p>
+              <p className="text-gray-600 text-sm">High Likelihood</p>
+              <p className="text-2xl font-bold text-green-500">{getCustomersByLikelihood('high').length}</p>
             </div>
-            <Target className="h-6 w-6 text-green-400/60" />
+            <Target className="h-6 w-6 text-green-500/60" />
           </div>
         </LuxuryCard>
 
-        <LuxuryCard className="p-4">
+        <LuxuryCard className="p-4 bg-white border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-luxury-cream/60 text-sm">Active Campaigns</p>
-              <p className="text-2xl font-bold text-blue-400">{mockCampaigns.filter(c => c.status === 'active').length}</p>
+              <p className="text-gray-600 text-sm">Active Campaigns</p>
+              <p className="text-2xl font-bold text-blue-500">{mockCampaigns.filter(c => c.status === 'active').length}</p>
             </div>
-            <Mail className="h-6 w-6 text-blue-400/60" />
+            <Mail className="h-6 w-6 text-blue-500/60" />
           </div>
         </LuxuryCard>
 
-        <LuxuryCard className="p-4">
+        <LuxuryCard className="p-4 bg-white border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-luxury-cream/60 text-sm">Avg Conversion</p>
-              <p className="text-2xl font-bold text-purple-400">10.4%</p>
+              <p className="text-gray-600 text-sm">Avg Conversion</p>
+              <p className="text-2xl font-bold text-purple-500">10.4%</p>
             </div>
-            <Users className="h-6 w-6 text-purple-400/60" />
+            <Users className="h-6 w-6 text-purple-500/60" />
           </div>
         </LuxuryCard>
       </div>
 
       <Tabs defaultValue="customers" className="space-y-4">
-        <TabsList className="bg-luxury-black/50 border border-luxury-gold/20">
-          <TabsTrigger value="customers" className="data-[state=active]:bg-luxury-gold data-[state=active]:text-luxury-black">
+        <TabsList className="bg-gray-100 border border-gray-200">
+          <TabsTrigger value="customers" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             Ready to Reorder
           </TabsTrigger>
-          <TabsTrigger value="campaigns" className="data-[state=active]:bg-luxury-gold data-[state=active]:text-luxury-black">
+          <TabsTrigger value="campaigns" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             Campaigns
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="data-[state=active]:bg-luxury-gold data-[state=active]:text-luxury-black">
+          <TabsTrigger value="analytics" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             Analytics
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="customers" className="space-y-4">
-          <LuxuryCard className="p-6">
+          <LuxuryCard className="p-6 bg-white border border-gray-200">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-display text-luxury-gold">Customers Ready for Reorder</h3>
-              <LuxuryButton 
+              <h3 className="text-lg font-sans text-primary">Customers Ready for Reorder</h3>
+              <Button 
                 onClick={() => handleSendReminders(mockCustomers.map(c => c.id))}
                 disabled={sendReminderMutation.isPending}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 bg-primary text-white hover:bg-primary/80"
               >
                 <Send className="h-4 w-4" />
                 <span>Send All Reminders</span>
-              </LuxuryButton>
+              </Button>
             </div>
 
             <div className="space-y-3">
               {mockCustomers.map((customer) => (
-                <div key={customer.id} className="border border-luxury-gold/20 rounded-lg p-4 hover:border-luxury-gold/40 transition-colors">
+                <div key={customer.id} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
                   <div className="flex justify-between items-start">
                     <div className="space-y-2">
                       <div className="flex items-center space-x-3">
-                        <h4 className="font-medium text-luxury-cream">{customer.name}</h4>
+                        <h4 className="font-medium text-black">{customer.name}</h4>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getLikelihoodColor(customer.reorder_likelihood)}`}>
                           {customer.reorder_likelihood} likelihood
                         </span>
                       </div>
-                      <p className="text-sm text-luxury-cream/60">{customer.email}</p>
-                      <div className="flex items-center space-x-4 text-sm text-luxury-cream/60">
+                      <p className="text-sm text-gray-600">{customer.email}</p>
+                      <div className="flex items-center space-x-4 text-sm text-gray-600">
                         <span>Last order: {customer.days_since_order} days ago</span>
                         <span>Value: ${customer.last_order_value}</span>
                         <span>Category: {customer.product_category}</span>
                       </div>
                     </div>
-                    <LuxuryButton
+                    <Button
                       size="sm"
                       onClick={() => handleSendReminders([customer.id])}
                       disabled={sendReminderMutation.isPending}
+                      className="bg-primary text-white hover:bg-primary/80"
                     >
                       Send Reminder
-                    </LuxuryButton>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -225,32 +226,32 @@ export const ConsumerReorderReminders = () => {
         </TabsContent>
 
         <TabsContent value="campaigns" className="space-y-4">
-          <LuxuryCard className="p-6">
-            <h3 className="text-lg font-display text-luxury-gold mb-4">Active Campaigns</h3>
+          <LuxuryCard className="p-6 bg-white border border-gray-200">
+            <h3 className="text-lg font-sans text-primary mb-4">Active Campaigns</h3>
             
             <div className="space-y-4">
               {mockCampaigns.map((campaign) => (
-                <div key={campaign.id} className="border border-luxury-gold/20 rounded-lg p-4">
+                <div key={campaign.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex justify-between items-start">
                     <div className="space-y-2">
-                      <h4 className="font-medium text-luxury-cream">{campaign.name}</h4>
-                      <div className="flex items-center space-x-4 text-sm text-luxury-cream/60">
+                      <h4 className="font-medium text-black">{campaign.name}</h4>
+                      <div className="flex items-center space-x-4 text-sm text-gray-600">
                         <span>Triggers after {campaign.trigger_days} days</span>
                         <span>Type: {campaign.template_type}</span>
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          campaign.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
+                          campaign.status === 'active' ? 'bg-green-500/20 text-green-500' : 'bg-gray-500/20 text-gray-500'
                         }`}>
                           {campaign.status}
                         </span>
                       </div>
                       <div className="flex items-center space-x-4 text-sm">
-                        <span className="text-luxury-cream/60">Targeted: {campaign.customers_targeted}</span>
-                        <span className="text-green-400">Conversion: {campaign.conversion_rate}%</span>
+                        <span className="text-gray-600">Targeted: {campaign.customers_targeted}</span>
+                        <span className="text-green-500">Conversion: {campaign.conversion_rate}%</span>
                       </div>
                     </div>
-                    <LuxuryButton variant="outline" size="sm">
+                    <Button variant="outline" size="sm">
                       Edit Campaign
-                    </LuxuryButton>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -259,10 +260,10 @@ export const ConsumerReorderReminders = () => {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
-          <LuxuryCard className="p-6">
-            <h3 className="text-lg font-display text-luxury-gold mb-4">Campaign Performance</h3>
-            <div className="text-center py-8 text-luxury-cream/60">
-              <Calendar className="h-12 w-12 mx-auto mb-4 text-luxury-gold/40" />
+          <LuxuryCard className="p-6 bg-white border border-gray-200">
+            <h3 className="text-lg font-sans text-primary mb-4">Campaign Performance</h3>
+            <div className="text-center py-8 text-gray-600">
+              <Calendar className="h-12 w-12 mx-auto mb-4 text-primary/40" />
               <p>Analytics dashboard coming soon...</p>
               <p className="text-sm mt-2">Track conversion rates, revenue impact, and campaign effectiveness</p>
             </div>

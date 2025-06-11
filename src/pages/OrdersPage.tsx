@@ -42,7 +42,7 @@ const OrdersPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-luxury-black text-luxury-cream">
+    <div className="flex h-screen bg-white text-black">
       <DashboardSidebar 
         isCollapsed={sidebarCollapsed} 
         toggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} 
@@ -55,8 +55,8 @@ const OrdersPage = () => {
           <div className="animate-fade-in">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h1 className="text-3xl font-display text-luxury-gold mb-2">Orders</h1>
-                <p className="text-luxury-cream/60">
+                <h1 className="text-3xl font-sans text-primary mb-2">Orders</h1>
+                <p className="text-gray-600">
                   Manage and track all your orders
                 </p>
               </div>
@@ -64,57 +64,57 @@ const OrdersPage = () => {
               {ordersData?.summary && (
                 <div className="flex gap-6 text-sm">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-luxury-gold">{ordersData.summary.total_orders}</div>
-                    <div className="text-luxury-cream/60">Total Orders</div>
+                    <div className="text-2xl font-bold text-primary">{ordersData.summary.total_orders}</div>
+                    <div className="text-gray-600">Total Orders</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-luxury-gold">${ordersData.summary.total_revenue.toFixed(2)}</div>
-                    <div className="text-luxury-cream/60">Total Revenue</div>
+                    <div className="text-2xl font-bold text-primary">${ordersData.summary.total_revenue.toFixed(2)}</div>
+                    <div className="text-gray-600">Total Revenue</div>
                   </div>
                 </div>
               )}
             </div>
 
-            <LuxuryCard className="overflow-hidden">
+            <LuxuryCard className="overflow-hidden bg-white border border-gray-200">
               {isLoading ? (
                 <div className="p-8 text-center">
-                  <div className="text-luxury-cream/60">Loading orders...</div>
+                  <div className="text-gray-600">Loading orders...</div>
                 </div>
               ) : error ? (
                 <div className="p-8 text-center">
                   <div className="text-red-400 mb-2">Failed to load orders</div>
-                  <div className="text-xs text-luxury-cream/60">Error: {error.message}</div>
+                  <div className="text-xs text-gray-600">Error: {error.message}</div>
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-luxury-gold/10 hover:bg-transparent">
-                      <TableHead className="text-luxury-cream/60 font-medium">Order ID</TableHead>
-                      <TableHead className="text-luxury-cream/60 font-medium">Customer</TableHead>
-                      <TableHead className="text-luxury-cream/60 font-medium">Email</TableHead>
-                      <TableHead className="text-luxury-cream/60 font-medium">Total</TableHead>
-                      <TableHead className="text-luxury-cream/60 font-medium">Status</TableHead>
-                      <TableHead className="text-luxury-cream/60 font-medium">Region</TableHead>
-                      <TableHead className="text-luxury-cream/60 font-medium">Date</TableHead>
-                      <TableHead className="text-luxury-cream/60 font-medium">Items</TableHead>
+                    <TableRow className="border-gray-200 hover:bg-transparent">
+                      <TableHead className="text-gray-600 font-medium">Order ID</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Customer</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Email</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Total</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Status</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Region</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Date</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Items</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {ordersData?.orders?.map((order) => (
                       <TableRow 
                         key={order.id} 
-                        className="border-luxury-gold/5 hover:bg-luxury-gold/5 transition-colors"
+                        className="border-gray-100 hover:bg-gray-50 transition-colors"
                       >
-                        <TableCell className="font-mono text-luxury-cream">
+                        <TableCell className="font-mono text-black">
                           #{order.id}
                         </TableCell>
-                        <TableCell className="text-luxury-cream">
+                        <TableCell className="text-black">
                           {order.customer_name}
                         </TableCell>
-                        <TableCell className="text-luxury-cream/80 text-sm">
+                        <TableCell className="text-gray-600 text-sm">
                           {order.customer_email || 'N/A'}
                         </TableCell>
-                        <TableCell className="text-luxury-cream font-medium">
+                        <TableCell className="text-black font-medium">
                           ${order.amount.toFixed(2)}
                         </TableCell>
                         <TableCell>
@@ -122,13 +122,13 @@ const OrdersPage = () => {
                             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-luxury-cream/80">
+                        <TableCell className="text-gray-600">
                           {order.region || 'Unknown'}
                         </TableCell>
-                        <TableCell className="text-luxury-cream/80 text-sm">
+                        <TableCell className="text-gray-600 text-sm">
                           {formatDate(order.date_created)}
                         </TableCell>
-                        <TableCell className="text-luxury-cream/80">
+                        <TableCell className="text-gray-600">
                           {order.items_count || 1} item{(order.items_count || 1) > 1 ? 's' : ''}
                         </TableCell>
                       </TableRow>
@@ -139,7 +139,7 @@ const OrdersPage = () => {
               
               {!isLoading && !error && (!ordersData?.orders || ordersData.orders.length === 0) && (
                 <div className="p-8 text-center">
-                  <div className="text-luxury-cream/60">No orders found</div>
+                  <div className="text-gray-600">No orders found</div>
                 </div>
               )}
             </LuxuryCard>

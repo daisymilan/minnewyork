@@ -121,11 +121,11 @@ export const LeadsUploader: React.FC<LeadsUploaderProps> = ({
         <Button
           onClick={handleFileSelect}
           disabled={isUploading || processingStatus?.status === 'processing'}
-          className="bg-luxury-gold text-luxury-black hover:bg-luxury-gold/80"
+          className="bg-primary text-white hover:bg-primary/80"
         >
           {isUploading ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-luxury-black mr-2"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               Uploading...
             </>
           ) : (
@@ -136,7 +136,7 @@ export const LeadsUploader: React.FC<LeadsUploaderProps> = ({
           )}
         </Button>
         
-        <div className="text-sm text-luxury-cream/60 flex items-center">
+        <div className="text-sm text-gray-600 flex items-center">
           <FileSpreadsheet className="mr-1 h-4 w-4" />
           .xlsx, .xls, .csv files supported
         </div>
@@ -172,32 +172,32 @@ export const LeadsUploader: React.FC<LeadsUploaderProps> = ({
 
       {/* Processed Leads Summary */}
       {processedLeads.length > 0 && (
-        <div className="bg-luxury-black/50 border border-luxury-gold/20 rounded-lg p-4">
-          <h4 className="text-luxury-gold font-medium mb-2">Processed Leads Summary</h4>
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <h4 className="text-primary font-medium mb-2">Processed Leads Summary</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="text-center">
-              <div className="text-red-400 font-bold text-xl">
+              <div className="text-red-500 font-bold text-xl">
                 {processedLeads.filter(l => l.priority === 'high').length}
               </div>
-              <div className="text-luxury-cream/60">High Priority</div>
+              <div className="text-gray-600">High Priority</div>
             </div>
             <div className="text-center">
-              <div className="text-yellow-400 font-bold text-xl">
+              <div className="text-yellow-500 font-bold text-xl">
                 {processedLeads.filter(l => l.priority === 'medium').length}
               </div>
-              <div className="text-luxury-cream/60">Medium Priority</div>
+              <div className="text-gray-600">Medium Priority</div>
             </div>
             <div className="text-center">
-              <div className="text-blue-400 font-bold text-xl">
+              <div className="text-blue-500 font-bold text-xl">
                 {processedLeads.filter(l => l.priority === 'research').length}
               </div>
-              <div className="text-luxury-cream/60">Research Needed</div>
+              <div className="text-gray-600">Research Needed</div>
             </div>
             <div className="text-center">
-              <div className="text-gray-400 font-bold text-xl">
+              <div className="text-gray-500 font-bold text-xl">
                 {processedLeads.filter(l => l.priority === 'low').length}
               </div>
-              <div className="text-luxury-cream/60">Low Priority</div>
+              <div className="text-gray-600">Low Priority</div>
             </div>
           </div>
         </div>

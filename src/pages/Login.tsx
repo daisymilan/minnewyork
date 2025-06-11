@@ -67,15 +67,14 @@ const Login = () => {
       </div>
       
       <div className="text-center mb-10 z-10">
-        <h1 className="text-4xl md:text-5xl font-sans font-bold text-luxury-gold mb-2">
+        <h1 className="text-4xl md:text-5xl font-sans font-bold text-primary mb-2">
           MiN NEW YORK
         </h1>
-        <p className="text-gray-600">Management Platform</p>
       </div>
       
       <LuxuryCard className="w-full max-w-md glass-card z-10 p-8">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-sans gold-gradient-text">Welcome Back</h2>
+          <h2 className="text-2xl font-sans text-primary">Welcome Back</h2>
           <p className="text-gray-600 text-sm mt-1">Sign in to your account</p>
         </div>
         
@@ -88,7 +87,7 @@ const Login = () => {
               id="email"
               type="email"
               placeholder="youremail@min.com"
-              className="w-full bg-gray-50 border border-gray-300 rounded-md py-2 px-3 text-black focus:outline-none focus:border-luxury-gold"
+              className="w-full bg-gray-50 border border-gray-300 rounded-md py-2 px-3 text-black focus:outline-none focus:border-primary"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -102,7 +101,7 @@ const Login = () => {
               id="password"
               type="password"
               placeholder="••••••••"
-              className="w-full bg-gray-50 border border-gray-300 rounded-md py-2 px-3 text-black focus:outline-none focus:border-luxury-gold"
+              className="w-full bg-gray-50 border border-gray-300 rounded-md py-2 px-3 text-black focus:outline-none focus:border-primary"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -140,7 +139,7 @@ const Login = () => {
         <div className="mt-6 text-center text-sm">
           <p className="text-gray-600">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-luxury-gold hover:underline">
+            <Link to="/signup" className="text-primary hover:underline">
               Sign up
             </Link>
           </p>

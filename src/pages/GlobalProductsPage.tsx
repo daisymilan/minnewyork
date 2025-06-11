@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -11,6 +10,7 @@ import { dashboardApi } from '@/services/dashboard';
 
 const GlobalProductsPage = () => {
   const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['dashboardProducts'],
@@ -37,10 +37,37 @@ const GlobalProductsPage = () => {
   const products = productsData?.products || [];
   const insights = productsData?.insights || { total_products: 0, low_stock_alerts: 0 };
 
+  // Low Stock: products with quantity between 1-5 (regardless of stock_status unless explicitly outofstock)
+  const lowStockProducts = products.filter(p => {
+    if (p.stock_status === 'outofstock') return false;
+    return p.stock_quantity !== null && p.stock_quantity !== undefined && p.stock_quantity > 0 && p.stock_quantity <= 5;
+  });
+
+  // Active products
+  const activeProducts = products.filter(p => p.status === 'active');
+
   const handleStatClick = (filterType: string) => {
     console.log('Global stat clicked:', filterType);
-    // You can implement filtering logic here or navigate to a filtered view
+    setActiveFilter(activeFilter === filterType ? null : filterType);
   };
+
+  // Filter products based on active filter
+  const getFilteredProducts = () => {
+    if (!activeFilter) return products;
+    
+    switch (activeFilter) {
+      case 'total':
+        return products;
+      case 'low_stock':
+        return lowStockProducts;
+      case 'active':
+        return activeProducts;
+      default:
+        return products;
+    }
+  };
+
+  const filteredProducts = getFilteredProducts();
 
   return (
     <div className="min-h-screen bg-white text-black p-6">
@@ -62,33 +89,61 @@ const GlobalProductsPage = () => {
           </div>
         </div>
 
+        {/* Active Filter Display */}
+        {activeFilter && (
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-sm text-gray-600">Showing:</span>
+            <Badge variant="outline" className="bg-white">
+              {activeFilter === 'total' ? 'All Products' :
+               activeFilter === 'low_stock' ? 'Low Stock Products' :
+               activeFilter === 'active' ? 'Active Products' : 'All Products'}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setActiveFilter(null)}
+              className="text-sm text-primary hover:bg-primary/10"
+            >
+              Clear Filter
+            </Button>
+          </div>
+        )}
+
         {/* Summary Stats - Now Clickable */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <LuxuryCard 
-            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            className={`p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200 ${
+              activeFilter === 'total' ? 'ring-2 ring-primary' : ''
+            }`}
             onClick={() => handleStatClick('total')}
           >
             <div className="text-3xl font-bold text-primary">{insights.total_products}</div>
             <div className="text-sm text-gray-600">Total Products</div>
           </LuxuryCard>
           <LuxuryCard 
-            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            className={`p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200 ${
+              activeFilter === 'low_stock' ? 'ring-2 ring-primary' : ''
+            }`}
             onClick={() => handleStatClick('low_stock')}
           >
-            <div className="text-3xl font-bold text-red-400">{insights.low_stock_alerts}</div>
+            <div className="text-3xl font-bold text-red-400">{lowStockProducts.length}</div>
             <div className="text-sm text-gray-600">Low Stock Alerts</div>
           </LuxuryCard>
           <LuxuryCard 
-            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            className={`p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200 ${
+              activeFilter === 'active' ? 'ring-2 ring-primary' : ''
+            }`}
             onClick={() => handleStatClick('active')}
           >
             <div className="text-3xl font-bold text-green-500">
-              {products.filter(p => p.status === 'active').length}
+              {activeProducts.length}
             </div>
             <div className="text-sm text-gray-600">Active Products</div>
           </LuxuryCard>
           <LuxuryCard 
-            className="p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200"
+            className={`p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors bg-white border border-gray-200 ${
+              activeFilter === 'total_value' ? 'ring-2 ring-primary' : ''
+            }`}
             onClick={() => handleStatClick('total_value')}
           >
             <div className="text-3xl font-bold text-primary">
@@ -100,7 +155,15 @@ const GlobalProductsPage = () => {
 
         {/* All Products */}
         <LuxuryCard className="p-6 bg-white border border-gray-200">
-          <h2 className="text-xl font-sans text-primary mb-6">All Products ({products.length})</h2>
+          <h2 className="text-xl font-sans text-primary mb-6">
+            {activeFilter ? 
+              `${activeFilter === 'total' ? 'All' :
+                activeFilter === 'low_stock' ? 'Low Stock' :
+                activeFilter === 'active' ? 'Active' :
+                activeFilter === 'total_value' ? 'All' : 'All'} Products (${filteredProducts.length})` :
+              `All Products (${products.length})`
+            }
+          </h2>
           {productsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 9 }).map((_, i) => (
@@ -115,9 +178,9 @@ const GlobalProductsPage = () => {
                 </div>
               ))}
             </div>
-          ) : products && products.length > 0 ? (
+          ) : filteredProducts && filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <div key={product.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="font-medium text-black">{product.name}</h3>
@@ -156,7 +219,9 @@ const GlobalProductsPage = () => {
             </div>
           ) : (
             <div className="text-center py-12 text-gray-600">
-              <p className="text-lg">No products found</p>
+              <p className="text-lg">
+                {activeFilter ? `No ${activeFilter.replace('_', ' ')} products found` : 'No products found'}
+              </p>
             </div>
           )}
         </LuxuryCard>

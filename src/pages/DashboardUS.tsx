@@ -25,7 +25,7 @@ const DashboardUS = () => {
   // Initialize US webhook event listeners
   useWebhookEventsUS();
   
-  // Fetch US dashboard data using the US-specific API endpoints
+  // all the data fetching logic
   const { data: overviewData, isLoading: overviewLoading } = useQuery({
     queryKey: ['dashboardOverviewUS'],
     queryFn: dashboardUSApi.getOverview,
@@ -112,6 +112,7 @@ const DashboardUS = () => {
     ]
   };
   
+  // helper functions
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'delivered': return 'bg-green-500/10 text-green-500';

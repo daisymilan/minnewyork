@@ -8,6 +8,7 @@ import KpiCard from '@/components/dashboard/KpiCard';
 import KpiDetailsModal from '@/components/dashboard/KpiDetailsModal';
 import WarehouseDetailsSheet from '@/components/dashboard/WarehouseDetailsSheet';
 import MarketInsightsModal from '@/components/dashboard/MarketInsightsModal';
+import CustomerInsightsModal from '@/components/dashboard/CustomerInsightsModal';
 import { LuxuryCard } from '@/components/ui/luxury-card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,6 +25,7 @@ const DashboardUS = () => {
   const [kpiDetailsOpen, setKpiDetailsOpen] = useState(false);
   const [selectedKpiType, setSelectedKpiType] = useState<'revenue' | 'orders' | 'conversion' | 'averageOrder' | null>(null);
   const [marketInsightsOpen, setMarketInsightsOpen] = useState(false);
+  const [customerInsightsOpen, setCustomerInsightsOpen] = useState(false);
   
   // Initialize US webhook event listeners
   useWebhookEventsUS();
@@ -167,6 +169,10 @@ const DashboardUS = () => {
 
   const handleMarketInsightsClick = () => {
     setMarketInsightsOpen(true);
+  };
+
+  const handleCustomerInsightsClick = () => {
+    setCustomerInsightsOpen(true);
   };
   
   return (
@@ -538,8 +544,11 @@ const DashboardUS = () => {
                     )}
                   </LuxuryCard>
 
-                  {/* US Customer Insights */}
-                  <LuxuryCard className="p-6 bg-white border border-gray-200">
+                  {/* Make US Customer Insights clickable */}
+                  <LuxuryCard 
+                    className="p-6 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={handleCustomerInsightsClick}
+                  >
                     <h3 className="text-lg font-sans text-primary mb-4">US Customer Insights</h3>
                     {customersLoading ? (
                       <div className="space-y-3">
@@ -565,6 +574,9 @@ const DashboardUS = () => {
                         <div className="flex justify-between">
                           <span className="text-gray-600">Premium Members</span>
                           <span className="text-primary">{customersData.insights?.customer_segments?.Premium || 'Loading...'}</span>
+                        </div>
+                        <div className="text-xs text-gray-400 mt-3 text-center">
+                          Click for detailed insights
                         </div>
                       </div>
                     ) : (
@@ -598,6 +610,14 @@ const DashboardUS = () => {
         isOpen={marketInsightsOpen}
         onClose={() => setMarketInsightsOpen(false)}
         data={marketInsightsData}
+        type="us"
+      />
+
+      {/* US Customer Insights Modal */}
+      <CustomerInsightsModal
+        isOpen={customerInsightsOpen}
+        onClose={() => setCustomerInsightsOpen(false)}
+        data={customersData}
         type="us"
       />
     </div>

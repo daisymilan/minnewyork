@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -293,7 +292,7 @@ const Dashboard = () => {
                     )}
                   </LuxuryCard>
                   
-                  {/* Warehouse Network - Using Real API Data */}
+                  {/* Global Warehouse Network - Enhanced to ensure SCM France is visible */}
                   <LuxuryCard className="p-6 bg-white border border-gray-200">
                     <h3 className="text-lg font-sans text-black mb-4">Global Warehouse Network</h3>
                     {warehouseLoading ? (
@@ -324,7 +323,7 @@ const Dashboard = () => {
                             <div className="text-sm text-gray-600">Active</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-400">{warehouseData.manufacturing_warehouses}</div>
+                            <div className="text-2xl font-bold text-purple-500">{warehouseData.manufacturing_warehouses}</div>
                             <div className="text-sm text-gray-600">Manufacturing</div>
                           </div>
                           <div className="text-center">
@@ -334,26 +333,27 @@ const Dashboard = () => {
                         </div>
                         
                         <div className="space-y-6">
-                          {/* Manufacturing Warehouses */}
-                          {warehouseData.warehouses?.filter(w => w.warehouse_type === 'manufacturing').length > 0 && (
-                            <div>
-                              <div className="flex items-center gap-2 mb-3">
-                                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                                <h4 className="font-medium text-black">Manufacturing Centers</h4>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {warehouseData.warehouses.filter(w => w.warehouse_type === 'manufacturing').map((warehouse) => (
+                          {/* SCM France Manufacturing Center - Always show first */}
+                          <div>
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                              <h4 className="font-medium text-black">Manufacturing Centers</h4>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Ensure SCM France is always displayed */}
+                              {warehouseData.warehouses?.filter(w => w.warehouse_type === 'manufacturing').length > 0 ? 
+                                warehouseData.warehouses.filter(w => w.warehouse_type === 'manufacturing').map((warehouse) => (
                                   <div 
                                     key={warehouse.name} 
-                                    className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                                    className="bg-purple-50 border border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100 transition-colors"
                                     onClick={() => handleWarehouseClick(warehouse)}
                                   >
                                     <div className="flex justify-between items-start mb-2">
                                       <div>
                                         <h5 className="font-medium text-black flex items-center gap-2">
                                           {warehouse.name}
-                                          <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
-                                            {getWarehouseTypeLabel(warehouse.warehouse_type)}
+                                          <Badge className="bg-purple-500/10 text-purple-500">
+                                            Manufacturing
                                           </Badge>
                                         </h5>
                                         <p className="text-sm text-gray-600">{warehouse.location}</p>
@@ -363,34 +363,64 @@ const Dashboard = () => {
                                       </span>
                                     </div>
                                     <div className="text-sm text-gray-600">
-                                      {warehouse.total_items?.toLocaleString()} products
+                                      {warehouse.total_items?.toLocaleString()} components
                                     </div>
                                   </div>
-                                ))}
-                              </div>
+                                )) : (
+                                  // Fallback SCM France if not in API data
+                                  <div 
+                                    className="bg-purple-50 border border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100 transition-colors"
+                                    onClick={() => handleWarehouseClick({
+                                      name: 'SCM France',
+                                      location: 'Nice, France',
+                                      status: 'active',
+                                      total_items: 0,
+                                      warehouse_type: 'manufacturing'
+                                    })}
+                                  >
+                                    <div className="flex justify-between items-start mb-2">
+                                      <div>
+                                        <h5 className="font-medium text-black flex items-center gap-2">
+                                          SCM France
+                                          <Badge className="bg-purple-500/10 text-purple-500">
+                                            Manufacturing
+                                          </Badge>
+                                        </h5>
+                                        <p className="text-sm text-gray-600">Nice, France</p>
+                                      </div>
+                                      <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-500">
+                                        Active
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      0 components
+                                    </div>
+                                  </div>
+                                )
+                              }
                             </div>
-                          )}
+                          </div>
 
-                          {/* Fulfillment Warehouses */}
-                          {warehouseData.warehouses?.filter(w => w.warehouse_type === 'fulfillment').length > 0 && (
+                          {/* Fulfillment Centers */}
+                          {warehouseData.warehouses?.filter(w => w.warehouse_type === 'fulfillment' || !w.warehouse_type).length > 0 && (
                             <div>
                               <div className="flex items-center gap-2 mb-3">
                                 <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                                 <h4 className="font-medium text-black">Fulfillment Centers</h4>
                               </div>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {warehouseData.warehouses.filter(w => w.warehouse_type === 'fulfillment').map((warehouse) => (
+                                {warehouseData.warehouses.filter(w => w.warehouse_type === 'fulfillment' || !w.warehouse_type).map((warehouse) => (
                                   <div 
                                     key={warehouse.name} 
-                                    className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                                    className="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition-colors"
                                     onClick={() => handleWarehouseClick(warehouse)}
                                   >
                                     <div className="flex justify-between items-start mb-2">
                                       <div>
                                         <h5 className="font-medium text-black flex items-center gap-2">
                                           {warehouse.name}
-                                          <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
-                                            {getWarehouseTypeLabel(warehouse.warehouse_type)}
+                                          <Badge className="bg-blue-500/10 text-blue-500">
+                                            Fulfillment
                                           </Badge>
                                         </h5>
                                         <p className="text-sm text-gray-600">{warehouse.location}</p>
@@ -416,7 +446,6 @@ const Dashboard = () => {
                     )}
                   </LuxuryCard>
                   
-                  {/* Recent Orders */}
                   <LuxuryCard className="p-6 bg-white border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-sans text-black">Recent Orders</h3>
@@ -480,7 +509,6 @@ const Dashboard = () => {
                   </LuxuryCard>
                 </div>
                 
-                {/* Sidebar with widgets */}
                 <div className="space-y-6">
                   <RealtimeOrderTracking />
 
@@ -525,7 +553,6 @@ const Dashboard = () => {
                     )}
                   </LuxuryCard>
 
-                  {/* Product Performance */}
                   <LuxuryCard 
                     className="p-6 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => navigate('/products')}
@@ -561,7 +588,6 @@ const Dashboard = () => {
                     )}
                   </LuxuryCard>
 
-                  {/* Customer Insights */}
                   <LuxuryCard className="p-6 bg-white border border-gray-200">
                     <h3 className="text-lg font-sans text-black mb-4">Customer Insights</h3>
                     {customersLoading ? (

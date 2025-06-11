@@ -39,32 +39,32 @@ export const SignInPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-luxury-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans">
       <div className="w-full max-w-md space-y-6">
         {/* Logo/Brand */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-luxury-gold mb-2">
+          <h1 className="text-4xl font-sans font-bold text-foreground mb-2">
             MiN NEW YORK
           </h1>
-          <p className="text-luxury-cream/60">Luxury Fragrance Management</p>
+          <p className="text-muted-foreground">Luxury Fragrance Management</p>
         </div>
 
         {/* Voice Authentication Card */}
-        <Card className="bg-black/30 border border-luxury-gold/20">
+        <Card className="bg-card border border-border">
           <CardHeader className="text-center">
-            <CardTitle className="text-luxury-cream flex items-center justify-center space-x-2">
-              <Mic className="w-5 h-5 text-luxury-gold" />
+            <CardTitle className="text-card-foreground flex items-center justify-center space-x-2">
+              <Mic className="w-5 h-5 text-primary" />
               <span>Voice Authentication</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-luxury-cream/60 text-sm">
+            <p className="text-muted-foreground text-sm">
               Say "Login as [Role]" to authenticate with voice
             </p>
             <VoiceCommandButton onCommand={handleVoiceCommand} disabled={isLoading} />
             {voiceDetectedRole && (
-              <Alert className="bg-green-900/20 border-green-500/50">
-                <AlertDescription className="text-green-400">
+              <Alert className="bg-green-50 border-green-200">
+                <AlertDescription className="text-green-800">
                   Voice detected: {voiceDetectedRole}. Signing you in...
                 </AlertDescription>
               </Alert>
@@ -73,27 +73,27 @@ export const SignInPage: React.FC = () => {
         </Card>
 
         {/* Sign In Form */}
-        <Card className="bg-black/30 border border-luxury-gold/20">
+        <Card className="bg-card border border-border">
           <CardHeader>
-            <CardTitle className="text-luxury-cream text-center">Sign In</CardTitle>
+            <CardTitle className="text-card-foreground text-center">Sign In</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-luxury-cream/80">Email</Label>
+                <Label htmlFor="email" className="text-card-foreground">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="bg-black/30 border-luxury-gold/20 text-luxury-cream"
+                  className="bg-input border-border text-foreground"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-luxury-cream/80">Password</Label>
+                <Label htmlFor="password" className="text-card-foreground">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -101,14 +101,14 @@ export const SignInPage: React.FC = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="bg-black/30 border-luxury-gold/20 text-luxury-cream pr-10"
+                    className="bg-input border-border text-foreground pr-10"
                     required
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 text-luxury-cream/60"
+                    className="absolute right-0 top-0 h-full px-3 text-muted-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -122,21 +122,21 @@ export const SignInPage: React.FC = () => {
                   checked={rememberMe}
                   onCheckedChange={(checked) => setRememberMe(!!checked)}
                 />
-                <Label htmlFor="remember" className="text-luxury-cream/80 text-sm">
+                <Label htmlFor="remember" className="text-card-foreground text-sm">
                   Remember me
                 </Label>
               </div>
 
               {error && (
-                <Alert className="bg-red-900/20 border-red-500/50">
-                  <AlertDescription className="text-red-400">{error}</AlertDescription>
+                <Alert className="bg-red-50 border-red-200">
+                  <AlertDescription className="text-red-800">{error}</AlertDescription>
                 </Alert>
               )}
 
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-gold-400 to-gold-600 hover:from-gold-500 hover:to-gold-700 text-black font-semibold"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
               >
                 {isLoading ? (
                   <>
@@ -153,9 +153,9 @@ export const SignInPage: React.FC = () => {
 
         {/* Sign Up Link */}
         <div className="text-center">
-          <p className="text-luxury-cream/60">
+          <p className="text-muted-foreground">
             Don't have an account?{' '}
-            <a href="/signup" className="text-luxury-gold hover:text-luxury-gold/80 font-medium">
+            <a href="/signup" className="text-primary hover:text-primary/80 font-medium">
               Sign up
             </a>
           </p>

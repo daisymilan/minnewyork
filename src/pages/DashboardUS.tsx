@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -11,6 +12,7 @@ import { LuxuryCard } from '@/components/ui/luxury-card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { dashboardUSApi } from '@/services/dashboardUS';
+import { orderRoutingApi } from '@/services/orderRouting';
 import { useWebhookEventsUS } from '@/hooks/useWebhookEventsUS';
 
 const DashboardUS = () => {
@@ -55,9 +57,23 @@ const DashboardUS = () => {
     queryFn: dashboardUSApi.getCustomers,
     refetchInterval: 120000, // Refetch every 2 minutes
   });
+
+  // US warehouse data from API
+  const { data: warehouseData, isLoading: warehouseLoading } = useQuery({
+    queryKey: ['warehouseOverviewUS'],
+    queryFn: () => orderRoutingApi.getWarehouseOverview('US'),
+    refetchInterval: 60000, // Refetch every minute
+  });
+
+  // US market insights from API
+  const { data: marketInsightsData, isLoading: marketInsightsLoading } = useQuery({
+    queryKey: ['marketInsightsUS'],
+    queryFn: () => fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/market-insights-us').then(res => res.json()),
+    refetchInterval: 300000, // Refetch every 5 minutes
+  });
   
   // Use US analytics data for KPIs
-  const kpiData = analyticsLoading ? null : analyticsData ? {
+  const kpiData = analyticsLoading || !analyticsData ? null : {
     revenue: {
       value: analyticsData.kpis.total_revenue,
       trend: analyticsData.kpis.growth_rate,
@@ -69,16 +85,16 @@ const DashboardUS = () => {
       type: 'number' as const,
     },
     conversion: {
-      value: analyticsData.kpis.conversion_rate || 3.2,
-      trend: -1.8, // Estimated trend
+      value: analyticsData.kpis.conversion_rate,
+      trend: analyticsData.kpis.conversion_trend || 0,
       type: 'percentage' as const,
     },
     averageOrder: {
       value: analyticsData.kpis.average_order_value || (analyticsData.kpis.total_revenue / analyticsData.kpis.total_orders),
-      trend: 5.3, // Estimated trend
+      trend: analyticsData.kpis.aov_trend || 0,
       type: 'currency' as const,
     }
-  } : null;
+  };
   
   // Use US regional data
   const regionalData = overviewLoading ? null : overviewData?.regional_breakdown ? 
@@ -98,20 +114,6 @@ const DashboardUS = () => {
       };
     }) : null;
   
-  // US-specific warehouse data
-  const usWarehouseOverview = {
-    total_warehouses: 3,
-    active_warehouses: 3,
-    manufacturing_warehouses: 0,
-    total_inventory_value: 1850000,
-    low_stock_alerts: 2,
-    warehouses: [
-      { name: 'Shipforus USA - West', location: 'Las Vegas, NV', status: 'active', total_items: 2145, warehouse_type: 'fulfillment' as const },
-      { name: 'Shipforus USA - East', location: 'New York, NY', status: 'active', total_items: 1834, warehouse_type: 'fulfillment' as const },
-      { name: 'Shipforus USA - Central', location: 'Chicago, IL', status: 'active', total_items: 1567, warehouse_type: 'fulfillment' as const }
-    ]
-  };
-  
   // helper functions
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -122,6 +124,7 @@ const DashboardUS = () => {
       case 'refunded': return 'bg-purple-500/10 text-purple-500';
       case 'cancelled': return 'bg-red-500/10 text-red-500';
       case 'active': return 'bg-green-500/10 text-green-500';
+      case 'operational': return 'bg-green-500/10 text-green-500';
       default: return 'bg-gray-500/10 text-gray-500';
     }
   };
@@ -143,15 +146,7 @@ const DashboardUS = () => {
   };
 
   const handleWarehouseClick = (warehouse) => {
-    const enhancedWarehouse = {
-      ...warehouse,
-      inventory_value: Math.round(warehouse.total_items * 45 + Math.random() * 50000),
-      low_stock_count: Math.round(warehouse.total_items * 0.05 + Math.random() * 10),
-      categories: ['Fragrances', 'Accessories', 'Gift Sets'],
-      last_updated: new Date().toISOString()
-    };
-    
-    setSelectedWarehouse(enhancedWarehouse);
+    setSelectedWarehouse(warehouse);
     setWarehouseDetailsOpen(true);
   };
 
@@ -280,7 +275,7 @@ const DashboardUS = () => {
                           </div>
                         ))}
                       </div>
-                    ) : regionalData ? (
+                    ) : regionalData && regionalData.length > 0 ? (
                       <div className="space-y-4">
                         {regionalData.map((region) => (
                           <div key={region.name} className="flex items-center">
@@ -296,65 +291,87 @@ const DashboardUS = () => {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-gray-600">No US regional data available</div>
+                      <div className="text-center py-4 text-gray-600">Loading...</div>
                     )}
                   </LuxuryCard>
                   
                   {/* US Warehouse Network */}
                   <LuxuryCard className="p-6 bg-white border border-gray-200">
                     <h3 className="text-lg font-sans text-primary mb-4">US Warehouse Network</h3>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">{usWarehouseOverview.total_warehouses}</div>
-                        <div className="text-sm text-gray-600">US Locations</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-500">{usWarehouseOverview.active_warehouses}</div>
-                        <div className="text-sm text-gray-600">Active</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-400">3</div>
-                        <div className="text-sm text-gray-600">Fulfillment</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">${usWarehouseOverview.total_inventory_value.toLocaleString()}</div>
-                        <div className="text-sm text-gray-600">Total Value</div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <h4 className="font-medium text-primary">US Fulfillment Centers</h4>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {usWarehouseOverview.warehouses.map((warehouse) => (
-                          <div 
-                            key={warehouse.name} 
-                            className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
-                            onClick={() => handleWarehouseClick(warehouse)}
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <h5 className="font-medium text-black flex items-center gap-2">
-                                  {warehouse.name}
-                                  <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
-                                    {getWarehouseTypeLabel(warehouse.warehouse_type)}
-                                  </Badge>
-                                </h5>
-                                <p className="text-sm text-gray-600">{warehouse.location}</p>
-                              </div>
-                              <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
-                                {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
-                              </span>
+                    {warehouseLoading ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="text-center">
+                              <Skeleton className="h-8 w-16 mx-auto mb-2" />
+                              <Skeleton className="h-4 w-20 mx-auto" />
                             </div>
-                            <div className="text-sm text-gray-600">
-                              {warehouse.total_items.toLocaleString()} products
-                            </div>
+                          ))}
+                        </div>
+                        <div className="space-y-4">
+                          {Array.from({ length: 3 }).map((_, i) => (
+                            <Skeleton key={i} className="h-20 w-full" />
+                          ))}
+                        </div>
+                      </div>
+                    ) : warehouseData ? (
+                      <>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-primary">{warehouseData.total_warehouses}</div>
+                            <div className="text-sm text-gray-600">US Locations</div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-green-500">{warehouseData.active_warehouses}</div>
+                            <div className="text-sm text-gray-600">Active</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-blue-400">{warehouseData.warehouses?.filter(w => w.warehouse_type === 'fulfillment').length || 0}</div>
+                            <div className="text-sm text-gray-600">Fulfillment</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-primary">${warehouseData.total_inventory_value?.toLocaleString()}</div>
+                            <div className="text-sm text-gray-600">Total Value</div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <h4 className="font-medium text-primary">US Fulfillment Centers</h4>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {warehouseData.warehouses?.map((warehouse) => (
+                              <div 
+                                key={warehouse.name} 
+                                className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                                onClick={() => handleWarehouseClick(warehouse)}
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <h5 className="font-medium text-black flex items-center gap-2">
+                                      {warehouse.name}
+                                      <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
+                                        {getWarehouseTypeLabel(warehouse.warehouse_type)}
+                                      </Badge>
+                                    </h5>
+                                    <p className="text-sm text-gray-600">{warehouse.location}</p>
+                                  </div>
+                                  <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
+                                    {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
+                                  </span>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  {warehouse.total_items?.toLocaleString()} products
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-4 text-gray-600">Loading...</div>
+                    )}
                   </LuxuryCard>
                   
                   {/* Recent US Orders */}
@@ -415,7 +432,7 @@ const DashboardUS = () => {
                       </div>
                     ) : (
                       <div className="text-center py-4">
-                        <div className="text-gray-600">No recent US orders found</div>
+                        <div className="text-gray-600">Loading...</div>
                       </div>
                     )}
                   </LuxuryCard>
@@ -429,20 +446,39 @@ const DashboardUS = () => {
                       Key metrics for the US market performance
                     </p>
                     
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Market Share</span>
-                        <span className="text-primary">23.4%</span>
+                    {marketInsightsLoading ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-8" />
+                        </div>
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-4 w-16" />
+                        </div>
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-4 w-12" />
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Top State</span>
-                        <span className="text-primary">California</span>
+                    ) : marketInsightsData ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Market Share</span>
+                          <span className="text-primary">{marketInsightsData.market_share || 'Loading...'}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Top State</span>
+                          <span className="text-primary">{marketInsightsData.top_state || 'Loading...'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Peak Hours</span>
+                          <span className="text-primary">{marketInsightsData.peak_hours || 'Loading...'}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Peak Hours</span>
-                        <span className="text-primary">2-4 PM EST</span>
-                      </div>
-                    </div>
+                    ) : (
+                      <div className="text-center py-4 text-gray-600">Loading...</div>
+                    )}
                   </LuxuryCard>
 
                   {/* US Product Performance */}
@@ -466,18 +502,18 @@ const DashboardUS = () => {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-gray-600">US Products</span>
-                          <span className="text-black">{productsData.insights?.total_products || 0}</span>
+                          <span className="text-black">{productsData.insights?.total_products || 'Loading...'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Low Stock (US)</span>
-                          <span className="text-red-400">{productsData.insights?.low_stock_alerts || 0}</span>
+                          <span className="text-red-400">{productsData.insights?.low_stock_alerts || 'Loading...'}</span>
                         </div>
                         <div className="text-xs text-gray-400 mt-3 text-center">
                           Click for US product details
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-gray-600">No US product data available</div>
+                      <div className="text-center py-4 text-gray-600">Loading...</div>
                     )}
                   </LuxuryCard>
 
@@ -499,19 +535,19 @@ const DashboardUS = () => {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Total US Customers</span>
-                          <span className="text-black">{customersData.insights?.total_customers || 0}</span>
+                          <span className="text-black">{customersData.insights?.total_customers || 'Loading...'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">VIP Customers</span>
-                          <span className="text-primary">{customersData.insights?.customer_segments?.VIP || 0}</span>
+                          <span className="text-primary">{customersData.insights?.customer_segments?.VIP || 'Loading...'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Premium Members</span>
-                          <span className="text-primary">{customersData.insights?.customer_segments?.Premium || 0}</span>
+                          <span className="text-primary">{customersData.insights?.customer_segments?.Premium || 'Loading...'}</span>
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-gray-600">No US customer data available</div>
+                      <div className="text-center py-4 text-gray-600">Loading...</div>
                     )}
                   </LuxuryCard>
                 </div>

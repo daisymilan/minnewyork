@@ -64,8 +64,15 @@ const Dashboard = () => {
     queryFn: orderRoutingApi.getWarehouseOverview,
     refetchInterval: 60000, // Refetch every minute
   });
+
+  // Global market insights from API
+  const { data: marketInsightsData, isLoading: marketInsightsLoading } = useQuery({
+    queryKey: ['marketInsightsGlobal'],
+    queryFn: () => fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/market-insights-global').then(res => res.json()),
+    refetchInterval: 300000, // Refetch every 5 minutes
+  });
   
-  const kpiData = analyticsLoading ? null : analyticsData ? {
+  const kpiData = analyticsLoading || !analyticsData ? null : {
     revenue: {
       value: analyticsData.kpis.total_revenue,
       trend: analyticsData.kpis.growth_rate,
@@ -77,16 +84,16 @@ const Dashboard = () => {
       type: 'number' as const,
     },
     conversion: {
-      value: analyticsData.kpis.conversion_rate || 3.2,
-      trend: -1.8, // Estimated trend
+      value: analyticsData.kpis.conversion_rate,
+      trend: analyticsData.kpis.conversion_trend || 0,
       type: 'percentage' as const,
     },
     averageOrder: {
       value: analyticsData.kpis.average_order_value || (analyticsData.kpis.total_revenue / analyticsData.kpis.total_orders),
-      trend: 5.3, // Estimated trend
+      trend: analyticsData.kpis.aov_trend || 0,
       type: 'currency' as const,
     }
-  } : null;
+  };
   
   const regionalData = overviewLoading ? null : overviewData?.regional_breakdown ? 
     Object.entries(overviewData.regional_breakdown).map(([name, value]) => {
@@ -137,15 +144,7 @@ const Dashboard = () => {
   };
 
   const handleWarehouseClick = (warehouse) => {
-    const enhancedWarehouse = {
-      ...warehouse,
-      inventory_value: Math.round(warehouse.total_items * 45 + Math.random() * 50000),
-      low_stock_count: Math.round(warehouse.total_items * 0.05 + Math.random() * 10),
-      categories: ['Fragrances', 'Accessories', 'Gift Sets'],
-      last_updated: new Date().toISOString()
-    };
-    
-    setSelectedWarehouse(enhancedWarehouse);
+    setSelectedWarehouse(warehouse);
     setWarehouseDetailsOpen(true);
   };
 
@@ -274,7 +273,7 @@ const Dashboard = () => {
                           </div>
                         ))}
                       </div>
-                    ) : regionalData ? (
+                    ) : regionalData && regionalData.length > 0 ? (
                       <div className="space-y-4">
                         {regionalData.map((region) => (
                           <div key={region.name} className="flex items-center">
@@ -290,7 +289,7 @@ const Dashboard = () => {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-gray-600">No regional data available</div>
+                      <div className="text-center py-4 text-gray-600">Loading...</div>
                     )}
                   </LuxuryCard>
                   
@@ -329,14 +328,14 @@ const Dashboard = () => {
                             <div className="text-sm text-gray-600">Manufacturing</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-primary">${warehouseData.total_inventory_value.toLocaleString()}</div>
+                            <div className="text-2xl font-bold text-primary">${warehouseData.total_inventory_value?.toLocaleString()}</div>
                             <div className="text-sm text-gray-600">Total Value</div>
                           </div>
                         </div>
                         
                         <div className="space-y-6">
                           {/* Manufacturing Warehouses */}
-                          {warehouseData.warehouses.filter(w => w.warehouse_type === 'manufacturing').length > 0 && (
+                          {warehouseData.warehouses?.filter(w => w.warehouse_type === 'manufacturing').length > 0 && (
                             <div>
                               <div className="flex items-center gap-2 mb-3">
                                 <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
@@ -364,7 +363,7 @@ const Dashboard = () => {
                                       </span>
                                     </div>
                                     <div className="text-sm text-gray-600">
-                                      {warehouse.total_items.toLocaleString()} products
+                                      {warehouse.total_items?.toLocaleString()} products
                                     </div>
                                   </div>
                                 ))}
@@ -373,7 +372,7 @@ const Dashboard = () => {
                           )}
 
                           {/* Fulfillment Warehouses */}
-                          {warehouseData.warehouses.filter(w => w.warehouse_type === 'fulfillment').length > 0 && (
+                          {warehouseData.warehouses?.filter(w => w.warehouse_type === 'fulfillment').length > 0 && (
                             <div>
                               <div className="flex items-center gap-2 mb-3">
                                 <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
@@ -401,7 +400,7 @@ const Dashboard = () => {
                                       </span>
                                     </div>
                                     <div className="text-sm text-gray-600">
-                                      {warehouse.total_items.toLocaleString()} products
+                                      {warehouse.total_items?.toLocaleString()} products
                                     </div>
                                   </div>
                                 ))}
@@ -412,8 +411,7 @@ const Dashboard = () => {
                       </>
                     ) : (
                       <div className="text-center py-8 text-gray-600">
-                        <p>Warehouse data is not available at the moment.</p>
-                        <p className="text-sm mt-2">Please check back later or contact support if this persists.</p>
+                        <p>Loading...</p>
                       </div>
                     )}
                   </LuxuryCard>
@@ -476,7 +474,7 @@ const Dashboard = () => {
                       </div>
                     ) : (
                       <div className="text-center py-4">
-                        <div className="text-gray-600">No recent orders found</div>
+                        <div className="text-gray-600">Loading...</div>
                       </div>
                     )}
                   </LuxuryCard>
@@ -492,20 +490,39 @@ const Dashboard = () => {
                       Key metrics across all regions
                     </p>
                     
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Market Share</span>
-                        <span className="text-primary">15.8%</span>
+                    {marketInsightsLoading ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-8" />
+                        </div>
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-4 w-16" />
+                        </div>
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-4 w-12" />
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Top Region</span>
-                        <span className="text-primary">Europe</span>
+                    ) : marketInsightsData ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Market Share</span>
+                          <span className="text-primary">{marketInsightsData.market_share || 'Loading...'}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Top Region</span>
+                          <span className="text-primary">{marketInsightsData.top_region || 'Loading...'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Peak Hours</span>
+                          <span className="text-primary">{marketInsightsData.peak_hours || 'Loading...'}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Peak Hours</span>
-                        <span className="text-primary">2-4 PM UTC</span>
-                      </div>
-                    </div>
+                    ) : (
+                      <div className="text-center py-4 text-gray-600">Loading...</div>
+                    )}
                   </LuxuryCard>
 
                   {/* Product Performance */}
@@ -529,18 +546,18 @@ const Dashboard = () => {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Total Products</span>
-                          <span className="text-black">{productsData.insights?.total_products || 0}</span>
+                          <span className="text-black">{productsData.insights?.total_products || 'Loading...'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Low Stock</span>
-                          <span className="text-red-400">{productsData.insights?.low_stock_alerts || 0}</span>
+                          <span className="text-red-400">{productsData.insights?.low_stock_alerts || 'Loading...'}</span>
                         </div>
                         <div className="text-xs text-gray-400 mt-3 text-center">
                           Click for product details
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-gray-600">No product data available</div>
+                      <div className="text-center py-4 text-gray-600">Loading...</div>
                     )}
                   </LuxuryCard>
 
@@ -562,19 +579,19 @@ const Dashboard = () => {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Total Customers</span>
-                          <span className="text-black">{customersData.insights?.total_customers || 0}</span>
+                          <span className="text-black">{customersData.insights?.total_customers || 'Loading...'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">VIP Customers</span>
-                          <span className="text-primary">{customersData.insights?.customer_segments?.VIP || 0}</span>
+                          <span className="text-primary">{customersData.insights?.customer_segments?.VIP || 'Loading...'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Premium Members</span>
-                          <span className="text-primary">{customersData.insights?.customer_segments?.Premium || 0}</span>
+                          <span className="text-primary">{customersData.insights?.customer_segments?.Premium || 'Loading...'}</span>
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-gray-600">No customer data available</div>
+                      <div className="text-center py-4 text-gray-600">Loading...</div>
                     )}
                   </LuxuryCard>
                 </div>

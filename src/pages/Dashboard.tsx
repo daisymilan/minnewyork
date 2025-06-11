@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -257,7 +258,7 @@ const Dashboard = () => {
   };
   
   return (
-    <div className="flex h-screen bg-luxury-black text-luxury-cream">
+    <div className="flex h-screen bg-black text-white">
       <DashboardSidebar 
         isCollapsed={sidebarCollapsed} 
         toggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} 
@@ -266,7 +267,7 @@ const Dashboard = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <DashboardHeader />
         
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 bg-black">
           {user && (
             <div className="animate-fade-in">
               <h2 className="text-2xl font-display mb-1 gold-gradient-text">
@@ -281,10 +282,10 @@ const Dashboard = () => {
                 {overviewLoading || !kpiData ? (
                   // Loading skeleton for KPI cards
                   Array.from({ length: 4 }).map((_, i) => (
-                    <LuxuryCard key={i} className="p-6">
-                      <Skeleton className="h-4 w-24 mb-4" />
-                      <Skeleton className="h-8 w-32 mb-2" />
-                      <Skeleton className="h-3 w-16" />
+                    <LuxuryCard key={i} className="p-6 bg-black border border-gray-700">
+                      <Skeleton className="h-4 w-24 mb-4 bg-gray-800" />
+                      <Skeleton className="h-8 w-32 mb-2 bg-gray-800" />
+                      <Skeleton className="h-3 w-16 bg-gray-800" />
                     </LuxuryCard>
                   ))
                 ) : (
@@ -295,7 +296,7 @@ const Dashboard = () => {
                         value={kpiData.revenue.value}
                         trend={kpiData.revenue.trend}
                         type={kpiData.revenue.type}
-                        className="hover:scale-105 transition-transform"
+                        className="hover:scale-105 transition-transform bg-black border-gray-700"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="10" />
@@ -313,7 +314,7 @@ const Dashboard = () => {
                         value={kpiData.orders.value}
                         trend={kpiData.orders.trend}
                         type={kpiData.orders.type}
-                        className="hover:scale-105 transition-transform"
+                        className="hover:scale-105 transition-transform bg-black border-gray-700"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
@@ -330,7 +331,7 @@ const Dashboard = () => {
                         value={kpiData.conversion.value}
                         trend={kpiData.conversion.trend}
                         type={kpiData.conversion.type}
-                        className="hover:scale-105 transition-transform"
+                        className="hover:scale-105 transition-transform bg-black border-gray-700"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="m2 4 3 12h14l3-12-6 7-4 7-4 7-6-7Z" />
@@ -347,7 +348,7 @@ const Dashboard = () => {
                         value={kpiData.averageOrder.value}
                         trend={kpiData.averageOrder.trend}
                         type={kpiData.averageOrder.type}
-                        className="hover:scale-105 transition-transform"
+                        className="hover:scale-105 transition-transform bg-black border-gray-700"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <rect width="18" height="18" x="3" y="3" rx="2" />
@@ -366,15 +367,15 @@ const Dashboard = () => {
                 {/* Main content area */}
                 <div className="lg:col-span-2 space-y-6">
                   {/* Sales by Region */}
-                  <LuxuryCard className="p-6">
+                  <LuxuryCard className="p-6 bg-black border border-gray-700">
                     <h3 className="text-lg font-display text-luxury-gold mb-4">Sales by Region</h3>
                     {overviewLoading ? (
                       <div className="space-y-4">
                         {Array.from({ length: 4 }).map((_, i) => (
                           <div key={i} className="flex items-center">
-                            <Skeleton className="w-32 h-4" />
-                            <Skeleton className="flex-1 h-2 ml-4 mr-3" />
-                            <Skeleton className="w-8 h-4" />
+                            <Skeleton className="w-32 h-4 bg-gray-800" />
+                            <Skeleton className="flex-1 h-2 ml-4 mr-3 bg-gray-800" />
+                            <Skeleton className="w-8 h-4 bg-gray-800" />
                           </div>
                         ))}
                       </div>
@@ -382,14 +383,14 @@ const Dashboard = () => {
                       <div className="space-y-4">
                         {regionalData.map((region) => (
                           <div key={region.name} className="flex items-center">
-                            <span className="w-32 text-sm">{region.name}</span>
-                            <div className="flex-1 h-2 bg-luxury-black rounded-full overflow-hidden">
+                            <span className="w-32 text-sm text-white">{region.name}</span>
+                            <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
                               <div 
                                 className="h-full bg-gold-gradient rounded-full"
                                 style={{ width: `${Math.min(region.value, 100)}%` }}
                               ></div>
                             </div>
-                            <span className="ml-3 text-sm">{region.value}%</span>
+                            <span className="ml-3 text-sm text-white">{region.value}%</span>
                           </div>
                         ))}
                       </div>
@@ -399,7 +400,7 @@ const Dashboard = () => {
                   </LuxuryCard>
                   
                   {/* Order Routing Statistics */}
-                  <LuxuryCard className="p-6">
+                  <LuxuryCard className="p-6 bg-black border border-gray-700">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-display text-luxury-gold">Order Routing Statistics</h3>
                       <div className="text-xs text-luxury-cream/40">
@@ -415,14 +416,14 @@ const Dashboard = () => {
                         <div className="grid grid-cols-3 gap-4">
                           {Array.from({ length: 3 }).map((_, i) => (
                             <div key={i} className="text-center">
-                              <Skeleton className="h-8 w-16 mx-auto mb-2" />
-                              <Skeleton className="h-4 w-20 mx-auto" />
+                              <Skeleton className="h-8 w-16 mx-auto mb-2 bg-gray-800" />
+                              <Skeleton className="h-4 w-20 mx-auto bg-gray-800" />
                             </div>
                           ))}
                         </div>
                         <div className="pt-4 border-t border-luxury-gold/10">
-                          <Skeleton className="h-4 w-48 mx-auto mb-1" />
-                          <Skeleton className="h-3 w-32 mx-auto" />
+                          <Skeleton className="h-4 w-48 mx-auto mb-1 bg-gray-800" />
+                          <Skeleton className="h-3 w-32 mx-auto bg-gray-800" />
                         </div>
                       </div>
                     ) : routingError ? (
@@ -468,33 +469,33 @@ const Dashboard = () => {
                   
                   {/* Enhanced Warehouse Overview with Manufacturing Distinction */}
                   {warehouseLoading ? (
-                    <LuxuryCard className="p-6">
+                    <LuxuryCard className="p-6 bg-black border border-gray-700">
                       <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Overview</h3>
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         {Array.from({ length: 4 }).map((_, i) => (
                           <div key={i} className="text-center">
-                            <Skeleton className="h-8 w-16 mx-auto mb-1" />
-                            <Skeleton className="h-4 w-20 mx-auto" />
+                            <Skeleton className="h-8 w-16 mx-auto mb-1 bg-gray-800" />
+                            <Skeleton className="h-4 w-20 mx-auto bg-gray-800" />
                           </div>
                         ))}
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4">
+                          <div key={i} className="bg-gray-900 border border-gray-700 rounded-lg p-4">
                             <div className="flex justify-between items-start mb-2">
                               <div>
-                                <Skeleton className="h-4 w-24 mb-1" />
-                                <Skeleton className="h-3 w-16" />
+                                <Skeleton className="h-4 w-24 mb-1 bg-gray-800" />
+                                <Skeleton className="h-3 w-16 bg-gray-800" />
                               </div>
-                              <Skeleton className="h-5 w-12" />
+                              <Skeleton className="h-5 w-12 bg-gray-800" />
                             </div>
-                            <Skeleton className="h-3 w-20" />
+                            <Skeleton className="h-3 w-20 bg-gray-800" />
                           </div>
                         ))}
                       </div>
                     </LuxuryCard>
                   ) : (
-                    <LuxuryCard className="p-6">
+                    <LuxuryCard className="p-6 bg-black border border-gray-700">
                       <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Network</h3>
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <div className="text-center">
@@ -529,7 +530,7 @@ const Dashboard = () => {
                               .map((warehouse) => (
                                 <div 
                                   key={warehouse.name} 
-                                  className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-4 cursor-pointer hover:bg-purple-500/10 transition-colors"
+                                  className="bg-gray-900 border border-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-800 transition-colors"
                                   onClick={() => handleWarehouseClick(warehouse)}
                                 >
                                   <div className="flex justify-between items-start mb-2">
@@ -569,7 +570,7 @@ const Dashboard = () => {
                               .map((warehouse) => (
                                 <div 
                                   key={warehouse.name} 
-                                  className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-4 cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+                                  className="bg-gray-900 border border-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-800 transition-colors"
                                   onClick={() => handleWarehouseClick(warehouse)}
                                 >
                                   <div className="flex justify-between items-start mb-2">
@@ -598,7 +599,7 @@ const Dashboard = () => {
                   )}
                   
                   {/* Recent Orders - Now using real data with loading state */}
-                  <LuxuryCard className="p-6">
+                  <LuxuryCard className="p-6 bg-black border border-gray-700">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-display text-luxury-gold">Recent Orders</h3>
                       <button 
@@ -613,13 +614,13 @@ const Dashboard = () => {
                       <div className="space-y-3">
                         <div className="grid grid-cols-5 gap-4 py-3 border-b border-luxury-gold/10">
                           {Array.from({ length: 5 }).map((_, i) => (
-                            <Skeleton key={i} className="h-4" />
+                            <Skeleton key={i} className="h-4 bg-gray-800" />
                           ))}
                         </div>
                         {Array.from({ length: 5 }).map((_, i) => (
                           <div key={i} className="grid grid-cols-5 gap-4 py-3 border-b border-luxury-gold/5">
                             {Array.from({ length: 5 }).map((_, j) => (
-                              <Skeleton key={j} className="h-4" />
+                              <Skeleton key={j} className="h-4 bg-gray-800" />
                             ))}
                           </div>
                         ))}
@@ -639,10 +640,10 @@ const Dashboard = () => {
                           <tbody>
                             {ordersData.orders.slice(0, 5).map((order) => (
                               <tr key={order.id} className="border-b border-luxury-gold/5">
-                                <td className="py-3">#{order.id}</td>
-                                <td className="py-3">{order.customer_name}</td>
+                                <td className="py-3 text-white">#{order.id}</td>
+                                <td className="py-3 text-white">{order.customer_name}</td>
                                 <td className="py-3 text-luxury-cream/60">{order.customer_email || 'N/A'}</td>
-                                <td className="py-3">${order.amount.toFixed(2)}</td>
+                                <td className="py-3 text-white">${order.amount.toFixed(2)}</td>
                                 <td className="py-3">
                                   <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(order.status)}`}>
                                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -663,7 +664,7 @@ const Dashboard = () => {
                 
                 {/* Sidebar with additional widgets */}
                 <div className="space-y-6">
-                  <LuxuryCard className="p-6" variant="glass">
+                  <LuxuryCard className="p-6 bg-black border border-gray-700" variant="glass">
                     <h3 className="text-lg font-display text-luxury-gold mb-3">Voice Commands</h3>
                     <p className="text-sm text-luxury-cream/70 mb-4">
                       Use these voice commands to navigate the dashboard:
@@ -672,40 +673,40 @@ const Dashboard = () => {
                     <ul className="text-sm space-y-2">
                       <li className="flex items-center gap-2">
                         <span className="text-luxury-gold">•</span>
-                        <span>"Show sales"</span>
+                        <span className="text-white">"Show sales"</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="text-luxury-gold">•</span>
-                        <span>"Show inventory"</span>
+                        <span className="text-white">"Show inventory"</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="text-luxury-gold">•</span>
-                        <span>"Create report"</span>
+                        <span className="text-white">"Create report"</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="text-luxury-gold">•</span>
-                        <span>"Show Dubai inventory"</span>
+                        <span className="text-white">"Show Dubai inventory"</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="text-luxury-gold">•</span>
-                        <span>"Help"</span>
+                        <span className="text-white">"Help"</span>
                       </li>
                     </ul>
                   </LuxuryCard>
                   
-                  <LuxuryCard className="p-6">
+                  <LuxuryCard className="p-6 bg-black border border-gray-700">
                     <h3 className="text-lg font-display text-luxury-gold mb-4">Warehouse Inventory</h3>
                     
                     {inventoryLoading ? (
                       <div className="space-y-3">
                         {Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md">
+                          <div key={i} className="flex justify-between items-center p-3 border border-gray-700 rounded-md bg-gray-900">
                             <div>
-                              <Skeleton className="h-4 w-20 mb-1" />
-                              <Skeleton className="h-3 w-16 mb-1" />
-                              <Skeleton className="h-3 w-12" />
+                              <Skeleton className="h-4 w-20 mb-1 bg-gray-800" />
+                              <Skeleton className="h-3 w-16 mb-1 bg-gray-800" />
+                              <Skeleton className="h-3 w-12 bg-gray-800" />
                             </div>
-                            <Skeleton className="h-5 w-12" />
+                            <Skeleton className="h-5 w-12 bg-gray-800" />
                           </div>
                         ))}
                       </div>
@@ -714,11 +715,11 @@ const Dashboard = () => {
                         {warehouseData.map((warehouse, index) => (
                           <div 
                             key={warehouse.warehouse || index} 
-                            className="flex justify-between items-center p-3 border border-luxury-gold/10 rounded-md cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+                            className="flex justify-between items-center p-3 border border-gray-700 rounded-md cursor-pointer hover:bg-gray-800 transition-colors bg-gray-900"
                             onClick={() => handleInventoryWarehouseClick(warehouse)}
                           >
                             <div>
-                              <h4 className="font-medium">{warehouse.warehouse}</h4>
+                              <h4 className="font-medium text-white">{warehouse.warehouse}</h4>
                               <p className="text-xs text-luxury-cream/60">
                                 {warehouse.stock_quantity} units
                               </p>
@@ -739,26 +740,26 @@ const Dashboard = () => {
 
                   {/* Product Insights - Now navigates to ProductsPage */}
                   <LuxuryCard 
-                    className="p-6 cursor-pointer hover:bg-luxury-gold/5 transition-colors"
+                    className="p-6 cursor-pointer hover:bg-gray-800 transition-colors bg-black border border-gray-700"
                     onClick={() => navigate('/products')}
                   >
                     <h3 className="text-lg font-display text-luxury-gold mb-4">Product Insights</h3>
                     {productsLoading ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-4 w-8" />
+                          <Skeleton className="h-4 w-24 bg-gray-800" />
+                          <Skeleton className="h-4 w-8 bg-gray-800" />
                         </div>
                         <div className="flex justify-between">
-                          <Skeleton className="h-4 w-28" />
-                          <Skeleton className="h-4 w-6" />
+                          <Skeleton className="h-4 w-28 bg-gray-800" />
+                          <Skeleton className="h-4 w-6 bg-gray-800" />
                         </div>
                       </div>
                     ) : productsData ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-luxury-cream/60">Total Products</span>
-                          <span>{productsData.insights?.total_products || 0}</span>
+                          <span className="text-white">{productsData.insights?.total_products || 0}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-luxury-cream/60">Low Stock Alerts</span>

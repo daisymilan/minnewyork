@@ -64,10 +64,19 @@ const Dashboard = () => {
     refetchInterval: 60000, // Refetch every minute
   });
 
-  // Global market insights from API
+  // Global market insights from API - updated to handle the correct response structure
   const { data: marketInsightsData, isLoading: marketInsightsLoading } = useQuery({
     queryKey: ['marketInsightsGlobal'],
-    queryFn: () => fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/market-insights-global').then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/market-insights-global');
+      const result = await response.json();
+      
+      // Handle array response - take the first item
+      if (Array.isArray(result) && result.length > 0) {
+        return result[0];
+      }
+      return result;
+    },
     refetchInterval: 300000, // Refetch every 5 minutes
   });
   
@@ -537,15 +546,15 @@ const Dashboard = () => {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Market Share</span>
-                          <span className="text-primary">{marketInsightsData.market_share || 'Loading...'}%</span>
+                          <span className="text-primary">{marketInsightsData.market_share || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Top Region</span>
-                          <span className="text-primary">{marketInsightsData.top_region || 'Loading...'}</span>
+                          <span className="text-primary">{marketInsightsData.top_region || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Peak Hours</span>
-                          <span className="text-primary">{marketInsightsData.peak_hours || 'Loading...'}</span>
+                          <span className="text-primary">{marketInsightsData.peak_hours || 'N/A'}</span>
                         </div>
                       </div>
                     ) : (

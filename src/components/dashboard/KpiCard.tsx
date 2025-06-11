@@ -58,23 +58,23 @@ const KpiCard: React.FC<KpiCardProps> = ({
     }));
   }, [data]);
 
-  const trendColor = trend === undefined ? 'text-luxury-cream' :
+  const trendColor = trend === undefined ? 'text-gray-600' :
                     trend > 0 ? 'text-green-500' : 
-                    trend < 0 ? 'text-red-500' : 'text-luxury-cream';
+                    trend < 0 ? 'text-red-500' : 'text-gray-600';
 
   return (
     <LuxuryCard 
-      className={cn("flex flex-col h-full w-full gap-2 p-5", className)}
+      className={cn("flex flex-col h-full w-full gap-2 p-5 bg-white border border-gray-200", className)}
       variant="default"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-luxury-cream/60">{title}</h3>
-        {icon && <div className="text-luxury-gold">{icon}</div>}
+        <h3 className="text-sm font-medium text-gray-600">{title}</h3>
+        {icon && <div className="text-primary">{icon}</div>}
       </div>
       
       <div className="grid grid-cols-1 gap-2">
         <div className="flex items-baseline justify-between">
-          <p className="text-2xl font-display font-semibold text-luxury-gold">
+          <p className="text-2xl font-sans font-semibold text-primary">
             {formattedValue}
           </p>
           
@@ -94,7 +94,7 @@ const KpiCard: React.FC<KpiCardProps> = ({
           )}
         </div>
         
-        <div className="text-xs text-luxury-cream/60">
+        <div className="text-xs text-gray-600">
           {duration}
         </div>
       </div>
@@ -106,7 +106,7 @@ const KpiCard: React.FC<KpiCardProps> = ({
             <Line
               type="monotone"
               dataKey="value"
-              stroke="#D4AF37"
+              stroke="hsl(var(--primary))"
               strokeWidth={2}
               dot={false}
             />
@@ -114,7 +114,7 @@ const KpiCard: React.FC<KpiCardProps> = ({
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className="bg-luxury-black p-2 border border-luxury-gold/30 text-xs">
+                    <div className="bg-white p-2 border border-gray-200 shadow-lg text-xs text-black">
                       {payload[0].value}
                     </div>
                   );

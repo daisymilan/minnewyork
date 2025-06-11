@@ -48,47 +48,47 @@ const RealtimeOrderTracking = () => {
       case 'success': return 'text-green-500';
       case 'failed': return 'text-red-500';
       case 'routing': return 'text-amber-500';
-      default: return 'text-luxury-cream/60';
+      default: return 'text-gray-600';
     }
   };
 
   const getProviderColor = (provider: string) => {
     switch (provider.toLowerCase()) {
-      case 'shipforus': return 'text-blue-400';
-      case 'oto': return 'text-purple-400';
-      case 'dsl': return 'text-green-400';
-      default: return 'text-luxury-cream/60';
+      case 'shipforus': return 'text-blue-500';
+      case 'oto': return 'text-purple-500';
+      case 'dsl': return 'text-green-500';
+      default: return 'text-gray-600';
     }
   };
 
   return (
-    <LuxuryCard className="p-6">
-      <h3 className="text-lg font-display text-luxury-gold mb-4">Real-time Order Routing</h3>
+    <LuxuryCard className="p-6 bg-white border border-gray-200">
+      <h3 className="text-lg font-sans text-primary mb-4">Real-time Order Routing</h3>
       
       {recentOrders.length === 0 ? (
         <div className="text-center py-8">
           <div className="text-4xl mb-2">📦</div>
-          <p className="text-luxury-cream/60">Waiting for new orders...</p>
-          <p className="text-xs text-luxury-cream/40 mt-1">Orders will appear here as they're routed</p>
+          <p className="text-gray-600">Waiting for new orders...</p>
+          <p className="text-xs text-gray-400 mt-1">Orders will appear here as they're routed</p>
         </div>
       ) : (
         <div className="space-y-3 max-h-80 overflow-y-auto">
           {recentOrders.map((order) => (
             <div 
               key={order.id} 
-              className="bg-luxury-black/30 border border-luxury-gold/20 rounded-lg p-3 animate-fade-in"
+              className="bg-gray-50 border border-gray-200 rounded-lg p-3 animate-fade-in"
             >
               <div className="flex justify-between items-start mb-2">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium text-luxury-cream">
+                    <span className="text-sm font-medium text-black">
                       {order.id}
                     </span>
-                    <span className={`text-xs px-2 py-1 rounded-full bg-luxury-black/50 ${getStatusColor(order.status)}`}>
+                    <span className={`text-xs px-2 py-1 rounded-full bg-white border ${getStatusColor(order.status)}`}>
                       {order.status}
                     </span>
                   </div>
-                  <div className="text-xs text-luxury-cream/60">
+                  <div className="text-xs text-gray-600">
                     {order.customer} • {order.country}
                   </div>
                 </div>
@@ -96,13 +96,13 @@ const RealtimeOrderTracking = () => {
                   <div className={`text-sm font-medium ${getProviderColor(order.provider)}`}>
                     {order.provider}
                   </div>
-                  <div className="text-xs text-luxury-cream/60">
+                  <div className="text-xs text-gray-600">
                     {new Date(order.timestamp).toLocaleTimeString()}
                   </div>
                 </div>
               </div>
               {order.amount > 0 && (
-                <div className="text-xs text-luxury-gold">
+                <div className="text-xs text-primary">
                   ${order.amount.toFixed(2)}
                 </div>
               )}

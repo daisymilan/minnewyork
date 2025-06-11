@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
@@ -12,6 +13,7 @@ import { LuxuryCard } from '@/components/ui/luxury-card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { dashboardApi } from '@/services/dashboard';
+import { orderRoutingApi } from '@/services/orderRouting';
 import { useWebhookEvents } from '@/hooks/useWebhookEvents';
 
 const Dashboard = () => {
@@ -55,6 +57,13 @@ const Dashboard = () => {
     queryFn: dashboardApi.getCustomers,
     refetchInterval: 120000, // Refetch every 2 minutes
   });
+
+  // Real warehouse data from API
+  const { data: warehouseData, isLoading: warehouseLoading } = useQuery({
+    queryKey: ['warehouseOverview'],
+    queryFn: orderRoutingApi.getWarehouseOverview,
+    refetchInterval: 60000, // Refetch every minute
+  });
   
   const kpiData = analyticsLoading ? null : analyticsData ? {
     revenue: {
@@ -96,28 +105,6 @@ const Dashboard = () => {
       };
     }) : null;
   
-  const warehouseData = {
-    total_warehouses: 12,
-    active_warehouses: 9,
-    manufacturing_warehouses: 3,
-    total_inventory_value: 5750000,
-    low_stock_alerts: 5,
-    warehouses: [
-      { name: 'Fragrance Hub - Main', location: 'New York, USA', status: 'active', total_items: 3245, warehouse_type: 'fulfillment' as const },
-      { name: 'Scent Source - Central', location: 'Frankfurt, Germany', status: 'active', total_items: 2876, warehouse_type: 'fulfillment' as const },
-      { name: 'Aroma Assembly - East', location: 'Shanghai, China', status: 'active', total_items: 2532, warehouse_type: 'manufacturing' as const },
-      { name: 'Essence Emporium - West', location: 'Los Angeles, USA', status: 'inactive', total_items: 1987, warehouse_type: 'fulfillment' as const },
-      { name: 'Perfume Palace - South', location: 'Sao Paulo, Brazil', status: 'active', total_items: 2211, warehouse_type: 'fulfillment' as const },
-      { name: 'Cologne Creation - North', location: 'Moscow, Russia', status: 'active', total_items: 1876, warehouse_type: 'manufacturing' as const },
-      { name: 'Fragrant Factory - Main', location: 'Tokyo, Japan', status: 'active', total_items: 2987, warehouse_type: 'fulfillment' as const },
-      { name: 'Scented Sphere - Hub', location: 'Sydney, Australia', status: 'inactive', total_items: 1654, warehouse_type: 'fulfillment' as const },
-      { name: 'Aroma Atelier - Prime', location: 'Paris, France', status: 'active', total_items: 2421, warehouse_type: 'manufacturing' as const },
-      { name: 'Essence Estate - Global', location: 'Dubai, UAE', status: 'active', total_items: 3122, warehouse_type: 'fulfillment' as const },
-      { name: 'Perfume Pavilion - Key', location: 'London, UK', status: 'active', total_items: 2765, warehouse_type: 'fulfillment' as const },
-      { name: 'Cologne Craft - Base', location: 'Toronto, Canada', status: 'active', total_items: 2344, warehouse_type: 'fulfillment' as const }
-    ]
-  };
-  
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'delivered': return 'bg-green-500/10 text-green-500';
@@ -127,6 +114,8 @@ const Dashboard = () => {
       case 'refunded': return 'bg-purple-500/10 text-purple-500';
       case 'cancelled': return 'bg-red-500/10 text-red-500';
       case 'active': return 'bg-green-500/10 text-green-500';
+      case 'operational': return 'bg-green-500/10 text-green-500';
+      case 'inactive': return 'bg-gray-500/10 text-gray-500';
       default: return 'bg-gray-500/10 text-gray-500';
     }
   };
@@ -305,99 +294,128 @@ const Dashboard = () => {
                     )}
                   </LuxuryCard>
                   
-                  {/* Warehouse Network */}
+                  {/* Warehouse Network - Using Real API Data */}
                   <LuxuryCard className="p-6 bg-white border border-gray-200">
                     <h3 className="text-lg font-sans text-black mb-4">Global Warehouse Network</h3>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">{warehouseData.total_warehouses}</div>
-                        <div className="text-sm text-gray-600">Total Locations</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-500">{warehouseData.active_warehouses}</div>
-                        <div className="text-sm text-gray-600">Active</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-400">{warehouseData.manufacturing_warehouses}</div>
-                        <div className="text-sm text-gray-600">Manufacturing</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">${warehouseData.total_inventory_value.toLocaleString()}</div>
-                        <div className="text-sm text-gray-600">Total Value</div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-6">
-                      {/* Manufacturing Warehouses */}
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                          <h4 className="font-medium text-black">Manufacturing Centers</h4>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {warehouseData.warehouses.filter(w => w.warehouse_type === 'manufacturing').map((warehouse) => (
-                            <div 
-                              key={warehouse.name} 
-                              className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
-                              onClick={() => handleWarehouseClick(warehouse)}
-                            >
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <h5 className="font-medium text-black flex items-center gap-2">
-                                    {warehouse.name}
-                                    <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
-                                      {getWarehouseTypeLabel(warehouse.warehouse_type)}
-                                    </Badge>
-                                  </h5>
-                                  <p className="text-sm text-gray-600">{warehouse.location}</p>
-                                </div>
-                                <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
-                                  {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
-                                </span>
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                {warehouse.total_items.toLocaleString()} products
-                              </div>
+                    {warehouseLoading ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="text-center">
+                              <Skeleton className="h-8 w-16 mx-auto mb-2" />
+                              <Skeleton className="h-4 w-20 mx-auto" />
                             </div>
                           ))}
                         </div>
+                        <div className="space-y-4">
+                          {Array.from({ length: 3 }).map((_, i) => (
+                            <Skeleton key={i} className="h-20 w-full" />
+                          ))}
+                        </div>
                       </div>
+                    ) : warehouseData ? (
+                      <>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-primary">{warehouseData.total_warehouses}</div>
+                            <div className="text-sm text-gray-600">Total Locations</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-green-500">{warehouseData.active_warehouses}</div>
+                            <div className="text-sm text-gray-600">Active</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-blue-400">{warehouseData.manufacturing_warehouses}</div>
+                            <div className="text-sm text-gray-600">Manufacturing</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-primary">${warehouseData.total_inventory_value.toLocaleString()}</div>
+                            <div className="text-sm text-gray-600">Total Value</div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-6">
+                          {/* Manufacturing Warehouses */}
+                          {warehouseData.warehouses.filter(w => w.warehouse_type === 'manufacturing').length > 0 && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                <h4 className="font-medium text-black">Manufacturing Centers</h4>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {warehouseData.warehouses.filter(w => w.warehouse_type === 'manufacturing').map((warehouse) => (
+                                  <div 
+                                    key={warehouse.name} 
+                                    className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                                    onClick={() => handleWarehouseClick(warehouse)}
+                                  >
+                                    <div className="flex justify-between items-start mb-2">
+                                      <div>
+                                        <h5 className="font-medium text-black flex items-center gap-2">
+                                          {warehouse.name}
+                                          <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
+                                            {getWarehouseTypeLabel(warehouse.warehouse_type)}
+                                          </Badge>
+                                        </h5>
+                                        <p className="text-sm text-gray-600">{warehouse.location}</p>
+                                      </div>
+                                      <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
+                                        {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      {warehouse.total_items.toLocaleString()} products
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
 
-                      {/* Fulfillment Warehouses */}
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                          <h4 className="font-medium text-black">Fulfillment Centers</h4>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {warehouseData.warehouses.filter(w => w.warehouse_type === 'fulfillment').map((warehouse) => (
-                            <div 
-                              key={warehouse.name} 
-                              className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
-                              onClick={() => handleWarehouseClick(warehouse)}
-                            >
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <h5 className="font-medium text-black flex items-center gap-2">
-                                    {warehouse.name}
-                                    <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
-                                      {getWarehouseTypeLabel(warehouse.warehouse_type)}
-                                    </Badge>
-                                  </h5>
-                                  <p className="text-sm text-gray-600">{warehouse.location}</p>
-                                </div>
-                                <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
-                                  {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
-                                </span>
+                          {/* Fulfillment Warehouses */}
+                          {warehouseData.warehouses.filter(w => w.warehouse_type === 'fulfillment').length > 0 && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                <h4 className="font-medium text-black">Fulfillment Centers</h4>
                               </div>
-                              <div className="text-sm text-gray-600">
-                                {warehouse.total_items.toLocaleString()} products
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {warehouseData.warehouses.filter(w => w.warehouse_type === 'fulfillment').map((warehouse) => (
+                                  <div 
+                                    key={warehouse.name} 
+                                    className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                                    onClick={() => handleWarehouseClick(warehouse)}
+                                  >
+                                    <div className="flex justify-between items-start mb-2">
+                                      <div>
+                                        <h5 className="font-medium text-black flex items-center gap-2">
+                                          {warehouse.name}
+                                          <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
+                                            {getWarehouseTypeLabel(warehouse.warehouse_type)}
+                                          </Badge>
+                                        </h5>
+                                        <p className="text-sm text-gray-600">{warehouse.location}</p>
+                                      </div>
+                                      <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
+                                        {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      {warehouse.total_items.toLocaleString()} products
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
-                          ))}
+                          )}
                         </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-8 text-gray-600">
+                        <p>Warehouse data is not available at the moment.</p>
+                        <p className="text-sm mt-2">Please check back later or contact support if this persists.</p>
                       </div>
-                    </div>
+                    )}
                   </LuxuryCard>
                   
                   {/* Recent Orders */}

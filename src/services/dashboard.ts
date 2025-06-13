@@ -94,21 +94,21 @@ export const dashboardApi = {
       const totalCustomers = customers.length;
       
       // Extract regional data from billing addresses
-      const regionCounts = {};
+      const regionCounts: { [key: string]: number } = {};
       orders.forEach(order => {
         const country = order.billing?.country || 'Unknown';
         regionCounts[country] = (regionCounts[country] || 0) + 1;
       });
       
       // Convert to percentages
-      const regionalBreakdown = {};
+      const regionalBreakdown: { [key: string]: number } = {};
       const totalRegionOrders = Object.values(regionCounts).reduce((sum: number, count: number) => sum + count, 0);
-      Object.entries(regionCounts).forEach(([region, count]: [string, number]) => {
+      Object.entries(regionCounts).forEach(([region, count]) => {
         regionalBreakdown[region] = totalRegionOrders > 0 ? Math.round((count / totalRegionOrders) * 100) : 0;
       });
       
       // Calculate fulfillment status from order statuses
-      const fulfillmentStatus = {};
+      const fulfillmentStatus: { [key: string]: number } = {};
       orders.forEach(order => {
         const status = order.status || 'unknown';
         fulfillmentStatus[status] = (fulfillmentStatus[status] || 0) + 1;

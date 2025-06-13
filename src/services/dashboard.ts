@@ -78,47 +78,66 @@ export const dashboardApi = {
       
       console.log('📊 Raw overview response:', result);
       
-      // Handle the new response structure - it's an array with one object
-      let overviewData = result;
+      // Handle the new response structure - it's an array with raw order/customer data
+      let rawData = result;
       if (Array.isArray(result) && result.length > 0) {
-        overviewData = result[0];
+        rawData = result[0];
       }
       
-      if (overviewData.success && overviewData.data) {
-        const data = overviewData.data;
-        
-        // Map the new structure to our expected interface
-        const mappedOverview: DashboardOverview = {
-          summary_cards: {
-            revenue: parseFloat(data.summary_cards?.total_revenue?.value?.replace('$', '').replace(',', '') || '0'),
-            orders: parseInt(data.summary_cards?.total_orders?.value || '0'),
-            customers: parseInt(data.summary_cards?.total_customers?.value || '0'),
-            products: data.quick_stats?.low_stock_alerts || 0
-          },
-          regional_breakdown: {},
-          fulfillment_status: {},
-          recent_activity: data.recent_activity || []
-        };
-        
-        // Map regional breakdown to percentage values
-        if (data.regional_breakdown) {
-          Object.entries(data.regional_breakdown).forEach(([key, region]: [string, any]) => {
-            mappedOverview.regional_breakdown[region.name] = parseFloat(region.percentage);
-          });
-        }
-        
-        // Map fulfillment status
-        if (data.fulfillment_status) {
-          Object.entries(data.fulfillment_status).forEach(([key, fulfillment]: [string, any]) => {
-            mappedOverview.fulfillment_status[fulfillment.name] = fulfillment.pending_orders || 0;
-          });
-        }
-        
-        console.log('📊 Mapped overview data:', mappedOverview);
-        return mappedOverview;
-      }
+      // Extract order data
+      const orders = rawData.orders ? [rawData.orders] : [];
+      const customers = rawData.data?.customers ? [rawData.data.customers] : [];
       
-      throw new Error('Invalid API response structure');
+      // Calculate summary cards from raw data
+      const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total || '0'), 0);
+      const totalOrders = orders.length;
+      const totalCustomers = customers.length;
+      
+      // Extract regional data from billing addresses
+      const regionCounts = {};
+      orders.forEach(order => {
+        const country = order.billing?.country || 'Unknown';
+        regionCounts[country] = (regionCounts[country] || 0) + 1;
+      });
+      
+      // Convert to percentages
+      const regionalBreakdown = {};
+      const totalRegionOrders = Object.values(regionCounts).reduce((sum: number, count: number) => sum + count, 0);
+      Object.entries(regionCounts).forEach(([region, count]: [string, number]) => {
+        regionalBreakdown[region] = totalRegionOrders > 0 ? Math.round((count / totalRegionOrders) * 100) : 0;
+      });
+      
+      // Calculate fulfillment status from order statuses
+      const fulfillmentStatus = {};
+      orders.forEach(order => {
+        const status = order.status || 'unknown';
+        fulfillmentStatus[status] = (fulfillmentStatus[status] || 0) + 1;
+      });
+      
+      // Create recent activity from orders
+      const recentActivity = orders.map(order => ({
+        id: order.id,
+        type: 'order',
+        description: `Order #${order.number} - ${order.billing?.first_name || 'Customer'}`,
+        timestamp: order.date_created,
+        amount: parseFloat(order.total || '0')
+      }));
+      
+      const mappedOverview: DashboardOverview = {
+        summary_cards: {
+          revenue: totalRevenue,
+          orders: totalOrders,
+          customers: totalCustomers,
+          products: orders.reduce((sum, order) => sum + (order.line_items?.length || 0), 0)
+        },
+        regional_breakdown: regionalBreakdown,
+        fulfillment_status: fulfillmentStatus,
+        recent_activity: recentActivity
+      };
+      
+      console.log('📊 Mapped overview data:', mappedOverview);
+      return mappedOverview;
+      
     } catch (error) {
       console.error('Error fetching dashboard overview:', error);
       throw error;

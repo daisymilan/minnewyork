@@ -61,10 +61,21 @@ const DashboardUS = () => {
     refetchInterval: 120000, // Refetch every 2 minutes
   });
 
-  // US warehouse data from US-specific API
+  // US warehouse data from US-specific API - Updated to use the correct endpoint
   const { data: warehouseData, isLoading: warehouseLoading } = useQuery({
     queryKey: ['warehouseOverviewUS'],
-    queryFn: () => orderRoutingApi.getWarehouseOverviewUS(),
+    queryFn: async () => {
+      const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/warehouse/overview-us');
+      const result = await response.json();
+      
+      console.log('🏭 Raw US warehouse overview response:', result);
+      
+      if (result.success) {
+        return result;
+      }
+      
+      throw new Error('Failed to fetch US warehouse overview');
+    },
     refetchInterval: 60000, // Refetch every minute
   });
 
@@ -315,7 +326,7 @@ const DashboardUS = () => {
                     )}
                   </LuxuryCard>
                   
-                  {/* US Warehouse Network */}
+                  {/* US Warehouse Network - Updated to use new warehouse data structure */}
                   <LuxuryCard className="p-6 bg-white border border-gray-200">
                     <h3 className="text-lg font-sans text-primary mb-4">US Warehouse Network</h3>
                     {warehouseLoading ? (
@@ -334,15 +345,15 @@ const DashboardUS = () => {
                           ))}
                         </div>
                       </div>
-                    ) : warehouseData?.overview ? (
+                    ) : warehouseData ? (
                       <>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-primary">{warehouseData.overview.total_warehouses}</div>
+                            <div className="text-2xl font-bold text-primary">{warehouseData.total_warehouses || 0}</div>
                             <div className="text-sm text-gray-600">US Locations</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-green-500">{warehouseData.overview.operational_warehouses}</div>
+                            <div className="text-2xl font-bold text-green-500">{warehouseData.active_warehouses || 0}</div>
                             <div className="text-sm text-gray-600">Active</div>
                           </div>
                           <div className="text-center">
@@ -350,7 +361,7 @@ const DashboardUS = () => {
                             <div className="text-sm text-gray-600">Fulfillment</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-primary">{warehouseData.overview.total_capacity || 'N/A'}</div>
+                            <div className="text-2xl font-bold text-primary">{warehouseData.total_capacity || 'N/A'}</div>
                             <div className="text-sm text-gray-600">Capacity</div>
                           </div>
                         </div>
@@ -375,14 +386,14 @@ const DashboardUS = () => {
                                         {getWarehouseTypeLabel(warehouse.warehouse_type)}
                                       </Badge>
                                     </h5>
-                                    <p className="text-sm text-gray-600">{warehouse.region || 'USA'}</p>
+                                    <p className="text-sm text-gray-600">{warehouse.location}</p>
                                   </div>
                                   <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
                                     {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
                                   </span>
                                 </div>
                                 <div className="text-sm text-gray-600">
-                                  {warehouse.orders_pending || 0} pending orders
+                                  {warehouse.total_items || 0} items in stock
                                 </div>
                               </div>
                             ))}

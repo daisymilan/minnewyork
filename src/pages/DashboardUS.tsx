@@ -31,37 +31,42 @@ const DashboardUS = () => {
   useWebhookEventsUS();
   
   // all the data fetching logic
+  // US overview data fetching every 2 hours
   const { data: overviewData, isLoading: overviewLoading } = useQuery({
     queryKey: ['dashboardOverviewUS'],
     queryFn: dashboardUSApi.getOverview,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 7200000, // 2 hours in milliseconds
   });
 
+  // US orders data fetching every 1 hour
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ['dashboardOrdersUS'],
     queryFn: dashboardUSApi.getOrders,
-    refetchInterval: 60000, // Refetch every minute
+    refetchInterval: 3600000, // 1 hour in milliseconds
   });
 
+  // US analytics data fetching every 2 hours
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
     queryKey: ['dashboardAnalyticsUS'],
     queryFn: dashboardUSApi.getAnalytics,
-    refetchInterval: 30000,
+    refetchInterval: 7200000, // 2 hours in milliseconds
   });
 
+  // US products data fetching every 2 hours
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['dashboardProductsUS'],
     queryFn: dashboardUSApi.getProducts,
-    refetchInterval: 120000, // Refetch every 2 minutes
+    refetchInterval: 7200000, // 2 hours in milliseconds
   });
 
+  // US customers data fetching every 2 hours
   const { data: customersData, isLoading: customersLoading } = useQuery({
     queryKey: ['dashboardCustomersUS'],
     queryFn: dashboardUSApi.getCustomers,
-    refetchInterval: 120000, // Refetch every 2 minutes
+    refetchInterval: 7200000, // 2 hours in milliseconds
   });
 
-  // US warehouse data from US-specific API - Updated to use the correct endpoint
+  // US warehouse data fetching every 1 hour
   const { data: warehouseData, isLoading: warehouseLoading } = useQuery({
     queryKey: ['warehouseOverviewUS'],
     queryFn: async () => {
@@ -76,10 +81,10 @@ const DashboardUS = () => {
       
       throw new Error('Failed to fetch US warehouse overview');
     },
-    refetchInterval: 60000, // Refetch every minute
+    refetchInterval: 3600000, // 1 hour in milliseconds
   });
 
-  // US market insights from API - updated to handle the correct response structure
+  // US market insights fetching every 2 hours
   const { data: marketInsightsData, isLoading: marketInsightsLoading } = useQuery({
     queryKey: ['marketInsightsUS'],
     queryFn: async () => {
@@ -92,7 +97,7 @@ const DashboardUS = () => {
       }
       return result;
     },
-    refetchInterval: 300000, // Refetch every 5 minutes
+    refetchInterval: 7200000, // 2 hours in milliseconds
   });
   
   // Use US analytics data for KPIs

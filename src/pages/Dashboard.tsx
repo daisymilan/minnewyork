@@ -8,7 +8,7 @@ import KpiCard from '@/components/dashboard/KpiCard';
 import KpiDetailsModal from '@/components/dashboard/KpiDetailsModal';
 import WarehouseDetailsSheet from '@/components/dashboard/WarehouseDetailsSheet';
 import MarketInsightsModal from '@/components/dashboard/MarketInsightsModal';
-import RealtimeOrderTracking from '@/components/dashboard/RealtimeOrderTracking';
+import CustomerInsightsModal from '@/components/dashboard/CustomerInsightsModal';
 import { LuxuryCard } from '@/components/ui/luxury-card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,52 +25,63 @@ const Dashboard = () => {
   const [kpiDetailsOpen, setKpiDetailsOpen] = useState(false);
   const [selectedKpiType, setSelectedKpiType] = useState<'revenue' | 'orders' | 'conversion' | 'averageOrder' | null>(null);
   const [marketInsightsOpen, setMarketInsightsOpen] = useState(false);
-  
+  const [customerInsightsOpen, setCustomerInsightsOpen] = useState(false);
+
   // Initialize webhook event listeners
   useWebhookEvents();
-  
+
+  // all the data fetching logic
   const { data: overviewData, isLoading: overviewLoading } = useQuery({
     queryKey: ['dashboardOverview'],
     queryFn: dashboardApi.getOverview,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 7200000, // 2 hours in milliseconds
   });
 
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ['dashboardOrders'],
     queryFn: dashboardApi.getOrders,
-    refetchInterval: 60000, // Refetch every minute
+    refetchInterval: 3600000, // 1 hour in milliseconds
   });
 
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
     queryKey: ['dashboardAnalytics'],
     queryFn: dashboardApi.getAnalytics,
-    refetchInterval: 30000,
+    refetchInterval: 7200000, // 2 hours in milliseconds
   });
 
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['dashboardProducts'],
     queryFn: dashboardApi.getProducts,
-    refetchInterval: 120000, // Refetch every 2 minutes
+    refetchInterval: 7200000, // 2 hours in milliseconds
   });
 
   const { data: customersData, isLoading: customersLoading } = useQuery({
     queryKey: ['dashboardCustomers'],
     queryFn: dashboardApi.getCustomers,
-    refetchInterval: 120000, // Refetch every 2 minutes
+    refetchInterval: 7200000, // 2 hours in milliseconds
   });
 
-  // Real warehouse data from API
   const { data: warehouseData, isLoading: warehouseLoading } = useQuery({
     queryKey: ['warehouseOverview'],
-    queryFn: orderRoutingApi.getWarehouseOverview,
-    refetchInterval: 60000, // Refetch every minute
+    queryFn: async () => {
+      const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/warehouse/overview');
+      const result = await response.json();
+      
+      console.log('🏭 Raw warehouse overview response:', result);
+      
+      if (result.success) {
+        return result;
+      }
+      
+      throw new Error('Failed to fetch warehouse overview');
+    },
+    refetchInterval: 3600000, // 1 hour in milliseconds
   });
 
-  // Global market insights from API - updated to handle the correct response structure
   const { data: marketInsightsData, isLoading: marketInsightsLoading } = useQuery({
-    queryKey: ['marketInsightsGlobal'],
+    queryKey: ['marketInsights'],
     queryFn: async () => {
-      const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/market-insights-global');
+      const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/market-insights');
       const result = await response.json();
       
       // Handle array response - take the first item
@@ -79,7 +90,7 @@ const Dashboard = () => {
       }
       return result;
     },
-    refetchInterval: 300000, // Refetch every 5 minutes
+    refetchInterval: 7200000, // 2 hours in milliseconds
   });
   
   const kpiData = analyticsLoading || !analyticsData ? null : {
@@ -122,6 +133,7 @@ const Dashboard = () => {
       };
     }) : null;
   
+  // helper functions
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'delivered': return 'bg-green-500/10 text-green-500';
@@ -132,7 +144,6 @@ const Dashboard = () => {
       case 'cancelled': return 'bg-red-500/10 text-red-500';
       case 'active': return 'bg-green-500/10 text-green-500';
       case 'operational': return 'bg-green-500/10 text-green-500';
-      case 'inactive': return 'bg-gray-500/10 text-gray-500';
       default: return 'bg-gray-500/10 text-gray-500';
     }
   };
@@ -166,9 +177,13 @@ const Dashboard = () => {
   const handleMarketInsightsClick = () => {
     setMarketInsightsOpen(true);
   };
+
+  const handleCustomerInsightsClick = () => {
+    setCustomerInsightsOpen(true);
+  };
   
   return (
-    <div className="flex h-screen bg-white text-black font-sans">
+    <div className="flex h-screen bg-white text-black">
       <DashboardSidebar 
         isCollapsed={sidebarCollapsed} 
         toggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} 
@@ -180,8 +195,8 @@ const Dashboard = () => {
         <main className="flex-1 overflow-y-auto p-6 bg-white">
           {user && (
             <div className="animate-fade-in">
-              <h2 className="text-2xl font-sans mb-1 text-black">
-                Welcome back, {user.name}
+              <h2 className="text-2xl font-sans mb-1 text-primary">
+                Welcome to Dashboard, {user.name}
               </h2>
               <p className="text-sm text-gray-600 mb-6">
                 Here's what's happening with your fragrance business today
@@ -204,7 +219,7 @@ const Dashboard = () => {
                         value={kpiData.revenue.value}
                         trend={kpiData.revenue.trend}
                         type={kpiData.revenue.type}
-                        className="hover:scale-105 transition-transform bg-white border border-gray-200"
+                        className="hover:scale-105 transition-transform"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="10" />
@@ -222,7 +237,7 @@ const Dashboard = () => {
                         value={kpiData.orders.value}
                         trend={kpiData.orders.trend}
                         type={kpiData.orders.type}
-                        className="hover:scale-105 transition-transform bg-white border border-gray-200"
+                        className="hover:scale-105 transition-transform"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
@@ -239,7 +254,7 @@ const Dashboard = () => {
                         value={kpiData.conversion.value}
                         trend={kpiData.conversion.trend}
                         type={kpiData.conversion.type}
-                        className="hover:scale-105 transition-transform bg-white border border-gray-200"
+                        className="hover:scale-105 transition-transform"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="m2 4 3 12h14l3-12-6 7-4 7-4 7-6-7Z" />
@@ -256,7 +271,7 @@ const Dashboard = () => {
                         value={kpiData.averageOrder.value}
                         trend={kpiData.averageOrder.trend}
                         type={kpiData.averageOrder.type}
-                        className="hover:scale-105 transition-transform bg-white border border-gray-200"
+                        className="hover:scale-105 transition-transform"
                         icon={
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <rect width="18" height="18" x="3" y="3" rx="2" />
@@ -270,12 +285,13 @@ const Dashboard = () => {
                 )}
               </div>
               
-              {/* Three column layout for dashboard widgets */}
+              {/* Two column layout for dashboard widgets */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main content area */}
                 <div className="lg:col-span-2 space-y-6">
+                  {/* Sales by Region */}
                   <LuxuryCard className="p-6 bg-white border border-gray-200">
-                    <h3 className="text-lg font-sans text-black mb-4">Global Sales by Region</h3>
+                    <h3 className="text-lg font-sans text-primary mb-4">Sales by Region</h3>
                     {overviewLoading ? (
                       <div className="space-y-4">
                         {Array.from({ length: 4 }).map((_, i) => (
@@ -306,9 +322,9 @@ const Dashboard = () => {
                     )}
                   </LuxuryCard>
                   
-                  {/* Global Warehouse Network - Enhanced to ensure SCM France is visible */}
+                  {/* Warehouse Network - Updated to use new warehouse data structure */}
                   <LuxuryCard className="p-6 bg-white border border-gray-200">
-                    <h3 className="text-lg font-sans text-black mb-4">Global Warehouse Network</h3>
+                    <h3 className="text-lg font-sans text-primary mb-4">Warehouse Network</h3>
                     {warehouseLoading ? (
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -329,142 +345,72 @@ const Dashboard = () => {
                       <>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-primary">{warehouseData.total_warehouses}</div>
-                            <div className="text-sm text-gray-600">Total Locations</div>
+                            <div className="text-2xl font-bold text-primary">{warehouseData.total_warehouses || 0}</div>
+                            <div className="text-sm text-gray-600">Locations</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-green-500">{warehouseData.active_warehouses}</div>
+                            <div className="text-2xl font-bold text-green-500">{warehouseData.active_warehouses || 0}</div>
                             <div className="text-sm text-gray-600">Active</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-purple-500">{warehouseData.manufacturing_warehouses || 0}</div>
-                            <div className="text-sm text-gray-600">Manufacturing</div>
+                            <div className="text-2xl font-bold text-blue-400">{warehouseData.warehouses?.filter(w => w.country !== 'US').length || 0}</div>
+                            <div className="text-sm text-gray-600">Fulfillment</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-primary">
-                              ${typeof warehouseData.total_inventory_value === 'number' ? warehouseData.total_inventory_value.toLocaleString() : '0'}
-                            </div>
-                            <div className="text-sm text-gray-600">Total Value</div>
+                            <div className="text-2xl font-bold text-primary">{warehouseData.total_capacity || 'N/A'}</div>
+                            <div className="text-sm text-gray-600">Capacity</div>
                           </div>
                         </div>
                         
-                        <div className="space-y-6">
-                          {/* SCM France Manufacturing Center - Always show first */}
-                          <div>
-                            <div className="flex items-center gap-2 mb-3">
-                              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                              <h4 className="font-medium text-black">Manufacturing Centers</h4>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {/* Ensure SCM France is always displayed */}
-                              {warehouseData.warehouses?.filter(w => w.warehouse_type === 'manufacturing').length > 0 ? 
-                                warehouseData.warehouses.filter(w => w.warehouse_type === 'manufacturing').map((warehouse) => (
-                                  <div 
-                                    key={warehouse.name} 
-                                    className="bg-purple-50 border border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100 transition-colors"
-                                    onClick={() => handleWarehouseClick(warehouse)}
-                                  >
-                                    <div className="flex justify-between items-start mb-2">
-                                      <div>
-                                        <h5 className="font-medium text-black flex items-center gap-2">
-                                          {warehouse.name}
-                                          <Badge className="bg-purple-500/10 text-purple-500">
-                                            Manufacturing
-                                          </Badge>
-                                        </h5>
-                                        <p className="text-sm text-gray-600">{warehouse.location}</p>
-                                      </div>
-                                      <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
-                                        {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
-                                      </span>
-                                    </div>
-                                    <div className="text-sm text-gray-600">
-                                      {warehouse.total_items?.toLocaleString()} components
-                                    </div>
-                                  </div>
-                                )) : (
-                                  // Fallback SCM France if not in API data
-                                  <div 
-                                    className="bg-purple-50 border border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100 transition-colors"
-                                    onClick={() => handleWarehouseClick({
-                                      name: 'SCM France',
-                                      location: 'Nice, France',
-                                      status: 'active',
-                                      total_items: 0,
-                                      warehouse_type: 'manufacturing'
-                                    })}
-                                  >
-                                    <div className="flex justify-between items-start mb-2">
-                                      <div>
-                                        <h5 className="font-medium text-black flex items-center gap-2">
-                                          SCM France
-                                          <Badge className="bg-purple-500/10 text-purple-500">
-                                            Manufacturing
-                                          </Badge>
-                                        </h5>
-                                        <p className="text-sm text-gray-600">Nice, France</p>
-                                      </div>
-                                      <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-500">
-                                        Active
-                                      </span>
-                                    </div>
-                                    <div className="text-sm text-gray-600">
-                                      0 components
-                                    </div>
-                                  </div>
-                                )
-                              }
-                            </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <h4 className="font-medium text-primary">Fulfillment Centers</h4>
                           </div>
-
-                          {/* Fulfillment Centers */}
-                          {warehouseData.warehouses?.filter(w => w.warehouse_type === 'fulfillment' || !w.warehouse_type).length > 0 && (
-                            <div>
-                              <div className="flex items-center gap-2 mb-3">
-                                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                <h4 className="font-medium text-black">Fulfillment Centers</h4>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {warehouseData.warehouses.filter(w => w.warehouse_type === 'fulfillment' || !w.warehouse_type).map((warehouse) => (
-                                  <div 
-                                    key={warehouse.name} 
-                                    className="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition-colors"
-                                    onClick={() => handleWarehouseClick(warehouse)}
-                                  >
-                                    <div className="flex justify-between items-start mb-2">
-                                      <div>
-                                        <h5 className="font-medium text-black flex items-center gap-2">
-                                          {warehouse.name}
-                                          <Badge className="bg-blue-500/10 text-blue-500">
-                                            Fulfillment
-                                          </Badge>
-                                        </h5>
-                                        <p className="text-sm text-gray-600">{warehouse.location}</p>
-                                      </div>
-                                      <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
-                                        {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
-                                      </span>
-                                    </div>
-                                    <div className="text-sm text-gray-600">
-                                      {warehouse.total_items?.toLocaleString()} products
-                                    </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {warehouseData.warehouses?.filter(warehouse => warehouse.country !== 'US').map((warehouse) => (
+                              <div 
+                                key={warehouse.id || warehouse.name} 
+                                className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                                onClick={() => handleWarehouseClick(warehouse)}
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <h5 className="font-medium text-black flex items-center gap-2">
+                                      {warehouse.name}
+                                      <Badge className={getWarehouseTypeColor(warehouse.warehouse_type)}>
+                                        {getWarehouseTypeLabel(warehouse.warehouse_type)}
+                                      </Badge>
+                                    </h5>
+                                    <p className="text-sm text-gray-600">{warehouse.location}</p>
                                   </div>
-                                ))}
+                                  <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(warehouse.status)}`}>
+                                    {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
+                                  </span>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  {warehouse.total_items || 0} items in stock
+                                </div>
                               </div>
+                            ))}
+                          </div>
+                          
+                          {(!warehouseData.warehouses?.filter(w => w.country !== 'US').length) && (
+                            <div className="text-center py-4 text-gray-600">
+                              No warehouses found
                             </div>
                           )}
                         </div>
                       </>
                     ) : (
-                      <div className="text-center py-8 text-gray-600">
-                        <p>Loading...</p>
-                      </div>
+                      <div className="text-center py-4 text-gray-600">Loading warehouse data...</div>
                     )}
                   </LuxuryCard>
                   
+                  {/* Recent Orders */}
                   <LuxuryCard className="p-6 bg-white border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-sans text-black">Recent Orders</h3>
+                      <h3 className="text-lg font-sans text-primary">Recent Orders</h3>
                       <button 
                         onClick={() => navigate('/orders')}
                         className="text-sm text-primary hover:underline"
@@ -525,17 +471,16 @@ const Dashboard = () => {
                   </LuxuryCard>
                 </div>
                 
+                {/* Sidebar with widgets */}
                 <div className="space-y-6">
-                  <RealtimeOrderTracking />
-
-                  {/* Make Global Market Insights clickable */}
+                  {/* Make Market Insights clickable */}
                   <LuxuryCard 
                     className="p-6 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={handleMarketInsightsClick}
                   >
-                    <h3 className="text-lg font-sans text-black mb-3">Global Market Insights</h3>
+                    <h3 className="text-lg font-sans text-primary mb-3">Market Insights</h3>
                     <p className="text-sm text-gray-600 mb-4">
-                      Key metrics across all regions
+                      Key metrics for overall market performance
                     </p>
                     
                     {marketInsightsLoading ? (
@@ -560,8 +505,8 @@ const Dashboard = () => {
                           <span className="text-primary">{marketInsightsData.market_share || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Top Region</span>
-                          <span className="text-primary">{marketInsightsData.top_region || 'N/A'}</span>
+                          <span className="text-gray-600">Top State</span>
+                          <span className="text-primary">{marketInsightsData.top_state || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Peak Hours</span>
@@ -576,11 +521,12 @@ const Dashboard = () => {
                     )}
                   </LuxuryCard>
 
+                  {/* Product Performance - Fixed routing */}
                   <LuxuryCard 
                     className="p-6 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => navigate('/products')}
                   >
-                    <h3 className="text-lg font-sans text-black mb-4">Product Performance</h3>
+                    <h3 className="text-lg font-sans text-primary mb-4">Product Performance</h3>
                     {productsLoading ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
@@ -595,7 +541,7 @@ const Dashboard = () => {
                     ) : productsData ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Total Products</span>
+                          <span className="text-gray-600">Products</span>
                           <span className="text-black">{productsData.insights?.total_products || 'Loading...'}</span>
                         </div>
                         <div className="flex justify-between">
@@ -611,8 +557,12 @@ const Dashboard = () => {
                     )}
                   </LuxuryCard>
 
-                  <LuxuryCard className="p-6 bg-white border border-gray-200">
-                    <h3 className="text-lg font-sans text-black mb-4">Customer Insights</h3>
+                  {/* Make Customer Insights clickable */}
+                  <LuxuryCard 
+                    className="p-6 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={handleCustomerInsightsClick}
+                  >
+                    <h3 className="text-lg font-sans text-primary mb-4">Customer Insights</h3>
                     {customersLoading ? (
                       <div className="space-y-3">
                         <div className="flex justify-between">
@@ -637,6 +587,9 @@ const Dashboard = () => {
                         <div className="flex justify-between">
                           <span className="text-gray-600">Premium Members</span>
                           <span className="text-primary">{customersData.insights?.customer_segments?.Premium || 'Loading...'}</span>
+                        </div>
+                        <div className="text-xs text-gray-400 mt-3 text-center">
+                          Click for detailed insights
                         </div>
                       </div>
                     ) : (
@@ -670,6 +623,14 @@ const Dashboard = () => {
         isOpen={marketInsightsOpen}
         onClose={() => setMarketInsightsOpen(false)}
         data={marketInsightsData}
+        type="global"
+      />
+
+      {/* Customer Insights Modal */}
+      <CustomerInsightsModal
+        isOpen={customerInsightsOpen}
+        onClose={() => setCustomerInsightsOpen(false)}
+        data={customersData}
         type="global"
       />
     </div>

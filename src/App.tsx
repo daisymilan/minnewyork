@@ -34,7 +34,7 @@ const ProfilePage = () => (
   </div>
 );
 
-// Define the AppRoutes component using useAuth hook
+// Define the AppRoutes component
 const AppRoutes = () => {
   return (
     <Routes>

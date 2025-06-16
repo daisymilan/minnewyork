@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { LuxuryButton } from '@/components/ui/luxury-button';
 import { LuxuryCard } from '@/components/ui/luxury-card';
 import VoiceCommandButton from '@/components/ui/voice-command-button';
@@ -11,33 +11,25 @@ import { toast } from '@/components/ui/sonner';
 const Login = () => {
   const [email, setEmail] = useState('ceo@min.com');
   const [password, setPassword] = useState('password');
-  const [isLoading, setIsLoading] = useState(false);
-  const { login, loginWithVoice } = useAuth();
+  const { signIn, voiceLogin, isLoading } = useAuth();
   const navigate = useNavigate();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    const success = await login(email, password);
+    const result = await signIn({ email, password });
     
-    if (success) {
+    if (result.success) {
       navigate('/dashboard');
     }
-    
-    setIsLoading(false);
   };
   
   const handleVoiceLogin = async () => {
-    setIsLoading(true);
+    const result = await voiceLogin({ voiceCommand: 'login as CEO' });
     
-    const success = await loginWithVoice();
-    
-    if (success) {
+    if (result.success) {
       navigate('/dashboard');
     }
-    
-    setIsLoading(false);
   };
   
   // Voice command hook setup

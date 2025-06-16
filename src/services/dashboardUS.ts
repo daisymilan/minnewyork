@@ -69,17 +69,42 @@ export interface DashboardAnalytics {
   kpis: DashboardKPIs;
 }
 
-// Helper function to safely parse JSON with fallback
-const safeJsonParseUS = async (response: Response, fallbackData: any) => {
+// Cache for preserving US data between API calls
+let usCacheData = {
+  overview: null as DashboardOverview | null,
+  orders: null as { orders: DashboardOrder[]; summary: any } | null,
+  products: null as { products: DashboardProduct[]; insights: any } | null,
+  customers: null as { customers: DashboardCustomer[]; insights: any } | null,
+  analytics: null as DashboardAnalytics | null,
+};
+
+// Helper function to safely parse JSON with US cached data preservation
+const safeJsonParseUS = async (response: Response, fallbackData: any, cacheKey?: keyof typeof usCacheData) => {
   try {
     const text = await response.text();
     if (!text.trim()) {
-      console.log('📊 Empty US response, using fallback data');
+      console.log('📊 Empty US response, using cached data if available');
+      // Return cached data if available, otherwise fallback
+      if (cacheKey && usCacheData[cacheKey]) {
+        console.log(`📊 Using cached US ${cacheKey} data`);
+        return usCacheData[cacheKey];
+      }
       return fallbackData;
     }
-    return JSON.parse(text);
+    const result = JSON.parse(text);
+    // Cache successful results
+    if (cacheKey && result) {
+      usCacheData[cacheKey] = result;
+      console.log(`📊 Cached US ${cacheKey} data`);
+    }
+    return result;
   } catch (error) {
-    console.log('📊 US JSON parse error, using fallback data:', error);
+    console.log('📊 US JSON parse error, using cached data if available:', error);
+    // Return cached data if available, otherwise fallback
+    if (cacheKey && usCacheData[cacheKey]) {
+      console.log(`📊 Using cached US ${cacheKey} data due to parse error`);
+      return usCacheData[cacheKey];
+    }
     return fallbackData;
   }
 };
@@ -117,7 +142,7 @@ export const dashboardUSApi = {
         recent_activity: []
       };
       
-      const result = await safeJsonParseUS(response, fallbackData);
+      const result = await safeJsonParseUS(response, fallbackData, 'overview');
       
       console.log('📊 Raw US overview response:', result);
       
@@ -158,32 +183,15 @@ export const dashboardUSApi = {
       }
       
       return fallbackData;
+      
     } catch (error) {
       console.error('Error fetching US dashboard overview:', error);
-      
-      return {
-        summary_cards: {
-          revenue: 75000,
-          orders: 42,
-          customers: 89,
-          products: 28
-        },
-        regional_breakdown: {
-          'California': 25,
-          'New York': 18,
-          'Texas': 15,
-          'Florida': 12,
-          'Illinois': 8,
-          'Other States': 22
-        },
-        fulfillment_status: {
-          'delivered': 35,
-          'shipped': 28,
-          'processing': 20,
-          'pending': 17
-        },
-        recent_activity: []
-      };
+      // Return cached data if available
+      if (usCacheData.overview) {
+        console.log('📊 Using cached US overview data due to error');
+        return usCacheData.overview;
+      }
+      throw error;
     }
   },
 
@@ -227,10 +235,11 @@ export const dashboardUSApi = {
         }
       };
       
-      const result = await safeJsonParseUS(response, fallbackData);
+      const result = await safeJsonParseUS(response, fallbackData, 'orders');
       
       console.log('📦 Raw US orders response:', result);
       
+      // If we got fallback data, return it directly
       if (result === fallbackData) {
         return result;
       }
@@ -271,39 +280,15 @@ export const dashboardUSApi = {
       }
       
       return fallbackData;
+      
     } catch (error) {
       console.error('Error fetching US dashboard orders:', error);
-      return {
-        orders: [
-          {
-            id: '2001',
-            customer_name: 'Michael Johnson',
-            customer_email: 'michael@example.com',
-            product_name: 'Order #2001',
-            amount: 180.00,
-            status: 'delivered',
-            date_created: new Date().toISOString(),
-            region: 'California',
-            items_count: 2
-          },
-          {
-            id: '2002',
-            customer_name: 'Jennifer Davis',
-            customer_email: 'jennifer@example.com',
-            product_name: 'Order #2002',
-            amount: 95.50,
-            status: 'shipped',
-            date_created: new Date().toISOString(),
-            region: 'New York',
-            items_count: 1
-          }
-        ],
-        summary: {
-          total_orders: 2,
-          total_revenue: 275.50,
-          orders_by_region: {}
-        }
-      };
+      // Return cached data if available  
+      if (usCacheData.orders) {
+        console.log('📦 Using cached US orders data due to error');
+        return usCacheData.orders;
+      }
+      throw error;
     }
   },
 
@@ -323,10 +308,11 @@ export const dashboardUSApi = {
         }
       };
       
-      const result = await safeJsonParseUS(response, fallbackData);
+      const result = await safeJsonParseUS(response, fallbackData, 'products');
       
       console.log('📦 Raw US products response:', result);
       
+      // If we got fallback data, return it directly
       if (result === fallbackData) {
         return result;
       }
@@ -363,15 +349,15 @@ export const dashboardUSApi = {
       }
       
       return fallbackData;
+      
     } catch (error) {
       console.error('Error fetching US dashboard products:', error);
-      return {
-        products: [],
-        insights: {
-          total_products: 28,
-          low_stock_alerts: 2
-        }
-      };
+      // Return cached data if available
+      if (usCacheData.products) {
+        console.log('📦 Using cached US products data due to error');
+        return usCacheData.products;
+      }
+      throw error;
     }
   },
 
@@ -395,10 +381,11 @@ export const dashboardUSApi = {
         }
       };
       
-      const result = await safeJsonParseUS(response, fallbackData);
+      const result = await safeJsonParseUS(response, fallbackData, 'customers');
       
       console.log('👥 Raw US customers response:', result);
       
+      // If we got fallback data, return it directly
       if (result === fallbackData) {
         return result;
       }
@@ -427,19 +414,15 @@ export const dashboardUSApi = {
       }
       
       return fallbackData;
+      
     } catch (error) {
       console.error('Error fetching US dashboard customers:', error);
-      return {
-        customers: [],
-        insights: {
-          total_customers: 89,
-          customer_segments: {
-            VIP: 8,
-            Premium: 21,
-            Regular: 60
-          }
-        }
-      };
+      // Return cached data if available
+      if (usCacheData.customers) {
+        console.log('👥 Using cached US customers data due to error');
+        return usCacheData.customers;
+      }
+      throw error;
     }
   },
 
@@ -471,38 +454,28 @@ export const dashboardUSApi = {
         }
       };
       
-      const result = await safeJsonParseUS(response, fallbackData);
+      const result = await safeJsonParseUS(response, fallbackData, 'analytics');
       
       if (result === fallbackData) {
         return result;
       }
       
       if (result.success && result.data) {
-        return result.data;
+        const analyticsData = result.data;
+        // Cache the successful result
+        usCacheData.analytics = analyticsData;
+        return analyticsData;
       }
       
       return fallbackData;
     } catch (error) {
       console.error('Error fetching US dashboard analytics:', error);
-      return {
-        revenue_chart: {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-          datasets: [{
-            label: 'US Revenue',
-            data: [8500, 10200, 12800, 11200, 14500, 16800]
-          }]
-        },
-        kpis: {
-          total_revenue: 75000,
-          total_orders: 42,
-          total_customers: 89,
-          growth_rate: 15.2,
-          conversion_rate: 4.1,
-          average_order_value: 1785,
-          conversion_trend: 1.2,
-          aov_trend: 7.8
-        }
-      };
+      // Return cached data if available
+      if (usCacheData.analytics) {
+        console.log('📊 Using cached US analytics data due to error');
+        return usCacheData.analytics;
+      }
+      throw error;
     }
   },
 

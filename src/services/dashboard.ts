@@ -1,4 +1,3 @@
-
 // Dashboard API service for comprehensive dashboard data
 export interface DashboardOrder {
   id: string;
@@ -70,17 +69,42 @@ export interface DashboardAnalytics {
   kpis: DashboardKPIs;
 }
 
-// Helper function to safely parse JSON with fallback
-const safeJsonParse = async (response: Response, fallbackData: any) => {
+// Cache for preserving data between API calls
+let dataCache = {
+  overview: null as DashboardOverview | null,
+  orders: null as { orders: DashboardOrder[]; summary: any } | null,
+  products: null as { products: DashboardProduct[]; insights: any } | null,
+  customers: null as { customers: DashboardCustomer[]; insights: any } | null,
+  analytics: null as DashboardAnalytics | null,
+};
+
+// Helper function to safely parse JSON with cached data preservation
+const safeJsonParse = async (response: Response, fallbackData: any, cacheKey?: keyof typeof dataCache) => {
   try {
     const text = await response.text();
     if (!text.trim()) {
-      console.log('📊 Empty response, using fallback data');
+      console.log('📊 Empty response, using cached data if available');
+      // Return cached data if available, otherwise fallback
+      if (cacheKey && dataCache[cacheKey]) {
+        console.log(`📊 Using cached ${cacheKey} data`);
+        return dataCache[cacheKey];
+      }
       return fallbackData;
     }
-    return JSON.parse(text);
+    const result = JSON.parse(text);
+    // Cache successful results
+    if (cacheKey && result) {
+      dataCache[cacheKey] = result;
+      console.log(`📊 Cached ${cacheKey} data`);
+    }
+    return result;
   } catch (error) {
-    console.log('📊 JSON parse error, using fallback data:', error);
+    console.log('📊 JSON parse error, using cached data if available:', error);
+    // Return cached data if available, otherwise fallback
+    if (cacheKey && dataCache[cacheKey]) {
+      console.log(`📊 Using cached ${cacheKey} data due to parse error`);
+      return dataCache[cacheKey];
+    }
     return fallbackData;
   }
 };
@@ -119,7 +143,7 @@ export const dashboardApi = {
         recent_activity: []
       };
       
-      const result = await safeJsonParse(response, fallbackData);
+      const result = await safeJsonParse(response, fallbackData, 'overview');
       
       console.log('📊 Raw overview response:', result);
       
@@ -190,6 +214,11 @@ export const dashboardApi = {
       
     } catch (error) {
       console.error('Error fetching dashboard overview:', error);
+      // Return cached data if available
+      if (dataCache.overview) {
+        console.log('📊 Using cached overview data due to error');
+        return dataCache.overview;
+      }
       throw error;
     }
   },
@@ -234,7 +263,7 @@ export const dashboardApi = {
         }
       };
       
-      const result = await safeJsonParse(response, fallbackData);
+      const result = await safeJsonParse(response, fallbackData, 'orders');
       
       console.log('📦 Raw orders response:', result);
       
@@ -285,6 +314,11 @@ export const dashboardApi = {
       return fallbackData;
     } catch (error) {
       console.error('Error fetching dashboard orders:', error);
+      // Return cached data if available
+      if (dataCache.orders) {
+        console.log('📦 Using cached orders data due to error');
+        return dataCache.orders;
+      }
       throw error;
     }
   },
@@ -305,7 +339,7 @@ export const dashboardApi = {
         }
       };
       
-      const result = await safeJsonParse(response, fallbackData);
+      const result = await safeJsonParse(response, fallbackData, 'products');
       
       console.log('📦 Raw products response:', result);
       
@@ -354,6 +388,11 @@ export const dashboardApi = {
       return fallbackData;
     } catch (error) {
       console.error('Error fetching dashboard products:', error);
+      // Return cached data if available
+      if (dataCache.products) {
+        console.log('📦 Using cached products data due to error');
+        return dataCache.products;
+      }
       throw error;
     }
   },
@@ -378,7 +417,7 @@ export const dashboardApi = {
         }
       };
       
-      const result = await safeJsonParse(response, fallbackData);
+      const result = await safeJsonParse(response, fallbackData, 'customers');
       
       console.log('👥 Raw customers response:', result);
       
@@ -418,6 +457,11 @@ export const dashboardApi = {
       return fallbackData;
     } catch (error) {
       console.error('Error fetching dashboard customers:', error);
+      // Return cached data if available
+      if (dataCache.customers) {
+        console.log('👥 Using cached customers data due to error');
+        return dataCache.customers;
+      }
       throw error;
     }
   },
@@ -450,7 +494,7 @@ export const dashboardApi = {
         }
       };
       
-      const result = await safeJsonParse(response, fallbackData);
+      const result = await safeJsonParse(response, fallbackData, 'analytics');
       
       if (result === fallbackData) {
         return result;
@@ -463,6 +507,11 @@ export const dashboardApi = {
       return fallbackData;
     } catch (error) {
       console.error('Error fetching dashboard analytics:', error);
+      // Return cached data if available
+      if (dataCache.analytics) {
+        console.log('📊 Using cached analytics data due to error');
+        return dataCache.analytics;
+      }
       throw error;
     }
   },

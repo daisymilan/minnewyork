@@ -34,23 +34,28 @@ const KpiCard: React.FC<KpiCardProps> = ({
   const formattedValue = React.useMemo(() => {
     if (typeof value === 'string') return value;
     
+    // Handle null, undefined, or invalid numbers
+    if (value == null || isNaN(Number(value))) return '0';
+    
+    const numValue = Number(value);
+    
     switch (type) {
       case 'currency':
         return new Intl.NumberFormat('en-US', { 
           style: 'currency', 
           currency: 'USD',
           maximumFractionDigits: 0
-        }).format(value);
+        }).format(numValue);
       case 'percentage':
-        return `${value}%`;
+        return `${numValue}%`;
       default:
-        return new Intl.NumberFormat('en-US').format(value);
+        return new Intl.NumberFormat('en-US').format(numValue);
     }
   }, [value, type]);
 
   // Default chart data if none provided
   const chartData = React.useMemo(() => {
-    if (data) return data;
+    if (data && Array.isArray(data)) return data;
     
     return Array.from({ length: 12 }, (_, i) => ({
       name: `Point ${i}`,
@@ -65,7 +70,6 @@ const KpiCard: React.FC<KpiCardProps> = ({
   return (
     <LuxuryCard 
       className={cn("flex flex-col h-full w-full gap-2 p-5 bg-white border border-gray-200", className)}
-      variant="default"
     >
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-gray-600">{title}</h3>

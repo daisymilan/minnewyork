@@ -14,7 +14,7 @@ import ProductsPage from "./pages/ProductsPage";
 import GlobalProductsPage from "./pages/GlobalProductsPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import NotFound from "./pages/NotFound";
-import { SignInPage } from "./components/auth/SignInPage";
+import Login from "./pages/Login";
 import { SignUpPage } from "./components/auth/SignUpPage";
 import B2BKingDashboard from "./pages/B2BKingDashboard";
 import MarketingDashboard from "./pages/MarketingDashboard";
@@ -22,6 +22,7 @@ import CalendarDashboard from "./pages/CalendarDashboard";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 import AdCreatorDashboard from "./pages/AdCreatorDashboard";
 import SupportDashboard from "./pages/SupportDashboard";
+import Index from "./pages/Index";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -38,7 +39,7 @@ const ProfilePage = () => (
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/login" element={<SignInPage />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/dashboard-us" element={<DashboardUS />} />
@@ -53,7 +54,7 @@ const AppRoutes = () => {
       <Route path="/ad-creator" element={<AdCreatorDashboard />} />
       <Route path="/support" element={<SupportDashboard />} />
       <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<Index />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

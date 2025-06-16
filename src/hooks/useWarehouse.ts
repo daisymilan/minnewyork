@@ -71,6 +71,11 @@ export const useWarehouse = () => {
 
     try {
       const response = await fetch(`${baseUrl}/test/connection`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const result = await response.json();
       
       if (!result.success) {
@@ -93,6 +98,11 @@ export const useWarehouse = () => {
 
     try {
       const response = await fetch(`${baseUrl}/inventory/woocommerce`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const result = await response.json();
       
       if (!result.success) {
@@ -115,6 +125,11 @@ export const useWarehouse = () => {
 
     try {
       const response = await fetch(`${baseUrl}/inventory/sync-all`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const result = await response.json();
       
       if (!result.success) {
@@ -122,10 +137,6 @@ export const useWarehouse = () => {
       }
       
       return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to sync orders';
-      setError(errorMessage);
-      throw err;
     } finally {
       setLoading(false);
     }
@@ -143,6 +154,10 @@ export const useWarehouse = () => {
         },
         body: JSON.stringify(orderData)
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
       const result = await response.json();
       

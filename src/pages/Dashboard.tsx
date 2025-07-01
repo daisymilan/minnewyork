@@ -34,31 +34,31 @@ const Dashboard = () => {
   const { data: overviewData, isLoading: overviewLoading } = useQuery({
     queryKey: ['dashboardOverview'],
     queryFn: dashboardApi.getOverview,
-    refetchInterval: 7200000, // 2 hours in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ['dashboardOrders'],
     queryFn: dashboardApi.getOrders,
-    refetchInterval: 3600000, // 1 hour in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
     queryKey: ['dashboardAnalytics'],
     queryFn: dashboardApi.getAnalytics,
-    refetchInterval: 7200000, // 2 hours in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['dashboardProducts'],
     queryFn: dashboardApi.getProducts,
-    refetchInterval: 7200000, // 2 hours in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
   const { data: customersData, isLoading: customersLoading } = useQuery({
     queryKey: ['dashboardCustomers'],
     queryFn: dashboardApi.getCustomers,
-    refetchInterval: 7200000, // 2 hours in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
   const { data: warehouseData, isLoading: warehouseLoading } = useQuery({
@@ -75,7 +75,7 @@ const Dashboard = () => {
       
       throw new Error('Failed to fetch warehouse overview');
     },
-    refetchInterval: 3600000, // 1 hour in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
   const { data: marketInsightsData, isLoading: marketInsightsLoading } = useQuery({
@@ -90,7 +90,7 @@ const Dashboard = () => {
       }
       return result;
     },
-    refetchInterval: 7200000, // 2 hours in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
   
   const kpiData = analyticsLoading || !analyticsData ? null : {

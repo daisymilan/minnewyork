@@ -31,42 +31,42 @@ const DashboardUS = () => {
   useWebhookEventsUS();
   
   // all the data fetching logic
-  // US overview data fetching every 2 hours
+  // US overview data fetching every 4 hours
   const { data: overviewData, isLoading: overviewLoading } = useQuery({
     queryKey: ['dashboardOverviewUS'],
     queryFn: dashboardUSApi.getOverview,
-    refetchInterval: 7200000, // 2 hours in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
-  // US orders data fetching every 1 hour
+  // US orders data fetching every 4 hours
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ['dashboardOrdersUS'],
     queryFn: dashboardUSApi.getOrders,
-    refetchInterval: 3600000, // 1 hour in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
-  // US analytics data fetching every 2 hours
+  // US analytics data fetching every 4 hours
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
     queryKey: ['dashboardAnalyticsUS'],
     queryFn: dashboardUSApi.getAnalytics,
-    refetchInterval: 7200000, // 2 hours in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
-  // US products data fetching every 2 hours
+  // US products data fetching every 4 hours
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['dashboardProductsUS'],
     queryFn: dashboardUSApi.getProducts,
-    refetchInterval: 7200000, // 2 hours in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
-  // US customers data fetching every 2 hours
+  // US customers data fetching every 4 hours
   const { data: customersData, isLoading: customersLoading } = useQuery({
     queryKey: ['dashboardCustomersUS'],
     queryFn: dashboardUSApi.getCustomers,
-    refetchInterval: 7200000, // 2 hours in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
-  // US warehouse data fetching every 1 hour
+  // US warehouse data fetching every 4 hours
   const { data: warehouseData, isLoading: warehouseLoading } = useQuery({
     queryKey: ['warehouseOverviewUS'],
     queryFn: async () => {
@@ -81,10 +81,10 @@ const DashboardUS = () => {
       
       throw new Error('Failed to fetch US warehouse overview');
     },
-    refetchInterval: 3600000, // 1 hour in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
-  // US market insights fetching every 2 hours
+  // US market insights fetching every 4 hours
   const { data: marketInsightsData, isLoading: marketInsightsLoading } = useQuery({
     queryKey: ['marketInsightsUS'],
     queryFn: async () => {
@@ -97,8 +97,9 @@ const DashboardUS = () => {
       }
       return result;
     },
-    refetchInterval: 7200000, // 2 hours in milliseconds
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
+  
   
   // Use US analytics data for KPIs
   const kpiData = analyticsLoading || !analyticsData ? null : {
@@ -190,6 +191,7 @@ const DashboardUS = () => {
   const handleCustomerInsightsClick = () => {
     setCustomerInsightsOpen(true);
   };
+  
   
   return (
     <div className="flex h-screen bg-white text-black">

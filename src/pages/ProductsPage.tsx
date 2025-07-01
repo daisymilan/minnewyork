@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +15,7 @@ const ProductsPage = () => {
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['dashboardProductsUS'],
     queryFn: dashboardUSApi.getProducts,
-    refetchInterval: 120000, // Refetch every 2 minutes
+    refetchInterval: 14400000, // 4 hours in milliseconds
   });
 
   const getStatusColor = (status: string) => {

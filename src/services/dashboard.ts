@@ -1,3 +1,4 @@
+
 // Dashboard API service for comprehensive dashboard data
 export interface DashboardOrder {
   id: string;
@@ -468,6 +469,7 @@ export const dashboardApi = {
 
   async getAnalytics(): Promise<DashboardAnalytics> {
     try {
+      console.log('📊 Fetching analytics data (triggered by page refresh)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/analytics');
       
       if (!response.ok) {
@@ -569,6 +571,7 @@ export const dashboardApi = {
 
   async getAllDashboardData() {
     try {
+      console.log('📊 Fetching all dashboard data (triggered by page refresh)');
       const [overview, orders, products, customers, analytics] = await Promise.all([
         this.getOverview(),
         this.getOrders(),

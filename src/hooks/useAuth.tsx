@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setError(null);
     
     try {
-      // Use the N8N webhook for sign in
+      console.log('🔐 Triggering sign-in webhook');
       const n8nWebhookUrl = 'https://minnewyorkofficial.app.n8n.cloud/webhook/auth/signin';
       
       const response = await fetch(n8nWebhookUrl, {
@@ -117,7 +117,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setError(null);
     
     try {
-      // Directly use the full webhook URL with proper CORS handling
+      console.log('🔐 Triggering sign-up webhook');
       const n8nWebhookUrl = 'https://minnewyorkofficial.app.n8n.cloud/webhook/auth/signup';
       
       console.log("Sending signup request to:", n8nWebhookUrl);
@@ -129,15 +129,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(userData),
-        // Add mode: 'no-cors' to handle CORS issues
         mode: 'no-cors'
       });
       
-      // When using no-cors mode, we can't actually read the response
-      // So we'll assume success and notify the user about potential issues
       toast.success('Account creation request sent successfully');
       
-      // Return a success object since we can't read the actual response with no-cors
       return { 
         success: true
       };
@@ -157,7 +153,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setError(null);
     
     try {
-      // Use the N8N webhook for voice login
+      console.log('🔐 Triggering voice login webhook');
       const n8nWebhookUrl = 'https://minnewyorkofficial.app.n8n.cloud/webhook/auth/voice-login';
       
       const response = await fetch(n8nWebhookUrl, {

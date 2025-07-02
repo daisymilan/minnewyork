@@ -1,4 +1,3 @@
-
 // Dashboard API service for comprehensive dashboard data
 export interface DashboardOrder {
   id: string;
@@ -113,6 +112,7 @@ const safeJsonParse = async (response: Response, fallbackData: any, cacheKey?: k
 export const dashboardApi = {
   async getOverview(): Promise<DashboardOverview> {
     try {
+      console.log('📊 Fetching dashboard overview (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/overview');
       
       if (!response.ok) {
@@ -226,6 +226,7 @@ export const dashboardApi = {
 
   async getOrders(): Promise<{ orders: DashboardOrder[]; summary: any }> {
     try {
+      console.log('📦 Fetching dashboard orders (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/orders');
       
       if (!response.ok) {
@@ -326,6 +327,7 @@ export const dashboardApi = {
 
   async getProducts(): Promise<{ products: DashboardProduct[]; insights: any }> {
     try {
+      console.log('📦 Fetching dashboard products (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/products');
       
       if (!response.ok) {
@@ -400,6 +402,7 @@ export const dashboardApi = {
 
   async getCustomers(): Promise<{ customers: DashboardCustomer[]; insights: any }> {
     try {
+      console.log('👥 Fetching dashboard customers (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/customers');
       
       if (!response.ok) {
@@ -469,7 +472,7 @@ export const dashboardApi = {
 
   async getAnalytics(): Promise<DashboardAnalytics> {
     try {
-      console.log('📊 Fetching analytics data (triggered by page refresh)');
+      console.log('📊 Fetching analytics data (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/analytics');
       
       if (!response.ok) {
@@ -571,7 +574,7 @@ export const dashboardApi = {
 
   async getAllDashboardData() {
     try {
-      console.log('📊 Fetching all dashboard data (triggered by page refresh)');
+      console.log('📊 Fetching all dashboard data (4-hour interval)');
       const [overview, orders, products, customers, analytics] = await Promise.all([
         this.getOverview(),
         this.getOrders(),

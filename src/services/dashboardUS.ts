@@ -112,6 +112,7 @@ const safeJsonParseUS = async (response: Response, fallbackData: any, cacheKey?:
 export const dashboardUSApi = {
   async getOverview(): Promise<DashboardOverview> {
     try {
+      console.log('📊 Fetching US dashboard overview (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/overview-us');
       
       if (!response.ok) {
@@ -197,6 +198,7 @@ export const dashboardUSApi = {
 
   async getOrders(): Promise<{ orders: DashboardOrder[]; summary: any }> {
     try {
+      console.log('📦 Fetching US dashboard orders (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/orders-us');
       
       if (!response.ok) {
@@ -294,6 +296,7 @@ export const dashboardUSApi = {
 
   async getProducts(): Promise<{ products: DashboardProduct[]; insights: any }> {
     try {
+      console.log('📦 Fetching US dashboard products (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/products-us');
       
       if (!response.ok) {
@@ -363,6 +366,7 @@ export const dashboardUSApi = {
 
   async getCustomers(): Promise<{ customers: DashboardCustomer[]; insights: any }> {
     try {
+      console.log('👥 Fetching US dashboard customers (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/customers-us');
       
       if (!response.ok) {
@@ -428,6 +432,7 @@ export const dashboardUSApi = {
 
   async getAnalytics(): Promise<DashboardAnalytics> {
     try {
+      console.log('📊 Fetching US analytics data (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/analytics-us');
       
       if (!response.ok) {
@@ -481,6 +486,7 @@ export const dashboardUSApi = {
 
   async getAllDashboardData() {
     try {
+      console.log('📊 Fetching all US dashboard data (4-hour interval)');
       const [overview, orders, products, customers, analytics] = await Promise.all([
         this.getOverview(),
         this.getOrders(),

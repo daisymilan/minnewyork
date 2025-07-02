@@ -28,6 +28,7 @@ export interface Customer {
 export const woocommerceApi = {
   async getOrders(): Promise<Order[]> {
     try {
+      console.log('🛒 Fetching WooCommerce orders (triggered by page refresh)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/woo/orders', {
         method: 'GET',
         headers: {
@@ -108,6 +109,7 @@ export const woocommerceApi = {
 
   async getProducts(): Promise<Product[]> {
     try {
+      console.log('📦 Fetching WooCommerce products (triggered by page refresh)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/woo/products', {
         method: 'GET',
         headers: {
@@ -131,6 +133,7 @@ export const woocommerceApi = {
 
   async getCustomers(): Promise<Customer[]> {
     try {
+      console.log('👥 Fetching WooCommerce customers (triggered by page refresh)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/woo/customers', {
         method: 'GET',
         headers: {

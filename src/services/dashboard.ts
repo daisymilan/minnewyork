@@ -1,3 +1,4 @@
+
 // Dashboard API service for comprehensive dashboard data
 export interface DashboardOrder {
   id: string;
@@ -78,6 +79,25 @@ let dataCache = {
   analytics: null as DashboardAnalytics | null,
 };
 
+// Track when data was last fetched
+let lastFetched = {
+  overview: 0,
+  orders: 0,
+  products: 0,
+  customers: 0,
+  analytics: 0,
+};
+
+// 4 hours in milliseconds
+const FOUR_HOURS = 4 * 60 * 60 * 1000;
+
+// Helper function to check if data needs to be refreshed
+const shouldRefresh = (endpoint: keyof typeof lastFetched): boolean => {
+  const now = Date.now();
+  const lastFetch = lastFetched[endpoint];
+  return now - lastFetch >= FOUR_HOURS;
+};
+
 // Helper function to safely parse JSON with cached data preservation
 const safeJsonParse = async (response: Response, fallbackData: any, cacheKey?: keyof typeof dataCache) => {
   try {
@@ -95,6 +115,7 @@ const safeJsonParse = async (response: Response, fallbackData: any, cacheKey?: k
     // Cache successful results
     if (cacheKey && result) {
       dataCache[cacheKey] = result;
+      lastFetched[cacheKey] = Date.now();
       console.log(`📊 Cached ${cacheKey} data`);
     }
     return result;
@@ -111,6 +132,12 @@ const safeJsonParse = async (response: Response, fallbackData: any, cacheKey?: k
 
 export const dashboardApi = {
   async getOverview(): Promise<DashboardOverview> {
+    // Check if we should use cached data
+    if (!shouldRefresh('overview') && dataCache.overview) {
+      console.log('📊 Using cached overview data (4-hour interval not reached)');
+      return dataCache.overview;
+    }
+
     try {
       console.log('📊 Fetching dashboard overview (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/overview');
@@ -225,6 +252,12 @@ export const dashboardApi = {
   },
 
   async getOrders(): Promise<{ orders: DashboardOrder[]; summary: any }> {
+    // Check if we should use cached data
+    if (!shouldRefresh('orders') && dataCache.orders) {
+      console.log('📦 Using cached orders data (4-hour interval not reached)');
+      return dataCache.orders;
+    }
+
     try {
       console.log('📦 Fetching dashboard orders (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/orders');
@@ -326,6 +359,12 @@ export const dashboardApi = {
   },
 
   async getProducts(): Promise<{ products: DashboardProduct[]; insights: any }> {
+    // Check if we should use cached data
+    if (!shouldRefresh('products') && dataCache.products) {
+      console.log('📦 Using cached products data (4-hour interval not reached)');
+      return dataCache.products;
+    }
+
     try {
       console.log('📦 Fetching dashboard products (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/products');
@@ -401,6 +440,12 @@ export const dashboardApi = {
   },
 
   async getCustomers(): Promise<{ customers: DashboardCustomer[]; insights: any }> {
+    // Check if we should use cached data
+    if (!shouldRefresh('customers') && dataCache.customers) {
+      console.log('👥 Using cached customers data (4-hour interval not reached)');
+      return dataCache.customers;
+    }
+
     try {
       console.log('👥 Fetching dashboard customers (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/customers');
@@ -471,6 +516,12 @@ export const dashboardApi = {
   },
 
   async getAnalytics(): Promise<DashboardAnalytics> {
+    // Check if we should use cached data
+    if (!shouldRefresh('analytics') && dataCache.analytics) {
+      console.log('📊 Using cached analytics data (4-hour interval not reached)');
+      return dataCache.analytics;
+    }
+
     try {
       console.log('📊 Fetching analytics data (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/analytics');

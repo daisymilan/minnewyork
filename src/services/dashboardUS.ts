@@ -1,3 +1,4 @@
+
 // US Dashboard API service for US-specific dashboard data
 export interface DashboardOrder {
   id: string;
@@ -78,6 +79,25 @@ let usCacheData = {
   analytics: null as DashboardAnalytics | null,
 };
 
+// Track when US data was last fetched
+let usLastFetched = {
+  overview: 0,
+  orders: 0,
+  products: 0,
+  customers: 0,
+  analytics: 0,
+};
+
+// 4 hours in milliseconds
+const FOUR_HOURS = 4 * 60 * 60 * 1000;
+
+// Helper function to check if US data needs to be refreshed
+const shouldRefreshUS = (endpoint: keyof typeof usLastFetched): boolean => {
+  const now = Date.now();
+  const lastFetch = usLastFetched[endpoint];
+  return now - lastFetch >= FOUR_HOURS;
+};
+
 // Helper function to safely parse JSON with US cached data preservation
 const safeJsonParseUS = async (response: Response, fallbackData: any, cacheKey?: keyof typeof usCacheData) => {
   try {
@@ -95,6 +115,7 @@ const safeJsonParseUS = async (response: Response, fallbackData: any, cacheKey?:
     // Cache successful results
     if (cacheKey && result) {
       usCacheData[cacheKey] = result;
+      usLastFetched[cacheKey] = Date.now();
       console.log(`📊 Cached US ${cacheKey} data`);
     }
     return result;
@@ -111,6 +132,12 @@ const safeJsonParseUS = async (response: Response, fallbackData: any, cacheKey?:
 
 export const dashboardUSApi = {
   async getOverview(): Promise<DashboardOverview> {
+    // Check if we should use cached data
+    if (!shouldRefreshUS('overview') && usCacheData.overview) {
+      console.log('📊 Using cached US overview data (4-hour interval not reached)');
+      return usCacheData.overview;
+    }
+
     try {
       console.log('📊 Fetching US dashboard overview (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/overview-us');
@@ -197,6 +224,12 @@ export const dashboardUSApi = {
   },
 
   async getOrders(): Promise<{ orders: DashboardOrder[]; summary: any }> {
+    // Check if we should use cached data
+    if (!shouldRefreshUS('orders') && usCacheData.orders) {
+      console.log('📦 Using cached US orders data (4-hour interval not reached)');
+      return usCacheData.orders;
+    }
+
     try {
       console.log('📦 Fetching US dashboard orders (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/orders-us');
@@ -295,6 +328,12 @@ export const dashboardUSApi = {
   },
 
   async getProducts(): Promise<{ products: DashboardProduct[]; insights: any }> {
+    // Check if we should use cached data
+    if (!shouldRefreshUS('products') && usCacheData.products) {
+      console.log('📦 Using cached US products data (4-hour interval not reached)');
+      return usCacheData.products;
+    }
+
     try {
       console.log('📦 Fetching US dashboard products (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/products-us');
@@ -365,6 +404,12 @@ export const dashboardUSApi = {
   },
 
   async getCustomers(): Promise<{ customers: DashboardCustomer[]; insights: any }> {
+    // Check if we should use cached data
+    if (!shouldRefreshUS('customers') && usCacheData.customers) {
+      console.log('👥 Using cached US customers data (4-hour interval not reached)');
+      return usCacheData.customers;
+    }
+
     try {
       console.log('👥 Fetching US dashboard customers (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/customers-us');
@@ -431,6 +476,12 @@ export const dashboardUSApi = {
   },
 
   async getAnalytics(): Promise<DashboardAnalytics> {
+    // Check if we should use cached data
+    if (!shouldRefreshUS('analytics') && usCacheData.analytics) {
+      console.log('📊 Using cached US analytics data (4-hour interval not reached)');
+      return usCacheData.analytics;
+    }
+
     try {
       console.log('📊 Fetching US analytics data (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/dashboard/analytics-us');
@@ -469,6 +520,7 @@ export const dashboardUSApi = {
         const analyticsData = result.data;
         // Cache the successful result
         usCacheData.analytics = analyticsData;
+        usLastFetched.analytics = Date.now();
         return analyticsData;
       }
       

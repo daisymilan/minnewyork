@@ -1,3 +1,4 @@
+
 // WooCommerce API service for orders, products, and customers
 export interface Order {
   id: string;
@@ -24,8 +25,38 @@ export interface Customer {
   orders_count: number;
 }
 
+// Cache for preserving WooCommerce data
+let wooCache = {
+  orders: null as Order[] | null,
+  products: null as Product[] | null,
+  customers: null as Customer[] | null,
+};
+
+// Track when WooCommerce data was last fetched
+let wooLastFetched = {
+  orders: 0,
+  products: 0,
+  customers: 0,
+};
+
+// 4 hours in milliseconds
+const FOUR_HOURS = 4 * 60 * 60 * 1000;
+
+// Helper function to check if WooCommerce data needs to be refreshed
+const shouldRefreshWoo = (endpoint: keyof typeof wooLastFetched): boolean => {
+  const now = Date.now();
+  const lastFetch = wooLastFetched[endpoint];
+  return now - lastFetch >= FOUR_HOURS;
+};
+
 export const woocommerceApi = {
   async getOrders(): Promise<Order[]> {
+    // Check if we should use cached data
+    if (!shouldRefreshWoo('orders') && wooCache.orders) {
+      console.log('🛒 Using cached WooCommerce orders (4-hour interval not reached)');
+      return wooCache.orders;
+    }
+
     try {
       console.log('🛒 Fetching WooCommerce orders (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/woo/orders', {
@@ -43,12 +74,14 @@ export const woocommerceApi = {
       
       // Check if the response is an array of orders
       if (Array.isArray(data)) {
+        wooCache.orders = data;
+        wooLastFetched.orders = Date.now();
         return data;
       }
       
       // If the API returns a workflow message or non-array response, return mock data
       console.log('API returned non-array response:', data);
-      return [
+      const mockData = [
         {
           id: 'ORD-7346',
           customer_name: 'Emma Wilson',
@@ -82,10 +115,19 @@ export const woocommerceApi = {
           date_created: new Date().toISOString()
         }
       ];
+      
+      wooCache.orders = mockData;
+      wooLastFetched.orders = Date.now();
+      return mockData;
     } catch (error) {
       console.error('Error fetching orders:', error);
-      // Return mock data as fallback
-      return [
+      // Return cached data or mock data as fallback
+      if (wooCache.orders) {
+        console.log('🛒 Using cached WooCommerce orders due to error');
+        return wooCache.orders;
+      }
+      
+      const fallbackData = [
         {
           id: 'ORD-7346',
           customer_name: 'Emma Wilson',
@@ -103,10 +145,20 @@ export const woocommerceApi = {
           date_created: new Date().toISOString()
         }
       ];
+      
+      wooCache.orders = fallbackData;
+      wooLastFetched.orders = Date.now();
+      return fallbackData;
     }
   },
 
   async getProducts(): Promise<Product[]> {
+    // Check if we should use cached data
+    if (!shouldRefreshWoo('products') && wooCache.products) {
+      console.log('📦 Using cached WooCommerce products (4-hour interval not reached)');
+      return wooCache.products;
+    }
+
     try {
       console.log('📦 Fetching WooCommerce products (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/woo/products', {
@@ -123,14 +175,31 @@ export const woocommerceApi = {
       const data = await response.json();
       
       // Ensure we return an array
-      return Array.isArray(data) ? data : [];
+      const products = Array.isArray(data) ? data : [];
+      wooCache.products = products;
+      wooLastFetched.products = Date.now();
+      return products;
     } catch (error) {
       console.error('Error fetching products:', error);
+      // Return cached data or empty array as fallback
+      if (wooCache.products) {
+        console.log('📦 Using cached WooCommerce products due to error');
+        return wooCache.products;
+      }
+      
+      wooCache.products = [];
+      wooLastFetched.products = Date.now();
       return [];
     }
   },
 
   async getCustomers(): Promise<Customer[]> {
+    // Check if we should use cached data
+    if (!shouldRefreshWoo('customers') && wooCache.customers) {
+      console.log('👥 Using cached WooCommerce customers (4-hour interval not reached)');
+      return wooCache.customers;
+    }
+
     try {
       console.log('👥 Fetching WooCommerce customers (4-hour interval)');
       const response = await fetch('https://minnewyorkofficial.app.n8n.cloud/webhook/woo/customers', {
@@ -147,9 +216,20 @@ export const woocommerceApi = {
       const data = await response.json();
       
       // Ensure we return an array
-      return Array.isArray(data) ? data : [];
+      const customers = Array.isArray(data) ? data : [];
+      wooCache.customers = customers;
+      wooLastFetched.customers = Date.now();
+      return customers;
     } catch (error) {
       console.error('Error fetching customers:', error);
+      // Return cached data or empty array as fallback
+      if (wooCache.customers) {
+        console.log('👥 Using cached WooCommerce customers due to error');
+        return wooCache.customers;
+      }
+      
+      wooCache.customers = [];
+      wooLastFetched.customers = Date.now();
       return [];
     }
   }

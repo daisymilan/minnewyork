@@ -4,19 +4,13 @@ import { toast } from '@/components/ui/sonner';
 
 // US-specific webhook event listeners - dashboard webhooks run every 4 hours
 export const useWebhookEventsUS = () => {
+  // Webhook events are now handled by 4-hour intervals in the service files
+  // No longer triggering on component mount to avoid refresh-based calls
+  
   useEffect(() => {
-    console.log('📡 US Dashboard API Integration Active');
-    console.log('US Dashboard endpoints (4-hour interval):');
-    console.log('- GET /webhook/dashboard/overview-us');
-    console.log('- GET /webhook/dashboard/orders-us'); 
-    console.log('- GET /webhook/dashboard/products-us');
-    console.log('- GET /webhook/dashboard/customers-us');
-    console.log('- GET /webhook/dashboard/analytics-us');
-    console.log('');
-    console.log('US Real-time webhooks (triggered by actions):');
-    console.log('- POST /webhook/woo/webhook/order-created-us (WooCommerce events)');
-    console.log('- POST /webhook/woo/webhook/customer-created-us (WooCommerce events)');
-
+    // Only log once that the US webhook system is active, without triggering calls
+    console.log('📡 US Webhook system initialized - running on 4-hour intervals');
+    
     return () => {
       console.log('US Webhook event handlers cleaned up');
     };

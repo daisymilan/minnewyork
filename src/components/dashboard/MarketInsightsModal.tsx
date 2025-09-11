@@ -33,13 +33,13 @@ const MarketInsightsModal: React.FC<MarketInsightsModalProps> = ({
   const regionData = isGlobal 
     ? Object.entries(data.regions_breakdown || {}).map(([region, info]: [string, any]) => ({
         name: region,
-        revenue: info.revenue || 0,
-        orders: info.count || 0
+        revenue: info.revenue || null,
+        orders: info.count || null
       }))
     : Object.entries(data.states_breakdown || {}).map(([state, info]: [string, any]) => ({
         name: state,
-        revenue: parseFloat(info.revenue) || 0,
-        orders: info.count || 0
+        revenue: parseFloat(info.revenue) || null,
+        orders: info.count || null
       }));
 
   // Colors for charts

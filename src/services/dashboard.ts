@@ -142,26 +142,13 @@ export const dashboardApi = {
       console.log('📊 No cache available, providing fallback data to avoid API call');
       const fallbackData = {
         summary_cards: {
-          revenue: 125000,
-          orders: 89,
-          customers: 156,
-          products: 45
+          revenue: null,
+          orders: null,
+          customers: null,
+          products: null
         },
-        regional_breakdown: {
-          'United States': 35,
-          'United Kingdom': 20,
-          'France': 15,
-          'Germany': 12,
-          'Canada': 8,
-          'Australia': 6,
-          'Other': 4
-        },
-        fulfillment_status: {
-          'delivered': 45,
-          'shipped': 25,
-          'processing': 15,
-          'pending': 15
-        },
+        regional_breakdown: {},
+        fulfillment_status: {},
         recent_activity: []
       };
       
@@ -196,26 +183,13 @@ export const dashboardApi = {
       
       const fallbackData = {
         summary_cards: {
-          revenue: 125000,
-          orders: 89,
-          customers: 156,
-          products: 45
+          revenue: null,
+          orders: null,
+          customers: null,
+          products: null
         },
-        regional_breakdown: {
-          'United States': 35,
-          'United Kingdom': 20,
-          'France': 15,
-          'Germany': 12,
-          'Canada': 8,
-          'Australia': 6,
-          'Other': 4
-        },
-        fulfillment_status: {
-          'delivered': 45,
-          'shipped': 25,
-          'processing': 15,
-          'pending': 15
-        },
+        regional_breakdown: {},
+        fulfillment_status: {},
         recent_activity: []
       };
       
@@ -275,10 +249,10 @@ export const dashboardApi = {
       
       const mappedOverview: DashboardOverview = {
         summary_cards: {
-          revenue: totalRevenue || fallbackData.summary_cards.revenue,
-          orders: totalOrders || fallbackData.summary_cards.orders,
-          customers: totalCustomers || fallbackData.summary_cards.customers,
-          products: orders.reduce((sum, order) => sum + (order.line_items?.length || 0), 0) || fallbackData.summary_cards.products
+          revenue: totalRevenue || null,
+          orders: totalOrders || null,
+          customers: totalCustomers || null,
+          products: orders.reduce((sum, order) => sum + (order.line_items?.length || 0), 0) || null
         },
         regional_breakdown: Object.keys(regionalBreakdown).length > 0 ? regionalBreakdown : fallbackData.regional_breakdown,
         fulfillment_status: Object.keys(fulfillmentStatus).length > 0 ? fulfillmentStatus : fallbackData.fulfillment_status,
@@ -310,22 +284,10 @@ export const dashboardApi = {
     if (!dataCache.orders && lastFetched.orders === 0) {
       console.log('📦 No cache available, providing fallback data to avoid API call');
       const fallbackData = {
-        orders: [
-          {
-            id: '1001',
-            customer_name: 'Sarah Johnson',
-            customer_email: 'sarah@example.com',
-            product_name: 'Order #1001',
-            amount: 150.00,
-            status: 'delivered',
-            date_created: new Date().toISOString(),
-            region: 'United States',
-            items_count: 2
-          }
-        ],
+        orders: [],
         summary: {
-          total_orders: 1,
-          total_revenue: 150.00,
+          total_orders: null,
+          total_revenue: null,
           orders_by_region: {}
         }
       };
@@ -344,33 +306,10 @@ export const dashboardApi = {
       }
       
       const fallbackData = {
-        orders: [
-          {
-            id: '1001',
-            customer_name: 'Sarah Johnson',
-            customer_email: 'sarah@example.com',
-            product_name: 'Order #1001',
-            amount: 150.00,
-            status: 'delivered',
-            date_created: new Date().toISOString(),
-            region: 'United States',
-            items_count: 2
-          },
-          {
-            id: '1002',
-            customer_name: 'Mike Chen',
-            customer_email: 'mike@example.com',
-            product_name: 'Order #1002',
-            amount: 89.50,
-            status: 'shipped',
-            date_created: new Date().toISOString(),
-            region: 'Canada',
-            items_count: 1
-          }
-        ],
+        orders: [],
         summary: {
-          total_orders: 2,
-          total_revenue: 239.50,
+          total_orders: null,
+          total_revenue: null,
           orders_by_region: {}
         }
       };
@@ -403,7 +342,7 @@ export const dashboardApi = {
           customer_name: order.customer_name || 'Unknown Customer',
           customer_email: order.customer_email,
           product_name: `Order #${order.order_number || order.id}`,
-          amount: parseFloat(order.total) || 0,
+          amount: parseFloat(order.total) || null,
           status: order.status || 'unknown',
           date_created: order.date_created || new Date().toISOString(),
           region: order.customer_country || 'Unknown',
@@ -412,7 +351,7 @@ export const dashboardApi = {
         
         const summary = {
           total_orders: ordersData.count || ordersData.orders.length,
-          total_revenue: ordersData.orders.reduce((sum: number, order: any) => sum + (parseFloat(order.total) || 0), 0),
+          total_revenue: ordersData.orders.reduce((sum: number, order: any) => sum + (parseFloat(order.total) || 0), 0) || null,
           orders_by_region: {}
         };
         
@@ -446,8 +385,8 @@ export const dashboardApi = {
       const fallbackData = {
         products: [],
         insights: {
-          total_products: 45,
-          low_stock_alerts: 3
+          total_products: null,
+          low_stock_alerts: null
         }
       };
       
@@ -467,8 +406,8 @@ export const dashboardApi = {
       const fallbackData = {
         products: [],
         insights: {
-          total_products: 45,
-          low_stock_alerts: 3
+          total_products: null,
+          low_stock_alerts: null
         }
       };
       
@@ -712,14 +651,14 @@ export const dashboardApi = {
         
         // Convert string values to numbers if needed
         const processedKpis = {
-          total_revenue: parseFloat(kpis.total_revenue) || 0,
-          total_orders: parseInt(kpis.total_orders) || 0,
-          total_customers: parseInt(kpis.total_customers) || 0,
-          growth_rate: parseFloat(kpis.growth_rate) || 0,
-          conversion_rate: parseFloat(kpis.conversion_rate) || 0,
-          average_order_value: parseFloat(kpis.average_order_value) || 0,
-          conversion_trend: parseFloat(kpis.conversion_trend) || 0,
-          aov_trend: parseFloat(kpis.aov_trend) || 0
+          total_revenue: parseFloat(kpis.total_revenue) || null,
+          total_orders: parseInt(kpis.total_orders) || null,
+          total_customers: parseInt(kpis.total_customers) || null,
+          growth_rate: parseFloat(kpis.growth_rate) || null,
+          conversion_rate: parseFloat(kpis.conversion_rate) || null,
+          average_order_value: parseFloat(kpis.average_order_value) || null,
+          conversion_trend: parseFloat(kpis.conversion_trend) || null,
+          aov_trend: parseFloat(kpis.aov_trend) || null
         };
         
         return {

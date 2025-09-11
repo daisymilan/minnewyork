@@ -35,7 +35,7 @@ const KpiCard: React.FC<KpiCardProps> = ({
     if (typeof value === 'string') return value;
     
     // Handle null, undefined, or invalid numbers
-    if (value == null || isNaN(Number(value))) return '0';
+    if (value == null || isNaN(Number(value))) return '--';
     
     const numValue = Number(value);
     
@@ -57,10 +57,8 @@ const KpiCard: React.FC<KpiCardProps> = ({
   const chartData = React.useMemo(() => {
     if (data && Array.isArray(data)) return data;
     
-    return Array.from({ length: 12 }, (_, i) => ({
-      name: `Point ${i}`,
-      value: Math.floor(Math.random() * 100)
-    }));
+    // Return empty chart data instead of random numbers
+    return [];
   }, [data]);
 
   const trendColor = trend === undefined ? 'text-gray-600' :

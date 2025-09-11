@@ -106,25 +106,24 @@ const Dashboard = () => {
     },
     conversion: {
       value: analyticsData.kpis.conversion_rate,
-      trend: analyticsData.kpis.conversion_trend || 0,
+      trend: analyticsData.kpis.conversion_trend,
       type: 'percentage' as const,
     },
     averageOrder: {
       value: analyticsData.kpis.average_order_value || (analyticsData.kpis.total_revenue / analyticsData.kpis.total_orders),
-      trend: analyticsData.kpis.aov_trend || 0,
+      trend: analyticsData.kpis.aov_trend,
       type: 'currency' as const,
     }
   };
   
   const regionalData = overviewLoading ? null : overviewData?.regional_breakdown ? 
     Object.entries(overviewData.regional_breakdown).map(([name, value]) => {
-      let numValue = 0;
-      if (typeof value === 'number') {
+      let numValue = null;
+      if (typeof value === 'number' && value > 0) {
         numValue = value;
-      } else if (typeof value === 'string') {
-        numValue = parseInt(value) || 0;
-      } else if (value != null) {
-        numValue = parseInt(String(value)) || 0;
+      } else if (typeof value === 'string' && value !== '') {
+        const parsed = parseInt(value);
+        numValue = isNaN(parsed) ? null : parsed;
       }
       
       return {
@@ -304,21 +303,25 @@ const Dashboard = () => {
                       </div>
                     ) : regionalData && regionalData.length > 0 ? (
                       <div className="space-y-4">
-                        {regionalData.map((region) => (
+                         {regionalData.map((region) => (
                           <div key={region.name} className="flex items-center">
                             <span className="w-32 text-sm text-black">{region.name}</span>
                             <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-primary rounded-full"
-                                style={{ width: `${Math.min(region.value, 100)}%` }}
-                              ></div>
+                              {region.value !== null && (
+                                <div 
+                                  className="h-full bg-primary rounded-full"
+                                  style={{ width: `${Math.min(region.value, 100)}%` }}
+                                ></div>
+                              )}
                             </div>
-                            <span className="ml-3 text-sm text-black">{region.value}%</span>
+                            <span className="ml-3 text-sm text-black">
+                              {region.value !== null ? `${region.value}%` : '--'}
+                            </span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-gray-600">Loading...</div>
+                      <div className="text-center py-4 text-gray-600">No regional data available</div>
                     )}
                   </LuxuryCard>
                   
@@ -345,15 +348,15 @@ const Dashboard = () => {
                       <>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-primary">{warehouseData.total_warehouses || 0}</div>
+                            <div className="text-2xl font-bold text-primary">{warehouseData.total_warehouses || '--'}</div>
                             <div className="text-sm text-gray-600">Locations</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-green-500">{warehouseData.active_warehouses || 0}</div>
+                            <div className="text-2xl font-bold text-green-500">{warehouseData.active_warehouses || '--'}</div>
                             <div className="text-sm text-gray-600">Active</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-400">{warehouseData.warehouses?.filter(w => w.country !== 'US').length || 0}</div>
+                            <div className="text-2xl font-bold text-blue-400">{warehouseData.warehouses?.filter(w => w.country !== 'US').length || '--'}</div>
                             <div className="text-sm text-gray-600">Fulfillment</div>
                           </div>
                           <div className="text-center">

@@ -49,19 +49,19 @@ const CustomerInsightsModal: React.FC<CustomerInsightsModalProps> = ({
           {/* Customer Segments Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-primary">{insights.total_customers || 0}</div>
+              <div className="text-2xl font-bold text-primary">{insights.total_customers || '--'}</div>
               <div className="text-sm text-gray-600">Total Customers</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-purple-500">{insights.customer_segments?.VIP || 0}</div>
+              <div className="text-2xl font-bold text-purple-500">{insights.customer_segments?.VIP || '--'}</div>
               <div className="text-sm text-gray-600">VIP</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-blue-500">{insights.customer_segments?.Premium || 0}</div>
+              <div className="text-2xl font-bold text-blue-500">{insights.customer_segments?.Premium || '--'}</div>
               <div className="text-sm text-gray-600">Premium</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-amber-500">{insights.customer_segments?.New || 0}</div>
+              <div className="text-2xl font-bold text-amber-500">{insights.customer_segments?.New || '--'}</div>
               <div className="text-sm text-gray-600">New</div>
             </div>
           </div>
@@ -74,11 +74,11 @@ const CustomerInsightsModal: React.FC<CustomerInsightsModalProps> = ({
                 <div className="text-sm text-gray-600">Active Customers</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 text-center">
-                <div className="text-xl font-bold text-primary">${insights.average_order_value || 0}</div>
+                <div className="text-xl font-bold text-primary">${insights.average_order_value || '--'}</div>
                 <div className="text-sm text-gray-600">Avg Order Value</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 text-center">
-                <div className="text-xl font-bold text-blue-500">{insights.new_customers_this_month || 0}</div>
+                <div className="text-xl font-bold text-blue-500">{insights.new_customers_this_month || '--'}</div>
                 <div className="text-sm text-gray-600">New This Month</div>
               </div>
             </div>
@@ -132,9 +132,9 @@ const CustomerInsightsModal: React.FC<CustomerInsightsModalProps> = ({
                             </Badge>
                           </TableCell>
                         )}
-                        <TableCell>{customer.orders_count || 0}</TableCell>
+                        <TableCell>{customer.orders_count || '--'}</TableCell>
                         <TableCell className="font-medium text-primary">
-                          ${customer.total_spent?.toFixed(2) || '0.00'}
+                          ${customer.total_spent?.toFixed(2) || '--'}
                         </TableCell>
                         <TableCell>
                           <Badge className={getSegmentColor(customer.segment || customer.customer_segment)}>

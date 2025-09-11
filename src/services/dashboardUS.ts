@@ -142,25 +142,13 @@ export const dashboardUSApi = {
       console.log('📊 No US cache available, providing fallback data to avoid API call');
       const fallbackData = {
         summary_cards: {
-          revenue: 75000,
-          orders: 42,
-          customers: 89,
-          products: 28
+          revenue: null,
+          orders: null,
+          customers: null,
+          products: null
         },
-        regional_breakdown: {
-          'California': 25,
-          'New York': 18,
-          'Texas': 15,
-          'Florida': 12,
-          'Illinois': 8,
-          'Other States': 22
-        },
-        fulfillment_status: {
-          'delivered': 35,
-          'shipped': 28,
-          'processing': 20,
-          'pending': 17
-        },
+        regional_breakdown: {},
+        fulfillment_status: {},
         recent_activity: []
       };
       
@@ -179,25 +167,13 @@ export const dashboardUSApi = {
       
       const fallbackData = {
         summary_cards: {
-          revenue: 75000,
-          orders: 42,
-          customers: 89,
-          products: 28
+          revenue: null,
+          orders: null,
+          customers: null,
+          products: null
         },
-        regional_breakdown: {
-          'California': 25,
-          'New York': 18,
-          'Texas': 15,
-          'Florida': 12,
-          'Illinois': 8,
-          'Other States': 22
-        },
-        fulfillment_status: {
-          'delivered': 35,
-          'shipped': 28,
-          'processing': 20,
-          'pending': 17
-        },
+        regional_breakdown: {},
+        fulfillment_status: {},
         recent_activity: []
       };
       
@@ -263,22 +239,10 @@ export const dashboardUSApi = {
     if (!usCacheData.orders && usLastFetched.orders === 0) {
       console.log('📦 No US orders cache available, providing fallback data');
       const fallbackData = {
-        orders: [
-          {
-            id: '2001',
-            customer_name: 'Michael Johnson',
-            customer_email: 'michael@example.com',
-            product_name: 'Order #2001',
-            amount: 180.00,
-            status: 'delivered',
-            date_created: new Date().toISOString(),
-            region: 'California',
-            items_count: 2
-          }
-        ],
+        orders: [],
         summary: {
-          total_orders: 1,
-          total_revenue: 180.00,
+          total_orders: null,
+          total_revenue: null,
           orders_by_region: {}
         }
       };
@@ -297,33 +261,10 @@ export const dashboardUSApi = {
       }
       
       const fallbackData = {
-        orders: [
-          {
-            id: '2001',
-            customer_name: 'Michael Johnson',
-            customer_email: 'michael@example.com',
-            product_name: 'Order #2001',
-            amount: 180.00,
-            status: 'delivered',
-            date_created: new Date().toISOString(),
-            region: 'California',
-            items_count: 2
-          },
-          {
-            id: '2002',
-            customer_name: 'Jennifer Davis',
-            customer_email: 'jennifer@example.com',
-            product_name: 'Order #2002',
-            amount: 95.50,
-            status: 'shipped',
-            date_created: new Date().toISOString(),
-            region: 'New York',
-            items_count: 1
-          }
-        ],
+        orders: [],
         summary: {
-          total_orders: 2,
-          total_revenue: 275.50,
+          total_orders: null,
+          total_revenue: null,
           orders_by_region: {}
         }
       };
@@ -353,7 +294,7 @@ export const dashboardUSApi = {
           customer_name: order.customer_name || 'Unknown Customer',
           customer_email: order.customer_email,
           product_name: `Order #${order.order_number || order.id}`,
-          amount: parseFloat(order.total) || 0,
+          amount: parseFloat(order.total) || null,
           status: order.status || 'unknown',
           date_created: order.date_created || new Date().toISOString(),
           region: order.customer_state || 'Unknown',
@@ -362,7 +303,7 @@ export const dashboardUSApi = {
         
         const summary = {
           total_orders: ordersData.count || ordersData.orders.length,
-          total_revenue: ordersData.orders.reduce((sum: number, order: any) => sum + (parseFloat(order.total) || 0), 0),
+          total_revenue: ordersData.orders.reduce((sum: number, order: any) => sum + (parseFloat(order.total) || 0), 0) || null,
           orders_by_region: {}
         };
         
@@ -395,8 +336,8 @@ export const dashboardUSApi = {
       const fallbackData = {
         products: [],
         insights: {
-          total_products: 28,
-          low_stock_alerts: 2
+          total_products: null,
+          low_stock_alerts: null
         }
       };
       
@@ -416,8 +357,8 @@ export const dashboardUSApi = {
       const fallbackData = {
         products: [],
         insights: {
-          total_products: 28,
-          low_stock_alerts: 2
+          total_products: null,
+          low_stock_alerts: null
         }
       };
       
@@ -579,14 +520,14 @@ export const dashboardUSApi = {
           }]
         },
         kpis: {
-          total_revenue: 75000,
-          total_orders: 42,
-          total_customers: 89,
-          growth_rate: 15.2,
-          conversion_rate: 4.1,
-          average_order_value: 1785,
-          conversion_trend: 1.2,
-          aov_trend: 7.8
+          total_revenue: null,
+          total_orders: null,
+          total_customers: null,
+          growth_rate: null,
+          conversion_rate: null,
+          average_order_value: null,
+          conversion_trend: null,
+          aov_trend: null
         }
       };
       
@@ -612,14 +553,14 @@ export const dashboardUSApi = {
           }]
         },
         kpis: {
-          total_revenue: 75000,
-          total_orders: 42,
-          total_customers: 89,
-          growth_rate: 15.2,
-          conversion_rate: 4.1,
-          average_order_value: 1785,
-          conversion_trend: 1.2,
-          aov_trend: 7.8
+          total_revenue: null,
+          total_orders: null,
+          total_customers: null,
+          growth_rate: null,
+          conversion_rate: null,
+          average_order_value: null,
+          conversion_trend: null,
+          aov_trend: null
         }
       };
       
